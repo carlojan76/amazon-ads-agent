@@ -417,6 +417,7 @@ def main():
     html = build_email_html(analyses, summaries)
 
     # Salva anche email su file
+    Path("reports").mkdir(exist_ok=True)
     Path("reports/last_email.html").write_text(html, encoding="utf-8")
 
     send_email(html)
