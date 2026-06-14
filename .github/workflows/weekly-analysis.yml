@@ -19,7 +19,7 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
 
     steps:
       - name: 🔄 Checkout repository
@@ -57,7 +57,7 @@ jobs:
           ANALYSIS_DAYS: ${{ github.event.inputs.days || '14' }}
         run: |
           cd python
-          python weekly_analysis.py
+          python -u weekly_analysis.py
 
       - name: 📦 Upload reports as artifacts
         if: always()
