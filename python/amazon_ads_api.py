@@ -272,8 +272,8 @@ class AmazonAdsAPI:
             print(f"   ⚠️ Errore richiesta report: {e}")
             return None
 
-    def poll_report(self, report_id, max_wait=300):
-        print(f"⏳ Attesa completamento report {report_id}...")
+    def poll_report(self, report_id, max_wait=180):
+        print(f"⏳ Attesa completamento report {report_id}...", flush=True)
         start = time.time()
         while time.time() - start < max_wait:
             try:
@@ -288,7 +288,7 @@ class AmazonAdsAPI:
                 status = data.get("status", "")
                 if status == "COMPLETED":
                     url = data.get("url")
-                    print("   ✅ Report completato!")
+                    print("   ✅ Report completato!", flush=True)
                     if url:
                         return self._download_report(url)
                     return []
@@ -296,12 +296,13 @@ class AmazonAdsAPI:
                     print(f"   ❌ Report fallito: {data.get('failureReason', 'sconosciuto')}")
                     return []
                 else:
-                    print(f"   ... stato: {status}")
+                    elapsed = int(time.time() - start)
+                    print(f"   ... stato: {status} ({elapsed}s)", flush=True)
                     time.sleep(10)
             except Exception as e:
-                print(f"   ⚠️ Errore polling: {e}")
+                print(f"   ⚠️ Errore polling: {e}", flush=True)
                 time.sleep(10)
-        print("   ⏰ Timeout attesa report")
+        print("   ⏰ Timeout attesa report", flush=True)
         return []
 
     def _download_report(self, url):

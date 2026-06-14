@@ -209,19 +209,27 @@ def call_claude(prompt):
     if not ANTHROPIC_API_KEY:
         return "⚠️ ANTHROPIC_API_KEY non configurata"
 
-    resp = requests.post(
-        "https://api.anthropic.com/v1/messages",
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": ANTHROPIC_API_KEY,
-            "anthropic-version": "2023-06-01",
-        },
-        json={
-            "model": ANTHROPIC_MODEL,
-            "max_tokens": 4000,
-            "messages": [{"role": "user", "content": prompt}],
-        },
-    )
+    print(f"   📤 Invio prompt a Claude ({len(prompt)} caratteri)...", flush=True)
+    try:
+        resp = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+            },
+            json={
+                "model": ANTHROPIC_MODEL,
+                "max_tokens": 4000,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+            timeout=120,
+        )
+    except requests.exceptions.Timeout:
+        return "⚠️ Timeout chiamata Claude (>120s)"
+    except Exception as e:
+        return f"⚠️ Errore connessione Claude: {e}"
+
     if resp.status_code != 200:
         return f"⚠️ Errore Claude API ({resp.status_code}): {resp.text[:300]}"
     data = resp.json()
