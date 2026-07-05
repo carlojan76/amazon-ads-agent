@@ -98,6 +98,7 @@ def build_summary(data):
         sales = num(r.get("sales7d", 0))
         c_acos = (spend / sales * 100) if sales > 0 else (999 if spend > 0 else 0)
         camp_summary.append({
+            "campaignId": str(r.get("campaignId", "")),
             "name": r.get("campaignName", "N/A"),
             "spend": spend,
             "sales": sales,
@@ -111,6 +112,7 @@ def build_summary(data):
     paused_summary = []
     for r in paused_report:
         paused_summary.append({
+            "campaignId": str(r.get("campaignId", "")),
             "name": r.get("campaignName", "N/A"),
             "state": state_by_id.get(str(r.get("campaignId", "")), "PAUSED"),
             "spend": num(r.get("cost", r.get("spend", 0))),
@@ -144,6 +146,9 @@ def build_summary(data):
             continue
         k_acos = (spend / sales * 100) if sales > 0 else 999
         kw_summary.append({
+            "keywordId": str(r.get("keywordId", "")),
+            "campaignId": str(r.get("campaignId", "")),
+            "adGroupId": str(r.get("adGroupId", "")),
             "keyword": kw, "matchType": mt,
             "spend": spend, "sales": sales,
             "clicks": clicks, "orders": orders, "acos": k_acos,
@@ -170,6 +175,8 @@ def build_summary(data):
         orders = num(r.get("purchases7d", 0))
         if spend > 0.5 and orders == 0:
             st_waste.append({
+                "campaignId": str(r.get("campaignId", "")),
+                "adGroupId": str(r.get("adGroupId", "")),
                 "searchTerm": r.get("searchTerm", ""),
                 "keyword": r.get("keyword", ""),
                 "spend": spend,
@@ -200,27 +207,27 @@ def build_summary(data):
 def build_claude_prompt(summary, marketplace, days):
     """Costruisci il prompt per Claude basato sulle metriche."""
     camps = "\n".join([
-        f"- {c['name']}: Spend €{c['spend']:.2f}, Sales €{c['sales']:.2f}, ACoS {c['acos']:.1f}%, Orders {c['orders']:.0f}"
+        f"- [id:{c['campaignId']}] {c['name']}: Spend €{c['spend']:.2f}, Sales €{c['sales']:.2f}, ACoS {c['acos']:.1f}%, Orders {c['orders']:.0f}"
         for c in summary["campaigns"]
     ])
     kws = "\n".join([
-        f'- "{k["keyword"]}" [{k["matchType"]}] €{k["spend"]:.2f} spend, €{k["sales"]:.2f} sales, ACoS {k["acos"]:.1f}%, {k["clicks"]:.0f} clicks, {k["orders"]:.0f} orders'
+        f'- [kwId:{k["keywordId"]} campId:{k["campaignId"]}] "{k["keyword"]}" [{k["matchType"]}] €{k["spend"]:.2f} spend, €{k["sales"]:.2f} sales, ACoS {k["acos"]:.1f}%, {k["clicks"]:.0f} clicks, {k["orders"]:.0f} orders'
         for k in summary["keywords"]
     ])
     waste = "\n".join([
-        f'- "{k["keyword"]}" [{k["matchType"]}] €{k["spend"]:.2f} spesi, {k["clicks"]:.0f} clicks, ZERO ordini'
+        f'- [kwId:{k["keywordId"]}] "{k["keyword"]}" [{k["matchType"]}] €{k["spend"]:.2f} spesi, {k["clicks"]:.0f} clicks, ZERO ordini'
         for k in summary["waste_kw"]
     ])
     best = "\n".join([
-        f'- "{k["keyword"]}" ACoS {k["acos"]:.1f}%, {k["orders"]:.0f} ordini, €{k["sales"]:.2f} sales'
+        f'- [kwId:{k["keywordId"]}] "{k["keyword"]}" ACoS {k["acos"]:.1f}%, {k["orders"]:.0f} ordini, €{k["sales"]:.2f} sales'
         for k in summary["best_kw"]
     ])
     st_waste = "\n".join([
-        f'- "{s["searchTerm"]}" (kw: "{s["keyword"]}") €{s["spend"]:.2f}, {s["clicks"]:.0f} clicks — ZERO ordini'
+        f'- [campId:{s["campaignId"]} adGroupId:{s["adGroupId"]}] "{s["searchTerm"]}" (kw: "{s["keyword"]}") €{s["spend"]:.2f}, {s["clicks"]:.0f} clicks — ZERO ordini'
         for s in summary["waste_st"]
     ])
     paused = "\n".join([
-        f'- {p["name"]} [{p["state"]}] — €{p["spend"]:.2f} spesi, €{p["sales"]:.2f} sales, {p["orders"]:.0f} ordini (ESCLUSA dai costi)'
+        f'- [id:{p["campaignId"]}] {p["name"]} [{p["state"]}] — €{p["spend"]:.2f} spesi, €{p["sales"]:.2f} sales, {p["orders"]:.0f} ordini (ESCLUSA dai costi)'
         for p in summary.get("paused_campaigns", [])
     ])
     ideas = "\n".join([
@@ -290,7 +297,34 @@ Keywords ATTIVE con ottimo ACoS dove aumentare bid o budget, PIÙ eventuali keyw
 # 💡 Quick Wins
 Altre 3-5 ottimizzazioni rapide ad alto impatto.
 
-Sii diretto, specifico, NIENTE teoria generica."""
+Sii diretto, specifico, NIENTE teoria generica.
+
+---
+
+# 🤖 AZIONI ESEGUIBILI (formato JSON)
+
+Alla FINE del report, aggiungi UN SOLO blocco `<actions>...</actions>` con un JSON pronto per lo script `apply_changes.py`. Regole:
+
+- Usa SOLO ID reali visibili nei dati sopra (kwId, campId, adGroupId). NON inventare ID. Se un ID manca o è vuoto, NON generare quell'azione.
+- Ogni azione va giustificata da un dato concreto visto sopra.
+- Massimo 15 azioni totali, prioritizzando ROI e sicurezza.
+- Tipi di azione ammessi:
+  * `update_bid`: keywordId, keyword, old_bid, new_bid  — variazione max ±30% del bid attuale se noto, o partire da CPC medio della keyword
+  * `pause_keyword`: keywordId, keyword — solo se spesa > €3 e ZERO ordini in 14gg
+  * `add_negative`: campaignId, adGroupId (opzionale), keywordText, matchType (NEGATIVE_EXACT o NEGATIVE_PHRASE) — per search terms sprechi
+  * `update_budget`: campaignId, campaign, old_budget (se noto), new_budget — variazione max ±50%
+- NON generare `pause_campaign` / `enable_campaign` in automatico (troppo rischioso, lascia decidere l'umano).
+- Se non ci sono azioni ragionevoli, restituisci `{{"actions": []}}`.
+
+Formato ESATTO (nessun testo dentro il blocco, solo JSON valido):
+
+<actions>
+{{"actions": [
+  {{"type": "add_negative", "campaignId": "123456", "adGroupId": "789", "keywordText": "gratis", "matchType": "NEGATIVE_PHRASE"}},
+  {{"type": "pause_keyword", "keywordId": "555", "keyword": "esempio kw sprecona"}},
+  {{"type": "update_bid", "keywordId": "666", "keyword": "esempio kw performante", "old_bid": 0.45, "new_bid": 0.55}}
+]}}
+</actions>"""
 
 
 def call_claude(prompt):
@@ -469,6 +503,94 @@ def send_email(html_body):
         return False
 
 
+import re
+
+
+def extract_actions(analysis_text, summary):
+    """Estrae il blocco <actions>...</actions> dall'output di Claude,
+    valida ogni azione contro gli ID reali del summary e restituisce
+    (actions_json_dict, clean_text_without_block, warnings_list).
+
+    Un'azione viene SCARTATA se:
+    - manca un ID obbligatorio
+    - l'ID non esiste tra quelli reali del summary (protezione anti-invenzione)
+    - il tipo non è supportato dallo script apply_changes.py
+    """
+    warnings = []
+    match = re.search(r"<actions>(.*?)</actions>", analysis_text, re.DOTALL)
+    if not match:
+        return None, analysis_text, ["Nessun blocco <actions> trovato nell'output Claude"]
+
+    raw = match.group(1).strip()
+    clean_text = (analysis_text[:match.start()] + analysis_text[match.end():]).strip()
+
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError as e:
+        return None, clean_text, [f"JSON <actions> non valido: {e}"]
+
+    proposed = parsed.get("actions", [])
+    if not isinstance(proposed, list):
+        return None, clean_text, ["Campo 'actions' non è una lista"]
+
+    # ID reali dal summary per validare
+    valid_kw_ids = {k["keywordId"] for k in summary.get("keywords", []) if k.get("keywordId")}
+    valid_kw_ids |= {k["keywordId"] for k in summary.get("waste_kw", []) if k.get("keywordId")}
+    valid_kw_ids |= {k["keywordId"] for k in summary.get("best_kw", []) if k.get("keywordId")}
+    valid_camp_ids = {c["campaignId"] for c in summary.get("campaigns", []) if c.get("campaignId")}
+    valid_camp_ids |= {c["campaignId"] for c in summary.get("paused_campaigns", []) if c.get("campaignId")}
+    valid_camp_ids |= {s["campaignId"] for s in summary.get("waste_st", []) if s.get("campaignId")}
+
+    ALLOWED_TYPES = {"update_bid", "pause_keyword", "enable_keyword",
+                     "add_negative", "update_budget"}
+
+    validated = []
+    for i, a in enumerate(proposed):
+        t = a.get("type")
+        if t not in ALLOWED_TYPES:
+            warnings.append(f"azione {i}: tipo '{t}' non ammesso, scartata")
+            continue
+
+        if t in ("update_bid", "pause_keyword", "enable_keyword"):
+            kwid = str(a.get("keywordId", ""))
+            if not kwid:
+                warnings.append(f"azione {i} ({t}): keywordId mancante, scartata")
+                continue
+            if kwid not in valid_kw_ids:
+                warnings.append(f"azione {i} ({t}): keywordId {kwid} non presente nei dati, scartata (anti-hallucination)")
+                continue
+
+        if t in ("add_negative", "update_budget"):
+            cid = str(a.get("campaignId", ""))
+            if not cid:
+                warnings.append(f"azione {i} ({t}): campaignId mancante, scartata")
+                continue
+            if cid not in valid_camp_ids:
+                warnings.append(f"azione {i} ({t}): campaignId {cid} non presente nei dati, scartata (anti-hallucination)")
+                continue
+
+        if t == "add_negative":
+            if not a.get("keywordText"):
+                warnings.append(f"azione {i}: keywordText mancante, scartata")
+                continue
+            mt = a.get("matchType", "NEGATIVE_EXACT")
+            if mt not in ("NEGATIVE_EXACT", "NEGATIVE_PHRASE"):
+                warnings.append(f"azione {i}: matchType '{mt}' non valido, scartata")
+                continue
+
+        if t == "update_bid" and not isinstance(a.get("new_bid"), (int, float)):
+            warnings.append(f"azione {i}: new_bid mancante o non numerico, scartata")
+            continue
+
+        if t == "update_budget" and not isinstance(a.get("new_budget"), (int, float)):
+            warnings.append(f"azione {i}: new_budget mancante o non numerico, scartata")
+            continue
+
+        validated.append(a)
+
+    return {"actions": validated}, clean_text, warnings
+
+
 def main():
     print(f"🚀 Weekly Amazon Ads Analysis — {datetime.now()}")
     print(f"   Marketplaces: {MARKETPLACES}")
@@ -496,11 +618,25 @@ def main():
 
             print(f"✅ Analisi {mp} completata ({len(analysis)} caratteri)")
 
+            # Estrai il blocco <actions> JSON e valida gli ID contro i dati reali
+            actions_dict, clean_analysis, warns = extract_actions(analysis, summary)
+            if warns:
+                for w in warns:
+                    print(f"   ⚠️ actions: {w}")
+
+            # Sostituisci l'analisi con la versione senza blocco JSON, per l'email
+            analyses[mp] = clean_analysis
+
             # Salva anche su file per debug/storico
             out_dir = Path("reports")
             out_dir.mkdir(exist_ok=True)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-            (out_dir / f"{mp}_{timestamp}_analysis.md").write_text(analysis, encoding="utf-8")
+            (out_dir / f"{mp}_{timestamp}_analysis.md").write_text(clean_analysis, encoding="utf-8")
+            if actions_dict is not None:
+                n_act = len(actions_dict.get("actions", []))
+                actions_path = out_dir / f"actions_{mp}_{timestamp}.json"
+                actions_path.write_text(json.dumps(actions_dict, indent=2, ensure_ascii=False), encoding="utf-8")
+                print(f"   💾 Azioni proposte salvate: {actions_path} ({n_act} azioni valide)")
         except Exception as e:
             print(f"❌ Errore su {mp}: {e}")
             analyses[mp] = f"⚠️ Errore durante l'analisi: {e}"
