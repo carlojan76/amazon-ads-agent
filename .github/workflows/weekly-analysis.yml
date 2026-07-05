@@ -1,12 +1,12 @@
-"""
-Weekly Amazon Ads Analysis
-===========================
-1. Fetch dati via API
-2. Invia a Claude per analisi
-3. Invia email con report HTML
+# """
+# Weekly Amazon Ads Analysis
+# ===========================
+# 1. Fetch dati via API
+# 2. Invia a Claude per analisi
+# 3. Invia email con report HTML
 
-Eseguito automaticamente da GitHub Actions ogni settimana.
-"""
+# Eseguito automaticamente da GitHub Actions ogni settimana.
+# """
 
 import os
 import sys
