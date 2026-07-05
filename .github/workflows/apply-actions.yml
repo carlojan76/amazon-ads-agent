@@ -1,0 +1,105 @@
+name: Apply Amazon Ads Changes
+
+# Workflow MANUALE per applicare modifiche alle campagne Amazon Ads.
+# Si lancia dalla UI di GitHub: tab Actions -> Apply Amazon Ads Changes -> Run workflow.
+#
+# Flusso:
+# 1. Scarica l'artefatto della weekly analysis (weekly-reports-N) dal tab Actions
+# 2. Apri actions_XX_YYYYMMDD_HHMM.json in un editor di testo
+# 3. Rivedi le azioni; cancella quelle su cui hai dubbi
+# 4. Copia tutto il contenuto del file
+# 5. Torna qui su Actions -> Run workflow, incolla il JSON, seleziona marketplace, digita APPLICA
+# 6. Il workflow applica le modifiche via API
+
+on:
+  workflow_dispatch:
+    inputs:
+      marketplace:
+        description: 'Marketplace su cui applicare le modifiche'
+        type: choice
+        required: true
+        options:
+          - IT
+          - FR
+          - DE
+      actions_json:
+        description: 'Contenuto del file actions_XX_YYYYMMDD_HHMM.json (incolla il JSON completo)'
+        required: true
+      confirm:
+        description: 'Per confermare, digita APPLICA (case sensitive)'
+        required: true
+        default: 'NO'
+      dry_run:
+        description: 'Se true: mostra solo anteprima, non applica nulla'
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: ✋ Verifica conferma
+        if: ${{ github.event.inputs.confirm != 'APPLICA' && github.event.inputs.dry_run != 'true' }}
+        run: |
+          echo "❌ Conferma non fornita o errata."
+          echo "   Per procedere devi digitare esattamente: APPLICA"
+          echo "   Hai digitato: '${{ github.event.inputs.confirm }}'"
+          echo ""
+          echo "Se vuoi solo vedere l'anteprima senza applicare, spunta invece il flag dry_run."
+          exit 1
+
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Install dependencies
+        run: pip install requests
+
+      - name: 📝 Scrivi actions.json
+        env:
+          ACTIONS_JSON: ${{ github.event.inputs.actions_json }}
+        run: |
+          cd python
+          printf '%s' "$ACTIONS_JSON" > actions_input.json
+          echo "--- Contenuto ricevuto ($(wc -c < actions_input.json) bytes) ---"
+          head -80 actions_input.json
+          echo "--- Validazione JSON ---"
+          python -c "import json; json.load(open('actions_input.json')); print('OK')"
+
+      - name: 🔍 Anteprima (dry-run sempre eseguita per sicurezza)
+        env:
+          AMAZON_ADS_CLIENT_ID: ${{ secrets.AMAZON_ADS_CLIENT_ID }}
+          AMAZON_ADS_CLIENT_SECRET: ${{ secrets.AMAZON_ADS_CLIENT_SECRET }}
+          AMAZON_ADS_REFRESH_TOKEN: ${{ secrets.AMAZON_ADS_REFRESH_TOKEN }}
+        run: |
+          cd python
+          python apply_changes.py actions_input.json \
+            --marketplace ${{ github.event.inputs.marketplace }} \
+            --dry-run
+
+      - name: 🚀 Applica modifiche
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          AMAZON_ADS_CLIENT_ID: ${{ secrets.AMAZON_ADS_CLIENT_ID }}
+          AMAZON_ADS_CLIENT_SECRET: ${{ secrets.AMAZON_ADS_CLIENT_SECRET }}
+          AMAZON_ADS_REFRESH_TOKEN: ${{ secrets.AMAZON_ADS_REFRESH_TOKEN }}
+        run: |
+          cd python
+          python apply_changes.py actions_input.json \
+            --marketplace ${{ github.event.inputs.marketplace }} \
+            --yes
+
+      - name: 📦 Upload log come artefatto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apply-log-${{ github.event.inputs.marketplace }}-${{ github.run_number }}
+          path: python/apply_log_*.json
+          retention-days: 90
