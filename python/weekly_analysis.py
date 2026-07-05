@@ -40,7 +40,13 @@ DAYS = int(os.getenv("ANALYSIS_DAYS", "14"))
 
 
 def build_summary(data):
-    """Estrai metriche aggregate dal JSON Amazon."""
+    """Estrai metriche aggregate dal JSON Amazon.
+
+    Le campagne NON attive (PAUSED / ARCHIVED) sono ESCLUSE da tutti i calcoli
+    di costo/performance. Le loro keyword che hanno convertito storicamente
+    vengono raccolte a parte, in `keyword_ideas`, come semplici suggerimenti
+    da valutare per le campagne attive (nessun giudizio di spreco/costo).
+    """
     reports = data.get("reports", {})
     campaigns_report = reports.get("campaigns", [])
     keywords_report = reports.get("keywords", [])
@@ -52,18 +58,42 @@ def build_summary(data):
         except Exception:
             return 0.0
 
-    total_spend = sum(num(r.get("cost", r.get("spend", 0))) for r in campaigns_report)
-    total_sales = sum(num(r.get("sales7d", 0)) for r in campaigns_report)
-    total_clicks = sum(num(r.get("clicks", 0)) for r in campaigns_report)
-    total_impr = sum(num(r.get("impressions", 0)) for r in campaigns_report)
-    total_orders = sum(num(r.get("purchases7d", 0)) for r in campaigns_report)
+    # ---- Mappa campaignId -> stato (ENABLED / PAUSED / ARCHIVED) ----
+    # Fonte primaria: lista strutturale delle campagne (campo `state`).
+    # Fallback: colonna `campaignStatus` del report performance.
+    state_by_id = {}
+    for c in data.get("campaigns", []):
+        cid = str(c.get("campaignId", ""))
+        state = str(c.get("state", "")).upper()
+        if cid and state:
+            state_by_id[cid] = state
+    for r in campaigns_report:
+        cid = str(r.get("campaignId", ""))
+        status = str(r.get("campaignStatus", "")).upper()
+        if cid and status and cid not in state_by_id:
+            state_by_id[cid] = status
+
+    def is_active(campaign_id):
+        # Stato ignoto -> per prudenza trattata come attiva (non nasconde costi)
+        return state_by_id.get(str(campaign_id), "ENABLED") == "ENABLED"
+
+    # ---- Split campagne: attive vs in pausa/archiviate ----
+    active_campaigns = [r for r in campaigns_report if is_active(r.get("campaignId"))]
+    paused_report = [r for r in campaigns_report if not is_active(r.get("campaignId"))]
+
+    # ---- Aggregati SOLO su campagne attive ----
+    total_spend = sum(num(r.get("cost", r.get("spend", 0))) for r in active_campaigns)
+    total_sales = sum(num(r.get("sales7d", 0)) for r in active_campaigns)
+    total_clicks = sum(num(r.get("clicks", 0)) for r in active_campaigns)
+    total_impr = sum(num(r.get("impressions", 0)) for r in active_campaigns)
+    total_orders = sum(num(r.get("purchases7d", 0)) for r in active_campaigns)
 
     acos = (total_spend / total_sales * 100) if total_sales > 0 else 0
     roas = (total_sales / total_spend) if total_spend > 0 else 0
 
-    # Top campagne
+    # Top campagne (solo attive)
     camp_summary = []
-    for r in campaigns_report:
+    for r in active_campaigns:
         spend = num(r.get("cost", r.get("spend", 0)))
         sales = num(r.get("sales7d", 0))
         c_acos = (spend / sales * 100) if sales > 0 else (999 if spend > 0 else 0)
@@ -77,30 +107,65 @@ def build_summary(data):
         })
     camp_summary.sort(key=lambda x: x["spend"], reverse=True)
 
-    # Top keywords
-    kw_summary = []
+    # Campagne in pausa/archiviate che avevano comunque attività (solo contesto)
+    paused_summary = []
+    for r in paused_report:
+        paused_summary.append({
+            "name": r.get("campaignName", "N/A"),
+            "state": state_by_id.get(str(r.get("campaignId", "")), "PAUSED"),
+            "spend": num(r.get("cost", r.get("spend", 0))),
+            "sales": num(r.get("sales7d", 0)),
+            "orders": num(r.get("purchases7d", 0)),
+        })
+    paused_summary.sort(key=lambda x: x["sales"], reverse=True)
+
+    # ---- Keywords: attive (analisi costi) vs in pausa (solo idee) ----
+    kw_summary = []   # da campagne attive
+    kw_ideas = []     # da campagne in pausa/archiviate -> suggerimenti
     for r in keywords_report:
         spend = num(r.get("cost", r.get("spend", 0)))
         sales = num(r.get("sales7d", 0))
         clicks = num(r.get("clicks", 0))
         orders = num(r.get("purchases7d", 0))
+        kw = r.get("keyword", "")
+        mt = r.get("matchType", "")
+
+        if not is_active(r.get("campaignId")):
+            # Interessa come idea solo se ha convertito / generato vendite
+            if orders > 0 or sales > 0:
+                k_acos = (spend / sales * 100) if sales > 0 else 999
+                kw_ideas.append({
+                    "keyword": kw, "matchType": mt,
+                    "orders": orders, "sales": sales, "acos": k_acos,
+                })
+            continue
+
         if spend == 0:
             continue
         k_acos = (spend / sales * 100) if sales > 0 else 999
         kw_summary.append({
-            "keyword": r.get("keyword", ""),
-            "matchType": r.get("matchType", ""),
-            "spend": spend,
-            "sales": sales,
-            "clicks": clicks,
-            "orders": orders,
-            "acos": k_acos,
+            "keyword": kw, "matchType": mt,
+            "spend": spend, "sales": sales,
+            "clicks": clicks, "orders": orders, "acos": k_acos,
         })
     kw_summary.sort(key=lambda x: x["spend"], reverse=True)
 
-    # Search terms sprechi
+    # Dedup + ranking idee (priorità: più ordini, poi ACoS più basso)
+    seen = set()
+    kw_ideas_dedup = []
+    for k in sorted(kw_ideas, key=lambda x: (-x["orders"], x["acos"])):
+        key = (k["keyword"].lower().strip(), k["matchType"])
+        if not k["keyword"].strip() or key in seen:
+            continue
+        seen.add(key)
+        kw_ideas_dedup.append(k)
+
+    # ---- Search terms sprechi: SOLO su campagne attive ----
+    # (negativizzare in una campagna spenta non ha senso)
     st_waste = []
     for r in st_report:
+        if not is_active(r.get("campaignId")):
+            continue
         spend = num(r.get("cost", r.get("spend", 0)))
         orders = num(r.get("purchases7d", 0))
         if spend > 0.5 and orders == 0:
@@ -121,10 +186,14 @@ def build_summary(data):
         "acos": acos,
         "roas": roas,
         "campaigns": camp_summary[:15],
+        "paused_campaigns": paused_summary[:10],
         "keywords": kw_summary[:30],
         "waste_kw": [k for k in kw_summary if k["orders"] == 0][:15],
         "best_kw": sorted([k for k in kw_summary if k["orders"] > 0 and k["acos"] < 25], key=lambda x: x["acos"])[:10],
+        "keyword_ideas": kw_ideas_dedup[:15],
         "waste_st": st_waste[:15],
+        "n_active": len(active_campaigns),
+        "n_paused": len(paused_report),
     }
 
 
@@ -150,10 +219,19 @@ def build_claude_prompt(summary, marketplace, days):
         f'- "{s["searchTerm"]}" (kw: "{s["keyword"]}") €{s["spend"]:.2f}, {s["clicks"]:.0f} clicks — ZERO ordini'
         for s in summary["waste_st"]
     ])
+    paused = "\n".join([
+        f'- {p["name"]} [{p["state"]}] — €{p["spend"]:.2f} spesi, €{p["sales"]:.2f} sales, {p["orders"]:.0f} ordini (ESCLUSA dai costi)'
+        for p in summary.get("paused_campaigns", [])
+    ])
+    ideas = "\n".join([
+        f'- "{k["keyword"]}" [{k["matchType"]}] — storico: {k["orders"]:.0f} ordini, €{k["sales"]:.2f} sales, ACoS {k["acos"]:.1f}%'
+        for k in summary.get("keyword_ideas", [])
+    ])
 
     return f"""## Marketplace: {marketplace} | Periodo: ultimi {days} giorni
+## Campagne: {summary.get('n_active', 0)} attive analizzate · {summary.get('n_paused', 0)} in pausa/archiviate ESCLUSE dai costi
 
-## Metriche Generali
+## Metriche Generali (SOLO campagne attive)
 - Spesa: €{summary['total_spend']:.2f}
 - Vendite: €{summary['total_sales']:.2f}
 - ACoS: {summary['acos']:.1f}%
@@ -162,24 +240,35 @@ def build_claude_prompt(summary, marketplace, days):
 - Click: {summary['total_clicks']:,.0f}
 - Ordini: {summary['total_orders']:.0f}
 
-## Top 15 Campagne per Spesa
+## Top 15 Campagne ATTIVE per Spesa
 {camps or "Nessun dato"}
 
-## Top 30 Keywords per Spesa
+## Top 30 Keywords per Spesa (campagne attive)
 {kws or "Nessun dato"}
 
-## Keywords Spreconi (spesa > 0, ZERO ordini)
+## Keywords Spreconi (spesa > 0, ZERO ordini) — campagne attive
 {waste or "Nessuno"}
 
-## Best Performer (ACoS < 25%)
+## Best Performer (ACoS < 25%) — campagne attive
 {best or "Nessuno"}
 
-## Search Terms Spreconi (spesa > €0.5, ZERO ordini) — DA NEGATIVIZZARE
+## Search Terms Spreconi (spesa > €0.5, ZERO ordini) — DA NEGATIVIZZARE (solo campagne attive)
 {st_waste or "Nessuno"}
+
+## Campagne IN PAUSA / ARCHIVIATE (NON conteggiate nei costi qui sopra)
+{paused or "Nessuna"}
+
+## Keyword-Idee da Campagne in Pausa (SOLO suggerimenti — NON sono sprechi)
+Keyword che in passato hanno convertito in campagne ora spente. Sono candidate da aggiungere/testare nelle campagne ATTIVE. Non valutarle come costo né come spreco.
+{ideas or "Nessuna"}
 
 ---
 
 Sei un consulente PPC Amazon senior. Analizza questi dati e fornisci un REPORT SETTIMANALE con consigli OPERATIVI in italiano.
+
+REGOLE:
+- I costi, ACoS, ROAS e le metriche riguardano SOLO le campagne attive. Le campagne in pausa/archiviate NON vanno criticate per la spesa: sono già spente.
+- Le "Keyword-Idee da Campagne in Pausa" vanno usate SOLO come suggerimenti da recuperare nelle campagne attive, mai come sprechi da tagliare.
 
 Struttura della risposta:
 
@@ -196,7 +285,7 @@ Le 3 cose più importanti da fare QUESTA SETTIMANA. Per ognuna:
 Lista di 5-10 search terms da aggiungere come negative (con match type suggerito).
 
 # 🟢 Keywords da Scalare
-Keywords con ottimo ACoS dove aumentare bid o budget.
+Keywords ATTIVE con ottimo ACoS dove aumentare bid o budget, PIÙ eventuali keyword-idee recuperate dalle campagne in pausa da testare nelle attive.
 
 # 💡 Quick Wins
 Altre 3-5 ottimizzazioni rapide ad alto impatto.
@@ -329,7 +418,7 @@ def build_email_html(analyses, summaries):
         <div style="background:#0d1117;border:1px solid #21262d;border-radius:12px;padding:20px;margin:20px 0;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <div style="background:linear-gradient(135deg,#f0883e,#c6561a);color:white;font-weight:bold;padding:4px 10px;border-radius:6px;font-size:14px;">{mp}</div>
-            <span style="color:#8b949e;font-size:12px;">Ultimi {DAYS} giorni</span>
+            <span style="color:#8b949e;font-size:12px;">Ultimi {DAYS} giorni · {s.get('n_active', 0)} campagne attive · {s.get('n_paused', 0)} in pausa escluse</span>
           </div>
           {kpi_grid}
           <div style="margin-top:16px;color:#e6edf3;">
