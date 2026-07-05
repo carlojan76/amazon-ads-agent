@@ -7,7 +7,6 @@
 
 # Eseguito automaticamente da GitHub Actions ogni settimana.
 # """
-
 import os
 import sys
 import json
