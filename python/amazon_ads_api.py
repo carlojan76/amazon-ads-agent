@@ -35,7 +35,7 @@ ENDPOINTS = {
     "fe": "https://advertising-api-fe.amazon.com",
 }
 
-TOKEN_URL = "https://api.amazon.com/auth/o2/token"
+TOKEN_URL = "https://api.amazon.co.uk/auth/o2/token"
 
 
 class AmazonAdsAPI:
