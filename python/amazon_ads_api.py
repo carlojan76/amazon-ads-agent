@@ -35,7 +35,7 @@ ENDPOINTS = {
     "fe": "https://advertising-api-fe.amazon.com",
 }
 
-TOKEN_URL = "https://api.amazon.co.uk/auth/o2/token"
+TOKEN_URL = "https://api.amazon.com/auth/o2/token"
 
 
 class AmazonAdsAPI:
@@ -105,6 +105,14 @@ class AmazonAdsAPI:
                 self.profile_id = match[0]["profileId"]
                 print(f"✅ Selezionato profilo {marketplace}: {self.profile_id}")
                 return
+            # FAIL LOUDLY: nessun fallback silenzioso su un profilo di altro paese
+            available = ", ".join(sorted({p.get("countryCode", "??") for p in profiles})) or "nessuno"
+            raise Exception(
+                f"Nessun profilo advertising per marketplace '{marketplace}'. "
+                f"Profili disponibili: {available}. "
+                f"Verifica che il refresh token sia stato autorizzato con l'account che possiede il profilo Ads {marketplace}."
+            )
+        # Solo se NON e' stato richiesto un marketplace specifico, si sceglie di default
         sellers = [p for p in profiles if p.get("accountInfo", {}).get("type") == "seller"]
         if sellers:
             self.profile_id = sellers[0]["profileId"]
