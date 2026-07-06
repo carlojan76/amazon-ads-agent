@@ -1,20 +1,12 @@
-{
-  "name": "amazon-ads-agent",
-  "version": "1.0.0",
-  "description": "AI-powered Amazon Advertising campaign analyzer with Claude",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.2"
-  }
-}
+# Anthropic API key per l'AI Advisor (opzionale, puoi inserirla anche nell'app)
+VITE_ANTHROPIC_API_KEY=sk-ant-...
+
+# Opzionali: prefill per la tab "Azioni" (puoi anche inserirli direttamente nella UI)
+VITE_GITHUB_CLIENT_ID=
+VITE_GITHUB_REPO=tuo-utente/amazon-ads-agent
+
+# Amazon Advertising API (per lo script Python)
+AMAZON_ADS_CLIENT_ID=amzn1.application-oa2-client.xxxxx
+AMAZON_ADS_CLIENT_SECRET=amzn1.oa2-cs.v1.xxxxx
+AMAZON_ADS_REFRESH_TOKEN=Atzr|xxxxx
+AMAZON_ADS_PROFILE_ID=
