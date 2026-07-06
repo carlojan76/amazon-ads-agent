@@ -96,6 +96,10 @@ Per ogni marketplace:
 
 I report sono salvati anche come **artifact GitHub** (Actions → Run → Artifacts) per 30 giorni in caso di problemi con l'email.
 
+### Pubblicazione automatica per la UI online
+
+Alla fine, il workflow copia i JSON di riepilogo (`python/reports/latest/*.json`) in `public/data/` e li committa sul branch `main` (richiede il permesso `contents: write`, già configurato nel workflow). Questo commit fa scattare automaticamente `deploy-pages.yml`, che ricostruisce e ripubblica la UI su GitHub Pages con i dati aggiornati — senza bisogno di scaricare/caricare nulla a mano. Vedi il README per l'attivazione di GitHub Pages e l'avviso sulla visibilità pubblica del sito.
+
 ## Costi stimati
 
 - **GitHub Actions**: gratis per repo privati con piano Free (2.000 minuti/mese). Una run dura ~5 min, quindi sei tranquillo.

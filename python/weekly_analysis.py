@@ -598,6 +598,7 @@ def main():
 
     analyses = {}
     summaries = {}
+    published_mps = []
 
     for mp in MARKETPLACES:
         mp = mp.strip().upper()
@@ -637,10 +638,32 @@ def main():
                 actions_path = out_dir / f"actions_{mp}_{timestamp}.json"
                 actions_path.write_text(json.dumps(actions_dict, indent=2, ensure_ascii=False), encoding="utf-8")
                 print(f"   💾 Azioni proposte salvate: {actions_path} ({n_act} azioni valide)")
+
+            # Pubblica una copia "latest" per la UI online (GitHub Pages).
+            # Riusa lo stesso JSON grezzo di fetch_all_data (che l'app React sa già
+            # leggere) aggiungendo analisi Claude e azioni proposte/validate.
+            latest_dir = out_dir / "latest"
+            latest_dir.mkdir(parents=True, exist_ok=True)
+            publish_payload = dict(data)
+            publish_payload["analysis"] = clean_analysis
+            publish_payload["actions"] = actions_dict or {"actions": []}
+            publish_payload["generated_at"] = datetime.now().isoformat()
+            (latest_dir / f"{mp}.json").write_text(
+                json.dumps(publish_payload, indent=2, ensure_ascii=False, default=str), encoding="utf-8"
+            )
+            published_mps.append(mp)
         except Exception as e:
             print(f"❌ Errore su {mp}: {e}")
             analyses[mp] = f"⚠️ Errore durante l'analisi: {e}"
             summaries[mp] = {}
+
+    if published_mps:
+        index = {"marketplaces": published_mps, "generated_at": datetime.now().isoformat()}
+        Path("reports/latest").mkdir(parents=True, exist_ok=True)
+        Path("reports/latest/index.json").write_text(
+            json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+        print(f"   🌐 Dati pubblicati per la UI online: {', '.join(published_mps)}")
 
     if not analyses:
         print("❌ Nessuna analisi prodotta, skip email")

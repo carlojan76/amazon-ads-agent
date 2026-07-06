@@ -1,15 +1,9 @@
-import { useState, useCallback, useRef } from "react";
-
-const C = {
-  bg: "#06090f", surface: "#0d1117", surface2: "#161b22", border: "#21262d",
-  accent: "#f0883e", accentDim: "#c6561a", accentGlow: "rgba(240,136,62,0.12)",
-  green: "#3fb950", greenDim: "rgba(63,185,80,0.1)", red: "#f85149",
-  redDim: "rgba(248,81,73,0.1)", blue: "#58a6ff", blueDim: "rgba(88,166,255,0.1)",
-  purple: "#bc8cff", yellow: "#d29922",
-  text: "#e6edf3", textMuted: "#8b949e", textDim: "#484f58",
-};
+import { useState, useCallback, useRef, useEffect } from "react";
+import { C } from "./theme";
+import ActionsPanel from "./ActionsPanel";
 
 const ENV_KEY = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_ANTHROPIC_API_KEY : '';
+const BASE_URL = typeof import.meta !== 'undefined' ? import.meta.env.BASE_URL : '/';
 
 function parseCSV(text) {
   const lines = text.split(/\r?\n/).filter(l => l.trim());
@@ -87,6 +81,10 @@ function processJSON(json) {
   m.cvr = m.totalClicks > 0 ? (m.totalOrders / m.totalClicks) * 100 : 0;
   m.cpc = m.totalClicks > 0 ? m.totalSpend / m.totalClicks : 0;
   m.meta = json._meta || {};
+  // Presenti solo quando il JSON viene dalla pubblicazione automatica (weekly_analysis.py)
+  m.weeklyAnalysis = json.analysis || null;
+  m.proposedActions = json.actions?.actions || [];
+  m.generatedAt = json.generated_at || null;
   return m;
 }
 
@@ -301,7 +299,32 @@ export default function App() {
   const [kwFilter, setKwFilter] = useState("all");
   const [apiKey, setApiKey] = useState(ENV_KEY || "");
   const [showSettings, setShowSettings] = useState(false);
+  const [publishedIndex, setPublishedIndex] = useState(null);
+  const [publishedError, setPublishedError] = useState(false);
+  const [loadingMp, setLoadingMp] = useState(null);
   const fileRef = useRef();
+
+  // Dati pubblicati automaticamente ogni settimana da weekly_analysis.py (se presenti)
+  useEffect(() => {
+    fetch(`${BASE_URL}data/index.json`)
+      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(setPublishedIndex)
+      .catch(() => setPublishedError(true));
+  }, []);
+
+  const loadPublished = useCallback(mp => {
+    setLoadingMp(mp);
+    fetch(`${BASE_URL}data/${mp}.json`)
+      .then(r => r.json())
+      .then(json => {
+        setMetrics(processJSON(json));
+        setFileName(`${mp}.json`);
+        setSourceType(`Pubblicato • ${mp} • ${json._meta?.days || "?"} giorni`);
+        setTab("overview");
+      })
+      .catch(() => setPublishedError(true))
+      .finally(() => setLoadingMp(null));
+  }, []);
 
   const handleFile = useCallback(file => {
     if (!file) return;
@@ -351,6 +374,26 @@ export default function App() {
             <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>La key resta locale nel browser, non viene salvata. Oppure usa VITE_ANTHROPIC_API_KEY nel .env</div>
           </div>
 
+          {/* Dati pubblicati automaticamente (weekly analysis) */}
+          {publishedIndex?.marketplaces?.length > 0 && (
+            <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16, marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>🌐 Ultimi dati pubblicati</div>
+                <div style={{ fontSize: 10, color: C.textDim }}>
+                  {publishedIndex.generated_at ? new Date(publishedIndex.generated_at).toLocaleString("it-IT") : ""}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {publishedIndex.marketplaces.map(mp => (
+                  <button key={mp} onClick={() => loadPublished(mp)} disabled={loadingMp === mp}
+                    style={{ background: C.accentGlow, border: `1px solid ${C.accent}`, borderRadius: 7, padding: "8px 16px", color: C.accent, fontWeight: 700, fontSize: 12, cursor: loadingMp ? "default" : "pointer" }}>
+                    {loadingMp === mp ? "⏳ Carico..." : `📊 ${mp}`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Upload */}
           <div onDragOver={e => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)}
             onDrop={e => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]); }}
@@ -393,6 +436,7 @@ export default function App() {
     { id: "keywords", label: "🔑 Keywords" },
     ...(metrics.searchTerms?.length ? [{ id: "searchterms", label: "🔍 Search Terms" }] : []),
     { id: "ai", label: "🤖 AI Advisor" },
+    { id: "actions", label: `✅ Azioni${metrics.proposedActions?.length ? ` (${metrics.proposedActions.length})` : ""}` },
   ];
 
   return (
@@ -539,6 +583,17 @@ export default function App() {
 
         {/* AI */}
         {tab === "ai" && <AiAdvisor metrics={metrics} sourceType={sourceType} apiKey={apiKey} />}
+
+        {/* Azioni: revisione, conferma, aggiunta e apply */}
+        {tab === "actions" && <div>
+          {metrics.weeklyAnalysis && (
+            <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16, marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: C.text, marginBottom: 8 }}>📋 Report Claude ({metrics.generatedAt ? new Date(metrics.generatedAt).toLocaleString("it-IT") : "settimanale"})</div>
+              <div style={{ whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.6, color: C.textMuted, maxHeight: 260, overflowY: "auto" }}>{metrics.weeklyAnalysis}</div>
+            </div>
+          )}
+          <ActionsPanel initialActions={metrics.proposedActions || []} marketplace={metrics.meta?.marketplace || ""} />
+        </div>}
       </div>
     </div>
   );
