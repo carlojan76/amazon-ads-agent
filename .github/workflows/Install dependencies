@@ -1,0 +1,7 @@
+- name: 📦 Install dependencies
+  run: |
+    if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+      npm ci
+    else
+      npm install
+    fi
