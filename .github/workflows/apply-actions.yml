@@ -22,6 +22,13 @@ on:
           - IT
           - FR
           - DE
+          - ES
+          - UK
+          - NL
+          - SE
+          - PL
+          - BE
+          - IE
       actions_json:
         description: 'Contenuto del file actions_XX_YYYYMMDD_HHMM.json (incolla il JSON completo)'
         required: true
