@@ -209,7 +209,10 @@ class AmazonAdsAPI:
 
     # --- Reporting v3 ---
     def request_report(self, report_type, days=14):
-        end_date = datetime.now().strftime("%Y-%m-%d")
+        # L'API v3 non ha dati consolidati per "oggi": usare endDate = ieri.
+        # Richiedere la data odierna e' una causa frequente di report che
+        # restano bloccati in PENDING o tornano vuoti.
+        end_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
         start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
         columns_map = {
@@ -266,52 +269,118 @@ class AmazonAdsAPI:
         }
 
         print(f"📊 Richiesta report {report_type} ({start_date} → {end_date})...")
+        headers = self._base_headers()
+        headers["Content-Type"] = "application/json"
+        headers["Accept"] = "application/vnd.createAsync.v3+json"
         try:
-            resp = self._post(
-                "/reporting/reports",
-                payload,
-                content_type="application/json",
-                accept="application/vnd.createAsync.v3+json",
+            resp = requests.post(
+                f"{self.base_url}/reporting/reports",
+                headers=headers,
+                json=payload,
+                timeout=30,
             )
-            report_id = resp.get("reportId")
+            # 425 = richiesta identica gia' in coda (report generato di recente,
+            # non ancora scaduto). Non e' un errore: Amazon evita i duplicati.
+            if resp.status_code == 425:
+                print(f"   ⏭️  {report_type}: report identico gia' in elaborazione (425), lo salto.")
+                return None
+            if resp.status_code >= 400:
+                print(f"   ⚠️ {report_type} HTTP {resp.status_code}: {resp.text[:300]}")
+                return None
+            report_id = resp.json().get("reportId")
             print(f"   Report ID: {report_id}")
             return report_id
         except Exception as e:
-            print(f"   ⚠️ Errore richiesta report: {e}")
+            print(f"   ⚠️ Errore richiesta report {report_type}: {e}")
             return None
 
-    def poll_report(self, report_id, max_wait=180):
-        print(f"⏳ Attesa completamento report {report_id}...", flush=True)
+    def _check_report(self, report_id):
+        """Controlla lo stato di un singolo report (una sola chiamata, no attesa).
+
+        Ritorna una tupla (status, url):
+          - ("COMPLETED", url)  -> pronto, scaricabile
+          - ("FAILURE", None)   -> fallito
+          - ("PENDING"/"PROCESSING", None) -> ancora in lavorazione
+          - ("ERROR", None)     -> errore di rete/HTTP su questa chiamata
+        """
+        try:
+            headers = self._base_headers()
+            headers["Accept"] = "application/vnd.createAsync.v3+json"
+            resp = requests.get(
+                f"{self.base_url}/reporting/reports/{report_id}",
+                headers=headers,
+                timeout=30,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            status = data.get("status", "")
+            if status == "COMPLETED":
+                return "COMPLETED", data.get("url")
+            if status == "FAILURE":
+                print(f"   ❌ Report {report_id} fallito: {data.get('failureReason', 'sconosciuto')}", flush=True)
+                return "FAILURE", None
+            return status or "PENDING", None
+        except Exception as e:
+            print(f"   ⚠️ Errore polling {report_id}: {e}", flush=True)
+            return "ERROR", None
+
+    def poll_reports(self, report_map, max_wait=600, interval=15):
+        """Attende IN PARALLELO piu' report richiesti in precedenza.
+
+        report_map: dict {report_type: report_id} gia' creati con request_report.
+        Ritorna:    dict {report_type: [righe]}  (lista vuota se timeout/fallito).
+
+        A differenza del vecchio polling sequenziale (che aspettava fino a
+        max_wait secondi PER OGNI report, sommando i tempi), qui tutti i report
+        vengono richiesti prima e poi interrogati insieme: il tempo totale e'
+        circa quello del report piu' lento, non la somma di tutti.
+        """
+        pending = {rt: rid for rt, rid in report_map.items() if rid}
+        results = {rt: [] for rt in report_map}  # default vuoto anche per i falliti
+        if not pending:
+            return results
+
+        print(f"⏳ Attesa in parallelo di {len(pending)} report (max {max_wait}s)...", flush=True)
         start = time.time()
-        while time.time() - start < max_wait:
-            try:
-                headers = self._base_headers()
-                headers["Accept"] = "application/vnd.createAsync.v3+json"
-                resp = requests.get(
-                    f"{self.base_url}/reporting/reports/{report_id}",
-                    headers=headers,
-                )
-                resp.raise_for_status()
-                data = resp.json()
-                status = data.get("status", "")
+        while pending and (time.time() - start) < max_wait:
+            elapsed = int(time.time() - start)
+            done_now = []
+            for rt, rid in list(pending.items()):
+                status, url = self._check_report(rid)
                 if status == "COMPLETED":
-                    url = data.get("url")
-                    print("   ✅ Report completato!", flush=True)
-                    if url:
-                        return self._download_report(url)
-                    return []
+                    print(f"   ✅ {rt} completato ({elapsed}s)", flush=True)
+                    results[rt] = self._download_report(url) if url else []
+                    done_now.append(rt)
                 elif status == "FAILURE":
-                    print(f"   ❌ Report fallito: {data.get('failureReason', 'sconosciuto')}")
-                    return []
-                else:
-                    elapsed = int(time.time() - start)
-                    print(f"   ... stato: {status} ({elapsed}s)", flush=True)
-                    time.sleep(10)
-            except Exception as e:
-                print(f"   ⚠️ Errore polling: {e}", flush=True)
-                time.sleep(10)
-        print("   ⏰ Timeout attesa report", flush=True)
-        return []
+                    results[rt] = []
+                    done_now.append(rt)
+                # PENDING/PROCESSING/ERROR -> resta in coda per il giro dopo
+            for rt in done_now:
+                pending.pop(rt, None)
+            if pending:
+                still = ", ".join(pending.keys())
+                print(f"   ... in attesa ({elapsed}s): {still}", flush=True)
+                time.sleep(interval)
+
+        if pending:
+            print(f"   ⏰ Timeout: report ancora in PENDING dopo {max_wait}s: {', '.join(pending.keys())}", flush=True)
+        return results
+
+    def fetch_reports(self, report_types, days=14, max_wait=600):
+        """Richiede TUTTI i report in blocco, poi li attende in parallelo.
+
+        report_types: lista di tipi (es. ['spCampaigns', 'spKeywords', ...]).
+        Ritorna:      dict {report_type: [righe]}.
+        """
+        report_map = {}
+        for rt in report_types:
+            report_map[rt] = self.request_report(rt, days)
+        return self.poll_reports(report_map, max_wait=max_wait)
+
+    def poll_report(self, report_id, max_wait=600, interval=15):
+        """Compatibilita': attende un singolo report riusando il polling batch."""
+        res = self.poll_reports({"_single": report_id}, max_wait=max_wait, interval=interval)
+        return res.get("_single", [])
 
     def _download_report(self, url):
         import gzip
@@ -356,11 +425,15 @@ def fetch_all_data(marketplace=None, days=14):
     print(f"📊 REPORT PERFORMANCE (ultimi {days} giorni)")
     print("=" * 50)
 
-    campaign_report = api.fetch_report("spCampaigns", days)
-    keyword_report = api.fetch_report("spKeywords", days)
-    search_term_report = api.fetch_report("spSearchTerm", days)
-    targeting_report = api.fetch_report("spTargeting", days)
-    product_report = api.fetch_report("spAdvertisedProduct", days)
+    # Richiede tutti i report in blocco e li attende IN PARALLELO.
+    # Il tempo totale ~= report piu' lento, non la somma dei 5.
+    report_types = ["spCampaigns", "spKeywords", "spSearchTerm", "spTargeting", "spAdvertisedProduct"]
+    reports = api.fetch_reports(report_types, days, max_wait=int(os.getenv("REPORT_MAX_WAIT", "600")))
+    campaign_report = reports.get("spCampaigns", [])
+    keyword_report = reports.get("spKeywords", [])
+    search_term_report = reports.get("spSearchTerm", [])
+    targeting_report = reports.get("spTargeting", [])
+    product_report = reports.get("spAdvertisedProduct", [])
 
     output = {
         "_meta": {
