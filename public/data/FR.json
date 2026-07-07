@@ -1,0 +1,1358 @@
+{
+  "_meta": {
+    "fetched_at": "2026-07-07T07:20:33.382509",
+    "profile_id": "4093691005399804",
+    "marketplace": "FR",
+    "days": 25,
+    "region": "eu"
+  },
+  "campaigns": [
+    {
+      "campaignId": "64445349747291",
+      "name": "Squalo Francia",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-01",
+      "endDate": "2026-04-01",
+      "bidding": {}
+    },
+    {
+      "campaignId": "22112281747911",
+      "name": "Zaino Francia",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-03-14",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "237631679607327",
+      "name": "Tiragraffi FR a frase",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-04-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "123475451997808",
+      "name": "Squalo Francese Parola Esatta",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-03-27",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "261281094174460",
+      "name": "Sdraietta Francia 15Apr",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-04-15",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "233757341768082",
+      "name": "Claude FR Sdraietta",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-08",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "176086942618530",
+      "name": "FR_Amaca_Auto_Jun",
+      "state": "ENABLED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-07",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "128021223208209",
+      "name": "FR Amaca Manuale",
+      "state": "ENABLED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-14",
+      "endDate": "",
+      "bidding": {}
+    }
+  ],
+  "adGroups": [
+    {
+      "adGroupId": "202280017861317",
+      "campaignId": "237631679607327",
+      "name": "Tiragraffi FR a Frase",
+      "state": "ARCHIVED",
+      "defaultBid": 0.23
+    },
+    {
+      "adGroupId": "37619354462423",
+      "campaignId": "123475451997808",
+      "name": "Squalo Francese Parola Esatta",
+      "state": "ARCHIVED",
+      "defaultBid": 0.11
+    },
+    {
+      "adGroupId": "118054081965475",
+      "campaignId": "233757341768082",
+      "name": "Claude FR Sdraietta",
+      "state": "ARCHIVED",
+      "defaultBid": 0.35
+    },
+    {
+      "adGroupId": "151082890508206",
+      "campaignId": "128021223208209",
+      "name": "FR Amaca Manuale",
+      "state": "ENABLED",
+      "defaultBid": 0.47
+    },
+    {
+      "adGroupId": "507375668602219",
+      "campaignId": "64445349747291",
+      "name": "Squalo Francia",
+      "state": "ARCHIVED",
+      "defaultBid": 0.2
+    },
+    {
+      "adGroupId": "510519893602910",
+      "campaignId": "22112281747911",
+      "name": "Zaino FRANCIA",
+      "state": "ARCHIVED",
+      "defaultBid": 0.25
+    },
+    {
+      "adGroupId": "490361755940656",
+      "campaignId": "261281094174460",
+      "name": "Sdraietta Francia",
+      "state": "ARCHIVED",
+      "defaultBid": 0.3
+    },
+    {
+      "adGroupId": "416144329258343",
+      "campaignId": "176086942618530",
+      "name": "FR_Amaca_Auto_Jun",
+      "state": "ENABLED",
+      "defaultBid": 0.28
+    }
+  ],
+  "keywords": [
+    {
+      "keywordId": "263935036788243",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "chariot amovible",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "7459679996764",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "chariot amovible",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "132125768637796",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "poussette chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.44
+    },
+    {
+      "keywordId": "233933867799434",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "poussette chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.4
+    },
+    {
+      "keywordId": "16173672007013",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "poussette chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.1
+    },
+    {
+      "keywordId": "228191639572610",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac à dos chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.66
+    },
+    {
+      "keywordId": "154187810153679",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac à dos chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.62
+    },
+    {
+      "keywordId": "75320409455688",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac à dos chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.6
+    },
+    {
+      "keywordId": "158201920062735",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac transport chat avion",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.7
+    },
+    {
+      "keywordId": "165895397163811",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac transport chat avion",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.7
+    },
+    {
+      "keywordId": "263692289842049",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac transport chat avion",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.78
+    },
+    {
+      "keywordId": "164444648124240",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "poussette pour chiens",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.8
+    },
+    {
+      "keywordId": "135296810482678",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "poussette pour chiens",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 1.05
+    },
+    {
+      "keywordId": "209783522673795",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "poussette pour chiens",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.69
+    },
+    {
+      "keywordId": "191643061059622",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "panier de transport pour chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.98
+    },
+    {
+      "keywordId": "6119155469269",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "panier de transport pour chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.88
+    },
+    {
+      "keywordId": "13844749364583",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "panier de transport pour chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.43
+    },
+    {
+      "keywordId": "113033578595286",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac à dos chat randonnée",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.63
+    },
+    {
+      "keywordId": "39007834815902",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac à dos chat randonnée",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.63
+    },
+    {
+      "keywordId": "56720280330777",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac à dos chat randonnée",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.63
+    },
+    {
+      "keywordId": "86348490835615",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "poussette pliable",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.27
+    },
+    {
+      "keywordId": "3086979927530",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "poussette pliable",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "207593653637076",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "poussette pliable",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.27
+    },
+    {
+      "keywordId": "106119437285696",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac de transport pour chien",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.87
+    },
+    {
+      "keywordId": "70493922098084",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac de transport pour chien",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.86
+    },
+    {
+      "keywordId": "74106065724353",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac de transport pour chien",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.87
+    },
+    {
+      "keywordId": "238070196575009",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "caisse transport chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 1.62
+    },
+    {
+      "keywordId": "269070904582379",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "caisse transport chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 1.63
+    },
+    {
+      "keywordId": "275389552244292",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "caisse transport chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 1.65
+    },
+    {
+      "keywordId": "28660075334913",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "accessoire chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.51
+    },
+    {
+      "keywordId": "112715776356894",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "accessoire chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.52
+    },
+    {
+      "keywordId": "18996044149469",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "accessoire chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.51
+    },
+    {
+      "keywordId": "244593161196635",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac à dos chien 5kg",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.5
+    },
+    {
+      "keywordId": "187854890902968",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac à dos chien 5kg",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.6
+    },
+    {
+      "keywordId": "54788953831871",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac à dos chien 5kg",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.6
+    },
+    {
+      "keywordId": "28947799725851",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "chariot amovible",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.31
+    },
+    {
+      "keywordId": "7359586546549",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac de voyage chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 1.63
+    },
+    {
+      "keywordId": "35560331488070",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac de voyage chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 1.67
+    },
+    {
+      "keywordId": "148904796677461",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac de voyage chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 1.68
+    },
+    {
+      "keywordId": "182622871995609",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "cage transport chien voiture",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.65
+    },
+    {
+      "keywordId": "119588282964528",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "cage transport chien voiture",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.65
+    },
+    {
+      "keywordId": "126605296261946",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "cage transport chien voiture",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.72
+    },
+    {
+      "keywordId": "135157661120626",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac bulle chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.56
+    },
+    {
+      "keywordId": "163605323315062",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac bulle chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.46
+    },
+    {
+      "keywordId": "220668686926284",
+      "campaignId": "22112281747911",
+      "adGroupId": "510519893602910",
+      "keywordText": "sac bulle chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.46
+    },
+    {
+      "keywordId": "64505501765444",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "185259484066892",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.19
+    },
+    {
+      "keywordId": "173567130908848",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "9350959523732",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier douillet pour chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.13
+    },
+    {
+      "keywordId": "213744744674036",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier douillet pour chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "93581133047903",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier douillet pour chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "279156176325487",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "cabane chat interieur",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "109789266103868",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "cabane chat interieur",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "keywordId": "159858987295843",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "cabane chat interieur",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "keywordId": "195514173650350",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "niche chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.15
+    },
+    {
+      "keywordId": "130600223117726",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "niche chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "200945968739136",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "niche chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "keywordId": "244952934176010",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "chat niche",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.15
+    },
+    {
+      "keywordId": "211982818341974",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "chat niche",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.17
+    },
+    {
+      "keywordId": "185967972175787",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "chat niche",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.19
+    },
+    {
+      "keywordId": "49144352174726",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "maison chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.15
+    },
+    {
+      "keywordId": "58099395073014",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "maison chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "265115716342470",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "maison chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "keywordId": "3312783152521",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "niche pour chat",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.15
+    },
+    {
+      "keywordId": "43687594113175",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "niche pour chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "72669470276983",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "niche pour chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.26
+    },
+    {
+      "keywordId": "106644066216502",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "lit chien",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "259651432091224",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "griffoir autocollant",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "279079327793976",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "griffoir autocollant",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "keywordId": "159222251850764",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "protection canapé chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "keywordId": "70380682263588",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "tapis griffoir",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "keywordId": "184698193274348",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "tapis griffoir",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "keywordId": "90671676951463",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "grattoir mural chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "keywordId": "129504221011887",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "griffoir",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.1
+    },
+    {
+      "keywordId": "204301630696542",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "chat escalade",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.26
+    },
+    {
+      "keywordId": "182746062825813",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "chat escalade",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "69723156500106",
+      "campaignId": "237631679607327",
+      "adGroupId": "202280017861317",
+      "keywordText": "chat escalade",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.21
+    },
+    {
+      "keywordId": "179063065338028",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier chat design",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "226530488951309",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier chat design",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.32
+    },
+    {
+      "keywordId": "170271893468019",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier chat original",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "100467447793510",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier chat original",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "247056924490775",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier chat requin",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.29
+    },
+    {
+      "keywordId": "242423273161996",
+      "campaignId": "123475451997808",
+      "adGroupId": "37619354462423",
+      "keywordText": "panier chat requin",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.29
+    },
+    {
+      "keywordId": "173724308226629",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "hamac pour chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.55
+    },
+    {
+      "keywordId": "5590732042128",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "hamac chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.5
+    },
+    {
+      "keywordId": "58648629790428",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "lit hamac chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.45
+    },
+    {
+      "keywordId": "20813489039662",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "hamac pour chat en bois",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.45
+    },
+    {
+      "keywordId": "192738857325140",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "griffoir hamac chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.4
+    },
+    {
+      "keywordId": "194114095589664",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "hamac griffoir chat",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.4
+    },
+    {
+      "keywordId": "150880923151732",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "hamac pour chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.35
+    },
+    {
+      "keywordId": "193594363264580",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "lit pour chat suspendu",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "68166631917989",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "arbre a chat hamac",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "52783491479177",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "repose chat bois",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "189838903778054",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "coussin hamac chat",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "226169292194805",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "panier chat original",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "28909940076464",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "accessoires chat design",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "99327077502649",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "lit chat bois",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "207174897912100",
+      "campaignId": "233757341768082",
+      "adGroupId": "118054081965475",
+      "keywordText": "chatiere hamac",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "14588349125846",
+      "campaignId": "128021223208209",
+      "adGroupId": "151082890508206",
+      "keywordText": "lit en bois pour chat",
+      "matchType": "EXACT",
+      "state": "ENABLED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "69737775797390",
+      "campaignId": "128021223208209",
+      "adGroupId": "151082890508206",
+      "keywordText": "hamac chat",
+      "matchType": "EXACT",
+      "state": "PAUSED",
+      "bid": 0.35
+    }
+  ],
+  "negativeKeywords": [
+    {
+      "keywordText": "niche pour chat exterieur",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "123475451997808",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "panier chat bureau",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "123475451997808",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "cat hammock",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "dog hammock",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "niche pour chat",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "cabane chat interieur",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "canapé chat",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "panier chat",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "arbre a chat",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "arbre a chat griffoir",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "arbre a chat",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "niche pour chat",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "233757341768082",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "griffoir",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "176086942618530",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "panier",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "176086942618530",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "maison chat",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "176086942618530",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "lit chat",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "176086942618530",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "hamac chat",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "128021223208209",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "hamac pour chat",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "128021223208209",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "grattoir chat",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "176086942618530",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "fukumaru",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "176086942618530",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "hamac chat",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "176086942618530",
+      "state": "ENABLED"
+    }
+  ],
+  "targets": [
+    {
+      "targetId": "238201969458672",
+      "campaignId": "64445349747291",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "88883854197597",
+      "campaignId": "64445349747291",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "173023250313144",
+      "campaignId": "64445349747291",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "243403573277324",
+      "campaignId": "64445349747291",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "103789105620212",
+      "campaignId": "261281094174460",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.47
+    },
+    {
+      "targetId": "3968299771201",
+      "campaignId": "261281094174460",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "49436973627817",
+      "campaignId": "261281094174460",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "271973484418255",
+      "campaignId": "261281094174460",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.4
+    },
+    {
+      "targetId": "213975828137298",
+      "campaignId": "176086942618530",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0.28
+    },
+    {
+      "targetId": "145353223891972",
+      "campaignId": "176086942618530",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "PAUSED",
+      "bid": 0.4
+    },
+    {
+      "targetId": "26558537400853",
+      "campaignId": "176086942618530",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "PAUSED",
+      "bid": 0.4
+    },
+    {
+      "targetId": "3313378436667",
+      "campaignId": "176086942618530",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "PAUSED",
+      "bid": 0.4
+    },
+    {
+      "targetId": "97325753645467",
+      "campaignId": "123475451997808",
+      "expression": [
+        {
+          "type": "KEYWORD_GROUP_SAME_AS",
+          "value": "category"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    }
+  ],
+  "reports": {
+    "campaigns": [],
+    "keywords": [],
+    "searchTerms": [],
+    "targeting": [],
+    "products": []
+  },
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace FR non presenta alcuna campagna attiva nel periodo analizzato (ultimi 25 giorni): spesa, vendite, impression e click sono tutti a zero. Non ci sono dati storici recuperabili da campagne in pausa o archiviate. Il marketplace è essenzialmente **inattivo dal punto di vista advertising**, il che significa zero visibilità organica supportata da PPC e probabilmente vendite molto limitate o nulle su Amazon FR.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Lanciare almeno una campagna Sponsored Products automatica**\n- **Azione**: Creare una campagna SP Auto su FR con targeting automatico (close match + complements) per i prodotti principali del catalogo, budget giornaliero di partenza €15–20.\n- **Motivo**: Zero campagne attive = zero dati di traffico, zero impression, zero possibilità di vendita PPC. Il marketplace FR è completamente cieco.\n- **Impatto stimato**: Anche con CTR basso, entro 7–10 giorni si raccolgono search term reali del mercato francese, fondamentali per costruire campagne manuali ottimizzate.\n\n**2. Affiancare una campagna Sponsored Products manuale su keyword core in francese**\n- **Azione**: Identificare 10–15 keyword principali tradotte/adattate in francese (es. titolo prodotto, categoria, use case), creare campagna SP manuale exact + phrase con bid di partenza basato su CPC suggerito da Amazon FR (tipicamente €0.40–0.80 per categoria consumer).\n- **Motivo**: La campagna auto da sola non basta per presidiare i termini ad alta intenzione d'acquisto. FR ha dinamiche di ricerca diverse da IT/DE: servono keyword in lingua locale.\n- **Impatto stimato**: Copertura sui termini a più alta conversione dal giorno 1, con dati puliti su cui ottimizzare bid entro 2 settimane.\n\n**3. Verificare lo stato dell'account e dei listing su Amazon FR**\n- **Azione**: Controllare che i prodotti siano attivi, buybox presente, listing in francese completo (titolo, bullet, descrizione), nessun blocco account o soppressione listing prima di investire in advertising.\n- **Motivo**: Con zero impression anche da campagne attive (se mai ce ne fossero state), la causa potrebbe essere a monte: listing inattivi, prodotti senza stock, o problemi di compliance FR (es. lingue obbligatorie, ASIN non idoneo).\n- **Impatto stimato**: Sblocca l'intero potenziale del marketplace — senza listing sani l'advertising non può performare.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n**Nessun search term da negativizzare** — non esistono campagne attive né dati di traffico nel periodo analizzato. Lista vuota per definizione.\n\n> ⚠️ Una volta lanciate le campagne (vedi Azioni Urgenti), rivedere questa sezione dopo 7–10 giorni con i primi dati di search term report.\n\n---\n\n# 🟢 Keywords da Scalare\n\n**Nessuna keyword attiva da scalare** — assenza totale di campagne attive e nessuna keyword-idea recuperabile da campagne in pausa (anch'esse assenti).\n\n> 📌 Dopo il lancio delle campagne indicate sopra, le keyword con ACoS < 25% entro 2 settimane saranno le candidate prioritarie per incremento bid (+20–25%).\n\n---\n\n# 💡 Quick Wins\n\n1. **Usa il Search Term Report di altri marketplace (IT, DE, ES)** se attivi: estrai le keyword che convertono meglio, traducile in francese e usale come seed list per la campagna manuale FR — risparmia 2–3 settimane di raccolta dati.\n\n2. **Imposta il budget giornaliero con regola automatica**: su Amazon Ads FR, attiva la regola di aumento budget automatico (+25%) nei giorni con ROAS superiore al target. Evita di perdere impression nei momenti di picco senza presidio manuale.\n\n3. **Crea subito una campagna Sponsored Brands (se Brand Registry attivo)**: anche solo con 3 prodotti e keyword brand, costa poco e costruisce awareness sul mercato FR dove il brand è probabilmente sconosciuto.\n\n4. **Segmenta per categoria di prodotto fin dal lancio**: non mettere tutto in una campagna sola. Almeno 2 campagne separate (es. prodotto A vs prodotto B) per avere dati puliti e budget controllabile per linea.\n\n5. **Monitora il Placement Report fin dal day 1**: su FR, spesso il placement \"Top of Search\" ha CPC molto più alto che in IT. Imposta un moltiplicatore placement conservativo (es. +0% inizialmente) e aggiusta solo dopo aver visto i dati di conversione per placement.\n\n---",
+  "actions": {
+    "actions": []
+  },
+  "generated_at": "2026-07-07T07:21:03.098825"
+}

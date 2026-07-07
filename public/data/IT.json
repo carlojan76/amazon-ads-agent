@@ -1,0 +1,3027 @@
+{
+  "_meta": {
+    "fetched_at": "2026-07-07T07:09:48.550862",
+    "profile_id": "681612226639233",
+    "marketplace": "IT",
+    "days": 25,
+    "region": "eu"
+  },
+  "campaigns": [
+    {
+      "campaignId": "121893827126311",
+      "name": "Campagna - 19/02/2026 22:12:46.519",
+      "state": "ARCHIVED",
+      "budget": 5.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-02-19",
+      "endDate": "2026-03-07",
+      "bidding": {}
+    },
+    {
+      "campaignId": "5431779769994",
+      "name": "Tiragraffi",
+      "state": "ARCHIVED",
+      "budget": 10.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-10",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "220860175637574",
+      "name": "Campagna - 09/03/2026 22:20:03.996",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-09",
+      "endDate": "2026-05-01",
+      "bidding": {}
+    },
+    {
+      "campaignId": "1166032704708",
+      "name": "zaino auto",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-09",
+      "endDate": "2026-05-01",
+      "bidding": {}
+    },
+    {
+      "campaignId": "117066060136351",
+      "name": "Squali",
+      "state": "ARCHIVED",
+      "budget": 5.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-09",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "85629292717499",
+      "name": "Zaino",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-03-08",
+      "endDate": "2026-04-01",
+      "bidding": {}
+    },
+    {
+      "campaignId": "122559503842189",
+      "name": "Zaino Parole Custom",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-03-14",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "32328910962430",
+      "name": "Campagna Sdraietta IT",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-22",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "47968131870457",
+      "name": "Squalo IT exact word",
+      "state": "ARCHIVED",
+      "budget": 7.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-03-24",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "13466121386619",
+      "name": "Squalo Automatico",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-26",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "43613971522137",
+      "name": "Sdraietta IT",
+      "state": "ARCHIVED",
+      "budget": 4.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-03-25",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "19765209655278",
+      "name": "Sdraietta automatico",
+      "state": "ARCHIVED",
+      "budget": 5.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-26",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "183563032458218",
+      "name": "Sdraietta IT Competitiva",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-03-27",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "160001998183198",
+      "name": "Tiragraffi IT parole esatte",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-04-05",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "69107893631058",
+      "name": "Tiragraffi IT Alternativa Focus",
+      "state": "ARCHIVED",
+      "budget": 4.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-04-13",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "239184394623778",
+      "name": "Cuccia Squalo 15 Aprile",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-04-18",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "230441551387668",
+      "name": "AD_READY: B0GC1VPQWB",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-16",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "151525844491870",
+      "name": "AD_READY: B0G5Q3XQ7K",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-16",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "247066377167608",
+      "name": "AD_READY: B0G64HGTHC",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-16",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "64281595402475",
+      "name": "Sdraietta IT 2in1 Conversioni",
+      "state": "ARCHIVED",
+      "budget": 8.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-20",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "147761864207305",
+      "name": "Tiragraffi Gemini",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-25",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "65959585850070",
+      "name": "FR_Sdraietta_Auto_Giu26",
+      "state": "ARCHIVED",
+      "budget": 1.5,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "119328681054569",
+      "name": "FR_Sdraietta_Manual_Exact_Giu26",
+      "state": "ARCHIVED",
+      "budget": 2.5,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "278217612648451",
+      "name": "FR_Squalo_Auto_Giu26",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "201540355834712",
+      "name": "FR_Squalo_Manual_Exact_Giu26",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "110411084577467",
+      "name": "FR_Tiragraffi_Auto_Giu26",
+      "state": "ARCHIVED",
+      "budget": 1.5,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "31060973650134",
+      "name": "FR_Tiragraffi_Manual_Exact_Giu26",
+      "state": "ARCHIVED",
+      "budget": 1.5,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "82847535944074",
+      "name": "Campaign - 03/06/2026 13:23:41.566",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-05",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "211659719678358",
+      "name": "DE_Sdraietta_Auto",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "168085412109580",
+      "name": "DE_Sdraietta_Manual",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-31",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "159018677716023",
+      "name": "DE_Tiragraffi_Auto",
+      "state": "ARCHIVED",
+      "budget": 1.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "224934298716719",
+      "name": "DE_Cuccia_Squalo_Auto",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-31",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "6533744873086",
+      "name": "DE_Tiragraffi_Manual",
+      "state": "ARCHIVED",
+      "budget": 1.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "2406051755881",
+      "name": "DE_Cuccia_Squalo_Manual",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "110568193578674",
+      "name": "FR_Tiragraffi_Manual",
+      "state": "ARCHIVED",
+      "budget": 1.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "14392719536689",
+      "name": "FR_Tiragraffi_Auto",
+      "state": "ARCHIVED",
+      "budget": 1.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "151331222861709",
+      "name": "FR_Cuccia_Squalo_Auto",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-31",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "223229577891239",
+      "name": "FR_Sdraietta_Manual",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "213933664679394",
+      "name": "FR_Cuccia_Squalo_Manual",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-31",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "233068426216700",
+      "name": "FR_Sdraietta_Auto",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "53116982441694",
+      "name": "Tiragraffi Manuale Giugno",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-02",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "109362706952310",
+      "name": "IT_Sdraietta_Manual",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-31",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "58813004524489",
+      "name": "IT_Tiragraffi_Auto",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "108845071247125",
+      "name": "IT_Tiragraffi_Manual",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-31",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "246809103232",
+      "name": "IT_Sdraietta_Auto",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "52043485444965",
+      "name": "IT_Cuccia_Squalo_Manual",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "102737529005895",
+      "name": "IT_Cuccia_Squalo_Auto",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "231070537397250",
+      "name": "Nuova Amaca IT Giugno",
+      "state": "ARCHIVED",
+      "budget": 5.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "5893243476207",
+      "name": "IT_Sdraietta_Auto_Giu26",
+      "state": "ARCHIVED",
+      "budget": 1.5,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "157474497682887",
+      "name": "IT_Sdraietta_Manual_Exact_Giu26",
+      "state": "ARCHIVED",
+      "budget": 2.5,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "86317299116367",
+      "name": "IT_Squalo_Auto_Giu26",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "19241048336045",
+      "name": "IT_Squalo_Manual_Exact_Giu26",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "177749121913771",
+      "name": "IT_Tiragraffi_Auto_Giu26",
+      "state": "ARCHIVED",
+      "budget": 1.5,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "29456341120737",
+      "name": "IT_Tiragraffi_Manual_Exact_Giu26",
+      "state": "ARCHIVED",
+      "budget": 1.5,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "88807121568898",
+      "name": "DE_Sdraietta_Auto_Giu26",
+      "state": "ARCHIVED",
+      "budget": 1.5,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "168510111485362",
+      "name": "DE_Sdraietta_Manual_Exact_Giu26",
+      "state": "ARCHIVED",
+      "budget": 2.5,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "105251717008121",
+      "name": "DE_Squalo_Auto_Giu26",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "274261791890066",
+      "name": "DE_Squalo_Manual_Exact_Giu26",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-29",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "233534199403877",
+      "name": "DE_Tiragraffi_Auto_Giu26",
+      "state": "ARCHIVED",
+      "budget": 1.5,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "58819669092764",
+      "name": "DE_Tiragraffi_Manual_Exact_Giu26",
+      "state": "ARCHIVED",
+      "budget": 1.5,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-01",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "183977692437190",
+      "name": "Tiragraffi automatico",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-02",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "267352724943321",
+      "name": "IT_Tiragraffi_Manual_Exact_7_Jun",
+      "state": "PAUSED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-07",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "45961448043845",
+      "name": "IT_Tiragraffi_Auto_07_Jun",
+      "state": "PAUSED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-07",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "266680794917910",
+      "name": "IT_Amaca_Manual_Exact_07_Jun",
+      "state": "ENABLED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-07",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "44287398976768",
+      "name": "IT_SpazzolaPeli_Auto_Jun",
+      "state": "PAUSED",
+      "budget": 4.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-07",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "177006849652366",
+      "name": "IT_CucciaSqualo_Auto_Jun",
+      "state": "PAUSED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-07",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "5155558181714",
+      "name": "IT_Amaca_Auto_07_jun",
+      "state": "PAUSED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-06-07",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "203905164846579",
+      "name": "IT_CucciaSqualo_Manual_Exact_Jun",
+      "state": "PAUSED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-07",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "186139101957962",
+      "name": "IT_SpazzolaPeli_Manual_Exact_Jun",
+      "state": "PAUSED",
+      "budget": 4.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-07",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "148408777680588",
+      "name": "Campagna - 14/06/2026 21:32:55.203",
+      "state": "ENABLED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-06-14",
+      "endDate": "",
+      "bidding": {}
+    }
+  ],
+  "adGroups": [
+    {
+      "adGroupId": "249448730843278",
+      "campaignId": "47968131870457",
+      "name": "Squali Italia Exact word",
+      "state": "ARCHIVED",
+      "defaultBid": 0.11
+    },
+    {
+      "adGroupId": "88126336711348",
+      "campaignId": "43613971522137",
+      "name": "Sdraietta exact word",
+      "state": "ARCHIVED",
+      "defaultBid": 0.11
+    },
+    {
+      "adGroupId": "185502503202057",
+      "campaignId": "183563032458218",
+      "name": "Sdraietta IT Competitiva",
+      "state": "ARCHIVED",
+      "defaultBid": 0.11
+    },
+    {
+      "adGroupId": "241955745949431",
+      "campaignId": "160001998183198",
+      "name": "Tiragraffi IT parole esatte",
+      "state": "ARCHIVED",
+      "defaultBid": 0.25
+    },
+    {
+      "adGroupId": "119213916827296",
+      "campaignId": "69107893631058",
+      "name": "Gruppo di annunci - 13/04/2026 21:30:32.861",
+      "state": "ARCHIVED",
+      "defaultBid": 0.41
+    },
+    {
+      "adGroupId": "2082193366337",
+      "campaignId": "239184394623778",
+      "name": "Cuccia Squalo 19 Aprile",
+      "state": "ARCHIVED",
+      "defaultBid": 0.24
+    },
+    {
+      "adGroupId": "73243834487514",
+      "campaignId": "230441551387668",
+      "name": "Gruppo di annunci - 16/05/2026 17:42:47.171",
+      "state": "ARCHIVED",
+      "defaultBid": 0.18
+    },
+    {
+      "adGroupId": "132953247743200",
+      "campaignId": "151525844491870",
+      "name": "Gruppo di annunci - 16/05/2026 17:43:10.880",
+      "state": "ARCHIVED",
+      "defaultBid": 0.31
+    },
+    {
+      "adGroupId": "181573622114214",
+      "campaignId": "247066377167608",
+      "name": "Gruppo di annunci - 16/05/2026 17:44:05.712",
+      "state": "ARCHIVED",
+      "defaultBid": 0.32
+    },
+    {
+      "adGroupId": "166585165558661",
+      "campaignId": "64281595402475",
+      "name": "Sdraietta IT 2in1 Conversioni",
+      "state": "ARCHIVED",
+      "defaultBid": 0.11
+    },
+    {
+      "adGroupId": "214844280031379",
+      "campaignId": "147761864207305",
+      "name": "Tiragraffi",
+      "state": "ARCHIVED",
+      "defaultBid": 0.38
+    },
+    {
+      "adGroupId": "123880606930113",
+      "campaignId": "213933664679394",
+      "name": "Cuccia_Squalo_Manual_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "273849657033078",
+      "campaignId": "110568193578674",
+      "name": "Tiragraffi_Manual_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "209686639840202",
+      "campaignId": "223229577891239",
+      "name": "Sdraietta_Manual_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "66706400267000",
+      "campaignId": "53116982441694",
+      "name": "Tiragraffi Manuale",
+      "state": "ARCHIVED",
+      "defaultBid": 0.33
+    },
+    {
+      "adGroupId": "118621423700790",
+      "campaignId": "231070537397250",
+      "name": "Sdraietta Giugno",
+      "state": "ARCHIVED",
+      "defaultBid": 0.11
+    },
+    {
+      "adGroupId": "35484298395844",
+      "campaignId": "6533744873086",
+      "name": "Tiragraffi_Manual_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "65891661555618",
+      "campaignId": "168085412109580",
+      "name": "Sdraietta_Manual_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "131635991204725",
+      "campaignId": "2406051755881",
+      "name": "Cuccia_Squalo_Manual_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "198317363169689",
+      "campaignId": "108845071247125",
+      "name": "Tiragraffi_Manual_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "167242955723830",
+      "campaignId": "52043485444965",
+      "name": "Cuccia_Squalo_Manual_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "141538265790663",
+      "campaignId": "109362706952310",
+      "name": "Sdraietta_Manual_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "475004801186548",
+      "campaignId": "121893827126311",
+      "name": "Gruppo di annunci - 19/02/2026 22:12:36.940",
+      "state": "ARCHIVED",
+      "defaultBid": 0.45
+    },
+    {
+      "adGroupId": "560344761749044",
+      "campaignId": "85629292717499",
+      "name": "Zaini Annuncio",
+      "state": "ARCHIVED",
+      "defaultBid": 0.22
+    },
+    {
+      "adGroupId": "295236708198948",
+      "campaignId": "1166032704708",
+      "name": "Zaino Auto",
+      "state": "ARCHIVED",
+      "defaultBid": 0.2
+    },
+    {
+      "adGroupId": "498671972135260",
+      "campaignId": "117066060136351",
+      "name": "Squali",
+      "state": "ARCHIVED",
+      "defaultBid": 0.15
+    },
+    {
+      "adGroupId": "561644257118686",
+      "campaignId": "220860175637574",
+      "name": "Zaino Auto",
+      "state": "ARCHIVED",
+      "defaultBid": 0.2
+    },
+    {
+      "adGroupId": "323513926686285",
+      "campaignId": "5431779769994",
+      "name": "Tiragraffi",
+      "state": "ARCHIVED",
+      "defaultBid": 0.25
+    },
+    {
+      "adGroupId": "526961773709901",
+      "campaignId": "122559503842189",
+      "name": "Zaini Manuale",
+      "state": "ARCHIVED",
+      "defaultBid": 0.16
+    },
+    {
+      "adGroupId": "382929247712617",
+      "campaignId": "32328910962430",
+      "name": "Sdraietta IT",
+      "state": "ARCHIVED",
+      "defaultBid": 0.15
+    },
+    {
+      "adGroupId": "290963796066057",
+      "campaignId": "19765209655278",
+      "name": "Sdraietta Automatico",
+      "state": "ARCHIVED",
+      "defaultBid": 0.11
+    },
+    {
+      "adGroupId": "485459869653639",
+      "campaignId": "13466121386619",
+      "name": "Squalo Automatico",
+      "state": "ARCHIVED",
+      "defaultBid": 0.11
+    },
+    {
+      "adGroupId": "446544630905230",
+      "campaignId": "233068426216700",
+      "name": "Sdraietta_Auto_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "372076204690549",
+      "campaignId": "14392719536689",
+      "name": "Tiragraffi_Auto_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "406418626847110",
+      "campaignId": "151331222861709",
+      "name": "Cuccia_Squalo_Auto_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "410124004465025",
+      "campaignId": "159018677716023",
+      "name": "Tiragraffi_Auto_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "432086616006365",
+      "campaignId": "224934298716719",
+      "name": "Cuccia_Squalo_Auto_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "293436160646747",
+      "campaignId": "211659719678358",
+      "name": "Sdraietta_Auto_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "288289940305522",
+      "campaignId": "102737529005895",
+      "name": "Cuccia_Squalo_Auto_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "339825649968718",
+      "campaignId": "58813004524489",
+      "name": "Tiragraffi_Auto_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "461412427214271",
+      "campaignId": "246809103232",
+      "name": "Sdraietta_Auto_AG",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "445030770801129",
+      "campaignId": "82847535944074",
+      "name": "Spazzola",
+      "state": "ARCHIVED",
+      "defaultBid": 0.32
+    }
+  ],
+  "keywords": [
+    {
+      "keywordId": "221230078983950",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino gatto",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "52475010081491",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino gatto",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "235334790351960",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino gatto",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "227009935487621",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino per cani",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.17
+    },
+    {
+      "keywordId": "253538385306945",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino per cani",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "280144090709133",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino per cani",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "191729024980925",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino per gatti",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.17
+    },
+    {
+      "keywordId": "208374751002104",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino per gatti",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.17
+    },
+    {
+      "keywordId": "233939137548580",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino per gatti",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "209435480051756",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino per cani",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.19
+    },
+    {
+      "keywordId": "72559562607421",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino per cani",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.19
+    },
+    {
+      "keywordId": "46362857797672",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino per cani",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.34
+    },
+    {
+      "keywordId": "13448566535690",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino cane",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "166933877723689",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino cane",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "222845776633254",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino cane",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "114487541375850",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino per gatti",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "203757129668763",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino per gatti",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.38
+    },
+    {
+      "keywordId": "204825893127804",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino per gatti",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.39
+    },
+    {
+      "keywordId": "80840156855105",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino gatto",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "73148522793381",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino gatto",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.35
+    },
+    {
+      "keywordId": "37480006884720",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino gatto",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.36
+    },
+    {
+      "keywordId": "127020723708391",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino gatto grande",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "107640670039727",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino gatto grande",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.15
+    },
+    {
+      "keywordId": "21875948023375",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino gatto grande",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "214272070856978",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino trasportino gatto",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.31
+    },
+    {
+      "keywordId": "198589070834496",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino trasportino gatto",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "108065056788919",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino trasportino gatto",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "237094108047008",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino cane",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.29
+    },
+    {
+      "keywordId": "27067033577148",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino cane",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.26
+    },
+    {
+      "keywordId": "220547580237371",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino cane",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "109013761413756",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino porta gatto",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.34
+    },
+    {
+      "keywordId": "223626918376043",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino porta gatto",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.34
+    },
+    {
+      "keywordId": "122118459281941",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino porta gatto",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.34
+    },
+    {
+      "keywordId": "15434495232476",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino gatto zaino",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.31
+    },
+    {
+      "keywordId": "126918883873581",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino gatto zaino",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.31
+    },
+    {
+      "keywordId": "9041067202700",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "trasportino gatto zaino",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.31
+    },
+    {
+      "keywordId": "262816145453005",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "cat pram stroller",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "173040334610130",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "small dog buggy",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "109217763823251",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino porta gatti",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.36
+    },
+    {
+      "keywordId": "114723679989454",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino porta gatti",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.35
+    },
+    {
+      "keywordId": "124533901023441",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino porta gatti",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.35
+    },
+    {
+      "keywordId": "93237887873379",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino porta cani",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.17
+    },
+    {
+      "keywordId": "29179980085741",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "zaino cani",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.19
+    },
+    {
+      "keywordId": "133049755208448",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "cat buggy",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "158114849785592",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "pet stroller",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "160330342094763",
+      "campaignId": "85629292717499",
+      "adGroupId": "560344761749044",
+      "keywordText": "cat stroller",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "keywordId": "108937184647339",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "carrello rimovibile",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "83358678027149",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "pet gear",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "249487428855228",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "carrello gatti ventilato",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "38689550443775",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "carrello gatti ventilato",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "74497018593133",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "carrello gatti ventilato",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "204405117660393",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "poliestere sostenibile",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "56969086740735",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "poliestere sostenibile",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "123801686732708",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "poliestere sostenibile",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "105433419642717",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "stroller 4 wheels",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "226649157093125",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "stroller 4 wheels",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "93428652081690",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "passeggino animali domestici",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.39
+    },
+    {
+      "keywordId": "161691473132999",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "passeggino animali domestici",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.34
+    },
+    {
+      "keywordId": "42421037757196",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "passeggino animali domestici",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.34
+    },
+    {
+      "keywordId": "164656276119605",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "carrello rimovibile",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "166939832511308",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "carrello rimovibile",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "148529504327018",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "zaino gatto",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "8246404664415",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "zaino gatto",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.29
+    },
+    {
+      "keywordId": "65176242359164",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "zaino gatto",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "256136427505607",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "pet stroller",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.24
+    },
+    {
+      "keywordId": "53524220173765",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "pet stroller",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.24
+    },
+    {
+      "keywordId": "191840967418902",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "pet stroller",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.24
+    },
+    {
+      "keywordId": "92276112769362",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "trasportino pieghevole",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.29
+    },
+    {
+      "keywordId": "123764432979910",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "trasportino pieghevole",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.14
+    },
+    {
+      "keywordId": "84497548830674",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "trasportino pieghevole",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "275886318555559",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "pet gear",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.27
+    },
+    {
+      "keywordId": "1308129016524",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "pet gear",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.27
+    },
+    {
+      "keywordId": "135462542294558",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "accessori cani piccola taglia",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "235435158195894",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "accessori cani piccola taglia",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "252229282418057",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "accessori cani piccola taglia",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "277089897671225",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "zaino porta animali",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.33
+    },
+    {
+      "keywordId": "278500321214147",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "zaino porta animali",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.33
+    },
+    {
+      "keywordId": "47089259182803",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "zaino porta animali",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.32
+    },
+    {
+      "keywordId": "125042770846946",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "chiusura cerniera",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.14
+    },
+    {
+      "keywordId": "863154601310",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "chiusura cerniera",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.14
+    },
+    {
+      "keywordId": "16958331593107",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "chiusura cerniera",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "6324070312823",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "stroller 4 wheels",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "keywordId": "205034998799515",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "trasportino gatti",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.31
+    },
+    {
+      "keywordId": "114643285205527",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "trasportino gatti",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.18
+    },
+    {
+      "keywordId": "2722065375096",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "trasportino gatti",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "175296203190148",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "trasportino cani",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "272648845333843",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "trasportino cani",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "keywordId": "195252941920588",
+      "campaignId": "122559503842189",
+      "adGroupId": "526961773709901",
+      "keywordText": "trasportino cani",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "156911930997759",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cucce gatti antistress",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "keywordId": "237869645760635",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cucce gatti antistress",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "keywordId": "167271632029226",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cucce gatti antistress",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "keywordId": "161670512319723",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cose utili per il gatto",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "keywordId": "166449489006758",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cose utili per il gatto",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "keywordId": "227810139964645",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cose utili per il gatto",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "keywordId": "165107786049977",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cuccia gatto a casetta",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.19
+    },
+    {
+      "keywordId": "247843124375623",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cuccia gatto a casetta",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.17
+    },
+    {
+      "keywordId": "212621300220474",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cuccia gatto a casetta",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.22
+    },
+    {
+      "keywordId": "77904893442741",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cuccia gatto",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "keywordId": "210930348812602",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cuccia gatto",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.12
+    },
+    {
+      "keywordId": "4615034535284",
+      "campaignId": "47968131870457",
+      "adGroupId": "249448730843278",
+      "keywordText": "cuccia gatto",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.15
+    }
+  ],
+  "negativeKeywords": [],
+  "targets": [
+    {
+      "targetId": "87722006159553",
+      "campaignId": "121893827126311",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "65246395014291",
+      "campaignId": "121893827126311",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "56603894966143",
+      "campaignId": "121893827126311",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "213416659393176",
+      "campaignId": "121893827126311",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "140604026743623",
+      "campaignId": "85629292717499",
+      "expression": [
+        {
+          "type": "KEYWORD_GROUP_SAME_AS",
+          "value": "category"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.16
+    },
+    {
+      "targetId": "84704943844893",
+      "campaignId": "1166032704708",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "158677332015641",
+      "campaignId": "1166032704708",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "146656124873408",
+      "campaignId": "1166032704708",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "166446806538939",
+      "campaignId": "1166032704708",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "128522915341501",
+      "campaignId": "220860175637574",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "223786731736569",
+      "campaignId": "220860175637574",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "26752895821935",
+      "campaignId": "220860175637574",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "145967238812954",
+      "campaignId": "220860175637574",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "140771293692302",
+      "campaignId": "117066060136351",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "targetId": "212753961695943",
+      "campaignId": "117066060136351",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "96636411668743",
+      "campaignId": "117066060136351",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "96947499556050",
+      "campaignId": "117066060136351",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "targetId": "84709741302614",
+      "campaignId": "5431779769994",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "123501184618033",
+      "campaignId": "5431779769994",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "1977757207899",
+      "campaignId": "5431779769994",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "219515072363782",
+      "campaignId": "5431779769994",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "183943508797631",
+      "campaignId": "32328910962430",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "276919297841564",
+      "campaignId": "32328910962430",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "185585556829059",
+      "campaignId": "32328910962430",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "227474172709210",
+      "campaignId": "32328910962430",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "249684368560126",
+      "campaignId": "19765209655278",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "196892822581944",
+      "campaignId": "19765209655278",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "83912360949332",
+      "campaignId": "19765209655278",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "150797458164990",
+      "campaignId": "19765209655278",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "20692696560641",
+      "campaignId": "13466121386619",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "26858692526572",
+      "campaignId": "13466121386619",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "44516773545008",
+      "campaignId": "13466121386619",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "28397011665010",
+      "campaignId": "13466121386619",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.21
+    },
+    {
+      "targetId": "99653133441192",
+      "campaignId": "159018677716023",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "167637923454543",
+      "campaignId": "159018677716023",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "100798424695886",
+      "campaignId": "159018677716023",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "135105403548748",
+      "campaignId": "159018677716023",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "185261399447773",
+      "campaignId": "224934298716719",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "52514195345169",
+      "campaignId": "224934298716719",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "219681889884662",
+      "campaignId": "224934298716719",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "245010573184444",
+      "campaignId": "224934298716719",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "73255746594526",
+      "campaignId": "211659719678358",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "251871190284866",
+      "campaignId": "211659719678358",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "33457326610536",
+      "campaignId": "211659719678358",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "252155968674523",
+      "campaignId": "211659719678358",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "259554452016647",
+      "campaignId": "233068426216700",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "201001906845216",
+      "campaignId": "233068426216700",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "18879047483355",
+      "campaignId": "233068426216700",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "20549521944224",
+      "campaignId": "233068426216700",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "67217783034030",
+      "campaignId": "14392719536689",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "17942675362570",
+      "campaignId": "14392719536689",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "81886025678007",
+      "campaignId": "151331222861709",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "92253218503985",
+      "campaignId": "14392719536689",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "138488639400453",
+      "campaignId": "14392719536689",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "73732698463477",
+      "campaignId": "151331222861709",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "16275138574745",
+      "campaignId": "151331222861709",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "240987458245214",
+      "campaignId": "151331222861709",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "29166831025090",
+      "campaignId": "102737529005895",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "213368135176272",
+      "campaignId": "102737529005895",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "170190359581185",
+      "campaignId": "102737529005895",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "51657129190859",
+      "campaignId": "58813004524489",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "160910605815079",
+      "campaignId": "58813004524489",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "224709269319292",
+      "campaignId": "58813004524489",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "68516091347379",
+      "campaignId": "58813004524489",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "207921104128754",
+      "campaignId": "102737529005895",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "84426084321295",
+      "campaignId": "246809103232",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "76439346034761",
+      "campaignId": "246809103232",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "96467448535618",
+      "campaignId": "246809103232",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "16561232672829",
+      "campaignId": "246809103232",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "267281346371507",
+      "campaignId": "82847535944074",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "19440219706566",
+      "campaignId": "82847535944074",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "238567978134507",
+      "campaignId": "82847535944074",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "263812545008409",
+      "campaignId": "82847535944074",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "213565205011205",
+      "campaignId": "47968131870457",
+      "expression": [
+        {
+          "type": "KEYWORD_GROUP_SAME_AS",
+          "value": "category"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "targetId": "239238141871623",
+      "campaignId": "43613971522137",
+      "expression": [
+        {
+          "type": "KEYWORD_GROUP_SAME_AS",
+          "value": "category"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.11
+    },
+    {
+      "targetId": "69300148426628",
+      "campaignId": "147761864207305",
+      "expression": [
+        {
+          "type": "KEYWORD_GROUP_SAME_AS",
+          "value": "category"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "targetId": "135278630792769",
+      "campaignId": "53116982441694",
+      "expression": [
+        {
+          "type": "ASIN_SAME_AS",
+          "value": "B0DMF7VSYW"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.27
+    },
+    {
+      "targetId": "260070210183591",
+      "campaignId": "53116982441694",
+      "expression": [
+        {
+          "type": "ASIN_SAME_AS",
+          "value": "B07S61897N"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.29
+    },
+    {
+      "targetId": "164698524681021",
+      "campaignId": "53116982441694",
+      "expression": [
+        {
+          "type": "ASIN_SAME_AS",
+          "value": "B0D3G4CQ1T"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.38
+    },
+    {
+      "targetId": "71977751269534",
+      "campaignId": "53116982441694",
+      "expression": [
+        {
+          "type": "ASIN_SAME_AS",
+          "value": "B0D3TDCJW3"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.26
+    },
+    {
+      "targetId": "186655359889220",
+      "campaignId": "53116982441694",
+      "expression": [
+        {
+          "type": "ASIN_SAME_AS",
+          "value": "B0B2NKLVCS"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.46
+    },
+    {
+      "targetId": "255167519224400",
+      "campaignId": "53116982441694",
+      "expression": [
+        {
+          "type": "ASIN_SAME_AS",
+          "value": "B0DFT82BWT"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.21
+    },
+    {
+      "targetId": "15646126977123",
+      "campaignId": "53116982441694",
+      "expression": [
+        {
+          "type": "ASIN_SAME_AS",
+          "value": "B0DFTPVSRK"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.24
+    },
+    {
+      "targetId": "37736756557167",
+      "campaignId": "53116982441694",
+      "expression": [
+        {
+          "type": "ASIN_SAME_AS",
+          "value": "B0F6N28VNK"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "targetId": "86532710709747",
+      "campaignId": "53116982441694",
+      "expression": [
+        {
+          "type": "ASIN_SAME_AS",
+          "value": "B0DG2XT2FR"
+        }
+      ],
+      "expressionType": "MANUAL",
+      "state": "ARCHIVED",
+      "bid": 0.33
+    }
+  ],
+  "reports": {
+    "campaigns": [],
+    "keywords": [],
+    "searchTerms": [],
+    "targeting": [],
+    "products": []
+  },
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace IT negli ultimi 25 giorni non mostra **nessuna campagna attiva in esecuzione**: spesa, impression, click e ordini sono tutti a zero. Non ci sono nemmeno campagne in pausa/archiviate né storico di keyword convertenti da recuperare. Il profilo pubblicitario risulta di fatto **inattivo**, il che significa zero visibilità organica/paid e zero vendite attribuite ad Ads.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Attivare almeno una campagna Sponsored Products**\n- **Azione**: Creare una campagna SP con targeting automatico su tutti gli ASIN del catalogo IT, budget giornaliero di test €10-15, bid suggerito €0.40-0.60.\n- **Motivo**: Zero campagne attive = zero impression = zero vendite ads-driven. Il marketplace IT è completamente cieco agli acquirenti su Amazon.\n- **Impatto stimato**: Anche con CTR conservativo (0.3%), 1.000 impression/giorno generano ~3 click/giorno → primi dati di search term entro 7 giorni.\n\n**2. Costruire una campagna Sponsored Products con targeting manuale su keyword brand/core**\n- **Azione**: Identificare le 5-10 keyword principali del prodotto (nome prodotto, categoria, use case) e creare una campagna manuale exact/phrase con bid €0.50-0.80.\n- **Motivo**: Senza copertura manuale sulle keyword core, i competitor occupano quelle posizioni. La campagna auto da sola non basta per difendere il brand.\n- **Impatto stimato**: Presidio delle keyword ad alto intento → miglioramento del CVR medio e riduzione ACoS a regime.\n\n**3. Impostare un sistema di tracking e reportistica baseline**\n- **Azione**: Verificare che il profilo Seller/Vendor IT sia correttamente collegato all'account ads, che gli ASIN siano eleggibili (Buy Box, recensioni, scheda completa) e che non ci siano errori di budget/pagamento.\n- **Motivo**: Zero impression anche con campagne teoricamente attive è spesso sintomo di ASIN non eleggibili, Buy Box persa, o problema di fatturazione account.\n- **Impatto stimato**: Sblocco immediato della delivery una volta risolto il problema tecnico.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n**Nessun search term da negativizzare** — non ci sono dati di search term poiché non esistono campagne attive che abbiano generato traffico nel periodo analizzato.\n\n> ⚠️ Una volta lanciate le campagne (soprattutto auto), tornare su questa sezione dopo 7-10 giorni per negativizzare i primi termini irrilevanti.\n\n---\n\n# 🟢 Keywords da Scalare\n\n**Nessuna keyword attiva con performance da scalare** — il dataset è vuoto.\n\n**Suggerimento operativo per il lancio:**\nUna volta creata la campagna manuale, le prime keyword candidate da testare (da ricerca organica/competitor analysis, in assenza di storico):\n- Keyword di categoria principale del prodotto (broad → poi affinare)\n- Nome brand proprio (exact) per protezione\n- Keyword problema/soluzione che il prodotto risolve (phrase)\n\nNon ci sono keyword-idee recuperabili da campagne in pausa poiché non ne esistono.\n\n---\n\n# 💡 Quick Wins\n\n1. **Verifica eligibilità ASIN**: Controlla su Seller Central IT che tutti gli ASIN abbiano Buy Box attiva, almeno 1 recensione e scheda prodotto completa (titolo, bullet, immagini). ASIN non eleggibili non vengono mai mostrati nelle ads.\n\n2. **Imposta budget giornaliero con cap conservativo**: Per il primo lancio, usa €15-20/giorno per campagna per raccogliere dati senza rischi. Dopo 14 giorni di dati, ottimizza.\n\n3. **Abilita il report Search Term Report settimanale**: Pianifica un export automatico ogni lunedì per intercettare sprechi e opportunità appena i dati iniziano a fluire.\n\n4. **Considera Sponsored Brands se hai brand registrato**: Una campagna SB con headline sul nome brand protegge la SERP e aumenta la brand awareness a costi spesso inferiori vs SP.\n\n5. **Controlla il metodo di pagamento dell'account ads IT**: Un account con carta scaduta o limite raggiunto mostra esattamente 0 impression/spesa pur avendo campagne \"attive\". È la causa più comune di questo scenario.\n\n---",
+  "actions": {
+    "actions": []
+  },
+  "generated_at": "2026-07-07T07:10:15.783912"
+}

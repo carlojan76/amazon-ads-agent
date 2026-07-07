@@ -1,0 +1,895 @@
+{
+  "_meta": {
+    "fetched_at": "2026-07-07T07:31:21.399028",
+    "profile_id": "2593537292052861",
+    "marketplace": "DE",
+    "days": 25,
+    "region": "eu"
+  },
+  "campaigns": [
+    {
+      "campaignId": "151886528673838",
+      "name": "Campagna - 22.2.2026 19:14:46.828",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-02-22",
+      "endDate": "2026-03-31",
+      "bidding": {}
+    },
+    {
+      "campaignId": "19490759476498",
+      "name": "GermanGray",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-08",
+      "endDate": "2026-04-01",
+      "bidding": {}
+    },
+    {
+      "campaignId": "254189782607521",
+      "name": "Zaino DE",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-03-15",
+      "endDate": "2026-04-30",
+      "bidding": {}
+    },
+    {
+      "campaignId": "207197551750922",
+      "name": "Sdraietta DE exact",
+      "state": "ARCHIVED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-04-02",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "24063022188836",
+      "name": "Tiragraffi DE Auto",
+      "state": "ARCHIVED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-04-02",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "199888851532858",
+      "name": "Squalo Germania 15 Aprile",
+      "state": "ARCHIVED",
+      "budget": 4.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-04-18",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "78199560724150",
+      "name": "Claude DE Sdraietta",
+      "state": "ARCHIVED",
+      "budget": 5.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-05-08",
+      "endDate": "",
+      "bidding": {}
+    }
+  ],
+  "adGroups": [
+    {
+      "adGroupId": "7880877567377",
+      "campaignId": "207197551750922",
+      "name": "Sdraietta DE exact",
+      "state": "ARCHIVED",
+      "defaultBid": 0.24
+    },
+    {
+      "adGroupId": "115236667912242",
+      "campaignId": "199888851532858",
+      "name": "Squalo Germania",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "108064222552985",
+      "campaignId": "78199560724150",
+      "name": "Claude DE Sdraietta",
+      "state": "ARCHIVED",
+      "defaultBid": 0.55
+    },
+    {
+      "adGroupId": "486155076821537",
+      "campaignId": "151886528673838",
+      "name": "Gruppo di annunci - 22.2.2026 19:14:45.794",
+      "state": "ARCHIVED",
+      "defaultBid": 0.68
+    },
+    {
+      "adGroupId": "437360994356789",
+      "campaignId": "19490759476498",
+      "name": "Gruppo di annunci - 8.3.2026 14:54:03.637",
+      "state": "ARCHIVED",
+      "defaultBid": 0.2
+    },
+    {
+      "adGroupId": "422227452581225",
+      "campaignId": "254189782607521",
+      "name": "Zaino GERMANIA",
+      "state": "ARCHIVED",
+      "defaultBid": 0.25
+    },
+    {
+      "adGroupId": "549703041879007",
+      "campaignId": "24063022188836",
+      "name": "Tiragraffi DE Auto",
+      "state": "ARCHIVED",
+      "defaultBid": 0.31
+    }
+  ],
+  "keywords": [
+    {
+      "keywordId": "89557865273368",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzenhängematte",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "68209412787072",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzenhängematte",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "110522745152478",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "kratzmöbel design",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.24
+    },
+    {
+      "keywordId": "22307124370774",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzenhängematte holz",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "127810513073382",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzenhängematte holz",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "87831848384604",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "kratzbrett kein schmutz",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.24
+    },
+    {
+      "keywordId": "131271464172315",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzensofa",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.41
+    },
+    {
+      "keywordId": "166525635293849",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzensofa",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "129161914482214",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzensofa",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "186208579100321",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzencouch",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.23
+    },
+    {
+      "keywordId": "270453234107953",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzencouch",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.23
+    },
+    {
+      "keywordId": "156958483140233",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzencouch",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.23
+    },
+    {
+      "keywordId": "85999238692118",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "kratzbrett",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.17
+    },
+    {
+      "keywordId": "124809661991781",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "kratzbrett",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.38
+    },
+    {
+      "keywordId": "244137969117887",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "kratzbrett",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.38
+    },
+    {
+      "keywordId": "179557161822540",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzenbett",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "178327945498715",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzenbett",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.23
+    },
+    {
+      "keywordId": "113630637610427",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "katzenbett",
+      "matchType": "BROAD",
+      "state": "ARCHIVED",
+      "bid": 0.23
+    },
+    {
+      "keywordId": "151712792067758",
+      "campaignId": "207197551750922",
+      "adGroupId": "7880877567377",
+      "keywordText": "kratzbaum",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "28473609874562",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "hai katzenbett",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "108299439483645",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "katzenhöhle",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "81458371480672",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "anti-stress katzenbett",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.35
+    },
+    {
+      "keywordId": "222881389511287",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "kuscheliges katzenbett",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "18410117349045",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "lustiges katzenbett",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "35443489988333",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "geschlossene katzenhöhle",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "146023595220857",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "katzenhaus für drinnen",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "99726810805891",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "weiches katzenbett",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "26896780787866",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "katzenhöhle haifisch",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "8510147946559",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "design katzenbett",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "233146579268687",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "hai katzenbett",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "185856222392308",
+      "campaignId": "199888851532858",
+      "adGroupId": "115236667912242",
+      "keywordText": "katzenhöhle hai",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.27
+    },
+    {
+      "keywordId": "20234413298408",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzenhängematte",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.6
+    },
+    {
+      "keywordId": "111723870044084",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "hängematte für katzen",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.55
+    },
+    {
+      "keywordId": "729337752022",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzen hängematte",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.55
+    },
+    {
+      "keywordId": "266557770619450",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "hängematte katze",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.5
+    },
+    {
+      "keywordId": "246122339357081",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzenhängematte holz",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.5
+    },
+    {
+      "keywordId": "281318750656783",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzenhängematte kratzbaum",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.45
+    },
+    {
+      "keywordId": "38257506081928",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzen kratzbrett wand",
+      "matchType": "EXACT",
+      "state": "ARCHIVED",
+      "bid": 0.4
+    },
+    {
+      "keywordId": "200762791228370",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzenhängematte",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.38
+    },
+    {
+      "keywordId": "77745652081331",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "kratzbaum hängematte",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.35
+    },
+    {
+      "keywordId": "164278615336092",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzen liegeplatz",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "228327945889203",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzenmöbel modern",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "118095559348083",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzenliege holz",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "keywordId": "19209697364324",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzenkorb hängend",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "76194570332543",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzenbett wand",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "149843750759947",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzen kratzmöbel design",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.28
+    },
+    {
+      "keywordId": "130409304081505",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzenruhe platz",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    },
+    {
+      "keywordId": "189112172895794",
+      "campaignId": "78199560724150",
+      "adGroupId": "108064222552985",
+      "keywordText": "katzen schlafplatz holz",
+      "matchType": "PHRASE",
+      "state": "ARCHIVED",
+      "bid": 0.25
+    }
+  ],
+  "negativeKeywords": [
+    {
+      "keywordText": "kratzpappe",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "207197551750922",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "wandmontage",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "207197551750922",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "griffoir pour chat",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "199888851532858",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "tiragraffi divano",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "199888851532858",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "cat hammock",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "199888851532858",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "katzenhöhle xxl",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "199888851532858",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "katzenhöhle",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "hund",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "transportbox",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "kletterwand",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "xxl",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "für hunde",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "katzentoilette",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "katzenklo",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "katzenfutter",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "katzenhöhle xxl",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "katzentransportbox",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "vogel",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    },
+    {
+      "keywordText": "hai",
+      "matchType": "NEGATIVE_EXACT",
+      "campaignId": "78199560724150",
+      "state": "ARCHIVED"
+    }
+  ],
+  "targets": [
+    {
+      "targetId": "89231194182793",
+      "campaignId": "151886528673838",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.4
+    },
+    {
+      "targetId": "141314241014093",
+      "campaignId": "151886528673838",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.4
+    },
+    {
+      "targetId": "73057219740369",
+      "campaignId": "151886528673838",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.4
+    },
+    {
+      "targetId": "147065669074863",
+      "campaignId": "151886528673838",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.4
+    },
+    {
+      "targetId": "185024875324243",
+      "campaignId": "19490759476498",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "129185834904384",
+      "campaignId": "19490759476498",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "63784584599174",
+      "campaignId": "19490759476498",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "270699925084852",
+      "campaignId": "19490759476498",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "165754285569230",
+      "campaignId": "254189782607521",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "179007724087271",
+      "campaignId": "254189782607521",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "236936888809929",
+      "campaignId": "254189782607521",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "128072943267554",
+      "campaignId": "254189782607521",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "100855981664542",
+      "campaignId": "24063022188836",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.31
+    },
+    {
+      "targetId": "252679091508669",
+      "campaignId": "24063022188836",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.3
+    },
+    {
+      "targetId": "180572937698695",
+      "campaignId": "24063022188836",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.2
+    },
+    {
+      "targetId": "87041482220017",
+      "campaignId": "24063022188836",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0.1
+    }
+  ],
+  "reports": {
+    "campaigns": [],
+    "keywords": [],
+    "searchTerms": [],
+    "targeting": [],
+    "products": []
+  },
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace DE non presenta attualmente **nessuna campagna attiva** nel periodo analizzato (ultimi 25 giorni). Spesa, vendite, impression e click sono tutti a zero. Non si tratta di un problema di performance, ma di un'assenza totale di attività pubblicitaria attiva su questo marketplace. Non ci sono nemmeno campagne in pausa/archiviate o keyword storiche da cui attingere suggerimenti.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Verifica lo stato dell'account pubblicitario DE**\n- **Azione**: Accedere a Seller Central → Advertising → Campaign Manager selezionando esplicitamente il marketplace DE e verificare se esistono campagne, se l'account è abilitato agli annunci e se non ci sono blocchi di fatturazione o policy.\n- **Motivo**: Zero campagne attive + zero storiche è anomalo. Potrebbe indicare un account mai configurato, sospeso, o un errore di connessione nell'estrazione dati.\n- **Impatto stimato**: Sbloccare l'advertising su DE significa attivare un marketplace con potere d'acquisto elevato (il più grande in Europa per Amazon).\n\n---\n\n**2. Lancia almeno 1 campagna Sponsored Products Auto su DE**\n- **Azione**: Creare una campagna SP Auto con i tuoi ASIN principali, budget giornaliero di test €15–20, bid dinamico \"solo al ribasso\", targeting automatico su tutti i gruppi (close match, loose match, complements, substitutes).\n- **Motivo**: Senza dati storici su DE, l'Auto è il punto di partenza obbligato per raccogliere search terms reali dal mercato tedesco, che ha query e comportamenti d'acquisto diversi da IT/ES/FR.\n- **Impatto stimato**: Nelle prime 2–3 settimane genera dati sufficienti per costruire campagne Manual Exact efficaci; potenziale di vendita incrementale immediato.\n\n---\n\n**3. Prepara almeno 1 campagna Sponsored Products Manual Broad/Phrase con keyword DE**\n- **Azione**: Usa strumenti come Helium 10 (Cerebro/Magnet su marketplace .de), Brand Analytics DE o i suggerimenti di Amazon stesso per identificare 10–20 keyword in tedesco rilevanti per i tuoi prodotti. Lancia una campagna Manual Broad con bid conservativo (€0.40–0.60 per keyword a media competizione).\n- **Motivo**: Le keyword in tedesco hanno spesso struttura diversa (parole composte, es. \"Holzküchenregal\" invece di \"scaffale cucina legno\"). Partire subito con termini localizzati accelera la raccolta di dati qualificati.\n- **Impatto stimato**: Riduce il tempo di apprendimento rispetto alla sola Auto; permette di testare intenzionalità di acquisto specifica.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n⚠️ **Nessun dato disponibile** — non esistono campagne attive né search terms rilevati nel periodo. Una volta lanciate le prime campagne Auto, torna a monitorare i search terms dopo 7–10 giorni e applica le negative in base agli sprechi emergenti.\n\n*Regola pratica per DE da applicare appena hai dati: aggiungi subito come NEGATIVE_EXACT termini generici non acquistabili tipici del mercato tedesco (es. \"kostenlos\", \"gratis\", \"anleitung\", \"pdf\", \"gebraucht\" se vendi nuovo).*\n\n---\n\n# 🟢 Keywords da Scalare\n\n⚠️ **Nessuna keyword attiva da scalare al momento.** Nessuna keyword-idea recuperabile da campagne storiche.\n\n*Azione preparatoria*: Prima di lanciare, costruisci una seed list DE partendo da:\n1. I tuoi top performer su altri marketplace (IT/ES/FR) → traduci e adatta in tedesco\n2. Brand Analytics DE (se hai accesso) → sezione \"Search Frequency Rank\"\n3. Reverse ASIN sui competitor diretti su amazon.de\n\n---\n\n# 💡 Quick Wins\n\n1. **Controlla le listing per il mercato DE**: Prima di spendere in ads, verifica che i tuoi ASIN abbiano titolo, bullet point e descrizione in **tedesco corretto** (non traduzione automatica). Una listing mal localizzata vanifica qualsiasi budget pubblicitario.\n\n2. **Imposta il tracking pre-lancio**: Configura subito il report \"Search Term Report\" su cadenza settimanale automatica per DE, così avrai dati pronti da analizzare dalla prima settimana di attività.\n\n3. **Verifica Buy Box su DE**: Controlla che i tuoi ASIN abbiano la Buy Box sul marketplace .de. Senza Buy Box, le campagne SP non vengono erogate (spesa zero esattamente come ora).\n\n4. **Budget allocation iniziale**: Pianifica un budget test di €300–500 per il primo mese su DE, distribuito tra 1 campagna Auto + 1 Manual Broad. È il minimo per raccogliere dati statisticamente utili su un marketplace nuovo.\n\n5. **Analisi competitor DE**: Prima del lancio, fai una ricerca manuale su amazon.de per le tue categorie principali — identifica i 3–5 top seller, analizza le loro keyword sponsorizzate visibili e usale come base per la tua Manual.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n\n\n> **Motivazione**: Non esistono ID reali di campagne, keyword, ad group o search terms nei dati forniti. Generare azioni con ID inventati causerebbe errori nello script o modifiche su entità sbagliate. Tutte le azioni necessarie (lancio campagne, creazione keyword) sono attività di *creazione* non gestibili tramite `apply_changes.py` con i tipi di azione disponibili. Eseguire manualmente da Campaign Manager DE.",
+  "actions": {
+    "actions": []
+  },
+  "generated_at": "2026-07-07T07:31:56.689791"
+}
