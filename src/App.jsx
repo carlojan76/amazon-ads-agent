@@ -221,7 +221,7 @@ Usa tabelle markdown. Sii diretto e operativo, no teoria generica.`;
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": apiKey,
+          "x-api-key": apiKey.trim(),
           "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true",
         },
