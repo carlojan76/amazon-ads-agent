@@ -364,6 +364,8 @@ class AmazonAdsAPI:
 
         if pending:
             print(f"   ⏰ Timeout: report ancora in PENDING dopo {max_wait}s: {', '.join(pending.keys())}", flush=True)
+        # Traccia i report NON arrivati: distingue 'zero reale' da 'timeout'.
+        self.timed_out_reports = list(pending.keys())
         return results
 
     def fetch_reports(self, report_types, days=14, max_wait=600):
@@ -428,7 +430,11 @@ def fetch_all_data(marketplace=None, days=14):
     # Richiede tutti i report in blocco e li attende IN PARALLELO.
     # Il tempo totale ~= report piu' lento, non la somma dei 5.
     report_types = ["spCampaigns", "spKeywords", "spSearchTerm", "spTargeting", "spAdvertisedProduct"]
-    reports = api.fetch_reports(report_types, days, max_wait=int(os.getenv("REPORT_MAX_WAIT", "600")))
+    reports = api.fetch_reports(report_types, days, max_wait=int(os.getenv("REPORT_MAX_WAIT", "1800")))
+    timed_out = getattr(api, "timed_out_reports", [])
+    if timed_out:
+        print("    ATTENZIONE: report incompleti per timeout: " + ", ".join(timed_out) +
+              " -> metriche a zero NON per reale assenza di attivita.", flush=True)
     campaign_report = reports.get("spCampaigns", [])
     keyword_report = reports.get("spKeywords", [])
     search_term_report = reports.get("spSearchTerm", [])
@@ -442,6 +448,8 @@ def fetch_all_data(marketplace=None, days=14):
             "marketplace": marketplace or "auto",
             "days": days,
             "region": CONFIG["region"],
+            "reports_incomplete": bool(timed_out),
+            "reports_timed_out": timed_out,
         },
         "campaigns": [
             {

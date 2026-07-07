@@ -1,5 +1,3 @@
-name: Weekly Amazon Ads Analysis
-
 on:
   schedule:
     # Ogni lunedì alle 07:00 UTC (08:00 ora italiana in inverno, 09:00 in estate)
@@ -58,6 +56,9 @@ jobs:
           # Parametri (override manuale se eseguito on-demand)
           MARKETPLACES: ${{ github.event.inputs.marketplaces || 'IT,FR,DE' }}
           ANALYSIS_DAYS: ${{ github.event.inputs.days || '14' }}
+          # Report API v3 spesso richiedono 15-25 min: 600s erano troppo pochi
+          # e facevano tornare dati VUOTI (tutti zero) per timeout.
+          REPORT_MAX_WAIT: "1800"
         run: |
           cd python
           python -u weekly_analysis.py
