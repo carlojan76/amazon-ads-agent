@@ -44,7 +44,7 @@ VND = {
 }
 
 VALID_TYPES = {
-    "update_bid", "pause_keyword", "enable_keyword",
+    "update_bid", "pause_keyword", "enable_keyword", "add_keyword",
     "add_negative", "update_budget", "pause_campaign", "enable_campaign",
 }
 
@@ -99,6 +99,8 @@ def describe(a):
         return f"⏸  PAUSA   keyword '{a.get('keyword', a['keywordId'])}'"
     if t == "enable_keyword":
         return f"▶️  RIATTIVA keyword '{a.get('keyword', a['keywordId'])}'"
+    if t == "add_keyword":
+        return " AGGIUNGI keyword '" + str(a.get("keywordText")) + "' [" + str(a.get("matchType", "EXACT")) + "] bid " + str(a.get("bid", "?")) + " (adGroup " + str(a.get("adGroupId")) + ")"
     if t == "add_negative":
         lvl = "ad group" if a.get("adGroupId") else "campagna"
         return f"🚫 NEGATIVA '{a['keywordText']}' [{a.get('matchType', 'NEGATIVE_EXACT')}] a livello {lvl} (camp {a.get('campaign', a['campaignId'])})"
@@ -130,6 +132,17 @@ def validate(actions):
             mt = a.get("matchType", "NEGATIVE_EXACT")
             if mt not in ("NEGATIVE_EXACT", "NEGATIVE_PHRASE"):
                 errors.append(f"azione {i}: matchType '{mt}' non valido (NEGATIVE_EXACT|NEGATIVE_PHRASE)")
+        if t == "add_keyword":
+            if not a.get("adGroupId"):
+                errors.append(f"azione {i} (add_keyword): manca adGroupId")
+            if not a.get("campaignId"):
+                errors.append(f"azione {i} (add_keyword): manca campaignId")
+            if not a.get("keywordText"):
+                errors.append(f"azione {i} (add_keyword): manca keywordText")
+            if a.get("matchType", "EXACT") not in ("EXACT", "PHRASE", "BROAD"):
+                errors.append(f"azione {i}: matchType non valido (EXACT|PHRASE|BROAD)")
+            if not isinstance(a.get("bid"), (int, float)):
+                errors.append(f"azione {i} (add_keyword): bid mancante o non numerico")
         if t in ("update_budget", "pause_campaign", "enable_campaign") and not a.get("campaignId"):
             errors.append(f"azione {i} ({t}): manca campaignId")
         if t == "update_budget" and not isinstance(a.get("new_budget"), (int, float)):
@@ -173,6 +186,23 @@ def apply_actions(api, actions):
         resp = _post(api, "/sp/negativeKeywords", {"negativeKeywords": negatives}, VND["negative"])
         ok, detail = _result_summary(resp, "negativeKeywords")
         results.append((f"POST /sp/negativeKeywords ({len(negatives)} negative)", ok, detail))
+
+    # 2b. Nuove keyword da aggiungere (POST /sp/keywords)
+    new_keywords = []
+    for a in actions:
+        if a["type"] == "add_keyword":
+            new_keywords.append({
+                "campaignId": a["campaignId"],
+                "adGroupId": a["adGroupId"],
+                "keywordText": a["keywordText"],
+                "matchType": a.get("matchType", "EXACT"),
+                "state": "ENABLED",
+                "bid": float(a["bid"]),
+            })
+    if new_keywords:
+        resp = _post(api, "/sp/keywords", {"keywords": new_keywords}, VND["keyword"])
+        ok, detail = _result_summary(resp, "keywords")
+        results.append((f"POST /sp/keywords ({len(new_keywords)} nuove keyword)", ok, detail))
 
     # 3. Campagne: budget + stato (PUT /sp/campaigns)
     camp_updates = {}

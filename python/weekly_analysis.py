@@ -41,6 +41,121 @@ MARKETPLACES = os.getenv("MARKETPLACES", "IT,FR,DE").split(",")
 DAYS = int(os.getenv("ANALYSIS_DAYS", "14"))
 
 
+def build_asin_view(data):
+    """Vista per-ASIN con attribuzione CERTA.
+
+    L'ASIN e' certo solo nel report prodotto (spAdvertisedProduct), che lo lega
+    all'ad group. Attribuiamo keyword/search-term a un ASIN SOLO quando l'ad group
+    di provenienza pubblicizza UN SOLO ASIN (mappatura 1:1). Gli ad group con piu'
+    ASIN sono ambigui ed ESCLUSI: nessuna inferenza, solo dati certi.
+    """
+    import re as _re
+    reports = data.get("reports", {})
+    prod_report = reports.get("products", [])
+    kw_report = reports.get("keywords", [])
+    st_report = reports.get("searchTerms", [])
+
+    def num(v):
+        try:
+            return float(v)
+        except Exception:
+            m = _re.findall(r"-?\d+\.?\d*", str(v or "").replace(",", ""))
+            return float(m[0]) if m else 0.0
+
+    # stato campagne e ad group
+    cstate = {}
+    for c in data.get("campaigns", []):
+        cid = str(c.get("campaignId", ""))
+        if cid:
+            cstate[cid] = str(c.get("state", "")).upper()
+    agstate = {}
+    for g in data.get("adGroups", []):
+        agid = str(g.get("adGroupId", ""))
+        if agid:
+            agstate[agid] = str(g.get("state", "")).upper()
+    cact = lambda cid: cstate.get(str(cid), "ENABLED") == "ENABLED"
+    agact = lambda agid: agstate.get(str(agid), "ENABLED") == "ENABLED"
+
+    # 1) adGroup -> set(ASIN) + aggregati per ASIN dal report prodotto (CERTO)
+    ag_asins, asin_sku, asin_agg, asin_active_ags = {}, {}, {}, {}
+    for r in prod_report:
+        asin = str(r.get("advertisedAsin", "")).strip()
+        agid = str(r.get("adGroupId", "")).strip()
+        cid = str(r.get("campaignId", "")).strip()
+        if not asin or not agid:
+            continue
+        ag_asins.setdefault(agid, set()).add(asin)
+        if r.get("advertisedSku"):
+            asin_sku[asin] = r.get("advertisedSku")
+        a = asin_agg.setdefault(asin, {"spend": 0.0, "sales": 0.0, "orders": 0.0})
+        a["spend"] += num(r.get("cost", r.get("spend", 0)))
+        a["sales"] += num(r.get("sales7d", 0))
+        a["orders"] += num(r.get("purchases7d", 0))
+        if cact(cid) and agact(agid):
+            lst = asin_active_ags.setdefault(asin, [])
+            if not any(x["adGroupId"] == agid for x in lst):
+                lst.append({"campaignId": cid, "adGroupId": agid})
+
+    certain = {agid: next(iter(v)) for agid, v in ag_asins.items() if len(v) == 1}
+    ambiguous = sum(1 for v in ag_asins.values() if len(v) > 1)
+
+    # 2) keyword vincenti per ASIN (solo ad group certi)
+    win_kw = {}
+    for r in kw_report:
+        asin = certain.get(str(r.get("adGroupId", "")).strip())
+        if not asin:
+            continue
+        orders, sales = num(r.get("purchases7d", 0)), num(r.get("sales7d", 0))
+        if orders <= 0 and sales <= 0:
+            continue
+        spend = num(r.get("cost", r.get("spend", 0)))
+        cid = str(r.get("campaignId", ""))
+        win_kw.setdefault(asin, []).append({
+            "keyword": r.get("keyword", ""), "matchType": r.get("matchType", ""),
+            "orders": orders, "sales": sales,
+            "acos": (spend / sales * 100) if sales > 0 else 999,
+            "active": cact(cid) and agact(r.get("adGroupId", "")),
+        })
+
+    # 3) search term vincenti per ASIN (solo certi, non gia' keyword)
+    win_st = {}
+    for r in st_report:
+        agid = str(r.get("adGroupId", "")).strip()
+        asin = certain.get(agid)
+        if not asin:
+            continue
+        orders = num(r.get("purchases7d", 0))
+        if orders <= 0:
+            continue
+        term = str(r.get("searchTerm", "")).strip()
+        kw = str(r.get("keyword", "")).strip()
+        if term and term.lower() == kw.lower():
+            continue
+        sales = num(r.get("sales7d", 0))
+        spend = num(r.get("cost", r.get("spend", 0)))
+        win_st.setdefault(asin, []).append({
+            "searchTerm": term, "orders": orders, "sales": sales,
+            "acos": (spend / sales * 100) if sales > 0 else 999,
+            "cpc": num(r.get("costPerClick", 0)),
+        })
+
+    out = []
+    for asin, agg in asin_agg.items():
+        kws = sorted(win_kw.get(asin, []), key=lambda x: (-x["orders"], x["acos"]))[:8]
+        sts = sorted(win_st.get(asin, []), key=lambda x: (-x["orders"], x["acos"]))[:8]
+        if not kws and not sts and agg["orders"] == 0:
+            continue
+        out.append({
+            "asin": asin, "sku": asin_sku.get(asin, ""),
+            "spend": agg["spend"], "sales": agg["sales"], "orders": agg["orders"],
+            "acos": (agg["spend"] / agg["sales"] * 100) if agg["sales"] > 0 else (999 if agg["spend"] > 0 else 0),
+            "active_adgroups": asin_active_ags.get(asin, []),
+            "winning_keywords": kws, "winning_search_terms": sts,
+        })
+    out.sort(key=lambda x: x["sales"], reverse=True)
+    return {"asins": out[:20], "ambiguous_adgroups": ambiguous}
+
+
 def build_summary(data):
     """Estrai metriche aggregate dal JSON Amazon.
 
@@ -203,6 +318,7 @@ def build_summary(data):
         "waste_st": st_waste[:15],
         "n_active": len(active_campaigns),
         "n_paused": len(paused_report),
+        "asin_view": build_asin_view(data),
     }
 
 
@@ -236,6 +352,28 @@ def build_claude_prompt(summary, marketplace, days):
         f'- "{k["keyword"]}" [{k["matchType"]}] — storico: {k["orders"]:.0f} ordini, €{k["sales"]:.2f} sales, ACoS {k["acos"]:.1f}%'
         for k in summary.get("keyword_ideas", [])
     ])
+
+    asin_view = summary.get("asin_view", {})
+    ambn = asin_view.get("ambiguous_adgroups", 0)
+    asin_blocks = []
+    for a in asin_view.get("asins", []):
+        tgt = a["active_adgroups"]
+        if tgt:
+            tgt_str = f'AD GROUP ATTIVO dove ri-aggiungere -> campId:{tgt[0]["campaignId"]} adGroupId:{tgt[0]["adGroupId"]}'
+        else:
+            tgt_str = "NESSUN ad group attivo per questo ASIN -> serve riattivazione manuale campagna (NON generare add_keyword)"
+        kw_lines = "\n".join(
+            f'    - KW "{k["keyword"]}" [{k["matchType"]}] {k["orders"]:.0f} ordini, ACoS {k["acos"]:.0f}% ({"ATTIVA" if k["active"] else "da campagna SPENTA"})'
+            for k in a["winning_keywords"]) or "    (nessuna)"
+        st_lines = "\n".join(
+            f'    - TERMINE "{t["searchTerm"]}" {t["orders"]:.0f} ordini, ACoS {t["acos"]:.0f}%, CPC {t["cpc"]:.2f} (non ancora keyword)'
+            for t in a["winning_search_terms"]) or "    (nessuno)"
+        asin_blocks.append(
+            f'ASIN {a["asin"]} (SKU {a["sku"]}): {a["orders"]:.0f} ordini, {a["sales"]:.2f} sales, ACoS {a["acos"]:.0f}%\n'
+            f'  {tgt_str}\n'
+            f'  Keyword vincenti:\n{kw_lines}\n'
+            f'  Search term vincenti (candidati add_keyword):\n{st_lines}')
+    asin_section = "\n\n".join(asin_blocks) or "Nessun dato per-ASIN certo disponibile"
 
     return f"""## Marketplace: {marketplace} | Periodo: ultimi {days} giorni
 ## Campagne: {summary.get('n_active', 0)} attive analizzate · {summary.get('n_paused', 0)} in pausa/archiviate ESCLUSE dai costi
@@ -271,6 +409,10 @@ def build_claude_prompt(summary, marketplace, days):
 Keyword che in passato hanno convertito in campagne ora spente. Sono candidate da aggiungere/testare nelle campagne ATTIVE. Non valutarle come costo né come spreco.
 {ideas or "Nessuna"}
 
+##  Vincitori per ASIN (attribuzione CERTA: solo ad group con 1 solo ASIN; {ambn} ad group ambigui esclusi)
+Per ogni ASIN: performance su TUTTE le campagne (incluse quelle spente se nella finestra dati), i vincitori storici e l'ad group ATTIVO dove ri-aggiungerli.
+{asin_section}
+
 ---
 
 Sei un consulente PPC Amazon senior. Analizza questi dati e fornisci un REPORT SETTIMANALE con consigli OPERATIVI in italiano.
@@ -292,6 +434,7 @@ Le 3 cose più importanti da fare QUESTA SETTIMANA. Per ognuna:
 
 # 🚫 Search Terms da Negativizzare
 Lista di 5-10 search terms da aggiungere come negative (con match type suggerito).
+- SEARCH TERMS VINCENTI -> NUOVE KEYWORD: dai search term con ordini/vendite che NON sono ancora keyword, proponi azioni `add_keyword` per promuoverli (match EXACT). E' la leva di crescita principale.
 
 # 🟢 Keywords da Scalare
 Keywords ATTIVE con ottimo ACoS dove aumentare bid o budget, PIÙ eventuali keyword-idee recuperate dalle campagne in pausa da testare nelle attive.
@@ -315,7 +458,9 @@ Alla FINE del report, aggiungi UN SOLO blocco `<actions>...</actions>` con un JS
   * `pause_keyword`: keywordId, keyword — solo se spesa > €3 e ZERO ordini in 14gg
   * `add_negative`: campaignId, adGroupId (opzionale), keywordText, matchType (NEGATIVE_EXACT o NEGATIVE_PHRASE) — per search terms sprechi
   * `update_budget`: campaignId, campaign, old_budget (se noto), new_budget — variazione max ±50%
+  * `add_keyword`: campaignId, adGroupId, keywordText, matchType (EXACT|PHRASE|BROAD), bid -> per search terms che HANNO GENERATO ORDINI ma non sono ancora keyword. Usa gli ID reali dell'ad group da cui proviene il search term. bid = CPC medio del search term (o 0.30-0.50 se ignoto). Preferisci match EXACT per i termini gia' vincenti.
 - NON generare `pause_campaign` / `enable_campaign` in automatico (troppo rischioso, lascia decidere l'umano).
+- RIATTIVAZIONE VINCITORI PER ASIN: per un vincitore (keyword da campagna spenta o search term non ancora keyword) usa `add_keyword` SOLO se l'ASIN ha un AD GROUP ATTIVO indicato sopra; punta a quel campId+adGroupId, match EXACT, bid = CPC del termine (o 0.30-0.50). Se l'ASIN non ha ad group attivo, NON generare add_keyword: segnalalo a parole come "riattivare manualmente una campagna per ASIN X".
 - Se non ci sono azioni ragionevoli, restituisci `{{"actions": []}}`.
 
 Formato ESATTO (nessun testo dentro il blocco, solo JSON valido):
