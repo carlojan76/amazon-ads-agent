@@ -3,5 +3,7 @@ dist/
 .env
 *.json
 !package.json
+!package-lock.json
+!public/data/*.json
 __pycache__/
 *.pyc

@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Amazon Ads Agent</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { background: #06090f; }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// base DEVE combaciare col nome del repo per GitHub Pages:
+// il sito è servito su https://carlojan76.github.io/amazon-ads-agent/
+export default defineConfig({
+  plugins: [react()],
+  base: '/amazon-ads-agent/',
+})
