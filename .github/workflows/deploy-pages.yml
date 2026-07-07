@@ -17,6 +17,11 @@ on:
       - "index.html"
       - "package.json"
       - "vite.config.js"
+  # Riparte quando "Weekly Amazon Ads Analysis" finisce: il commit dei dati
+  # fatto col GITHUB_TOKEN NON fa scattare il trigger push, quindi serve questo.
+  workflow_run:
+    workflows: ["Weekly Amazon Ads Analysis"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -30,6 +35,8 @@ concurrency:
 
 jobs:
   build:
+    # Su push e run manuale gira sempre; su workflow_run solo se l'analisi è OK.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: 🔄 Checkout repository
