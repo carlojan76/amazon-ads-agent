@@ -225,7 +225,7 @@ Usa tabelle markdown. Sii diretto e operativo, no teoria generica.`;
           "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true",
         },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 4000, system: sys,
+        body: JSON.stringify({ model: "claude-sonnet-5", max_tokens: 4000, system: sys,
           messages: [...history.map(h => ({ role: h.role, content: h.content })), { role: "user", content: msg }] }),
       });
       const data = await resp.json();
