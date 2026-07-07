@@ -1,3 +1,5 @@
+name: Weekly Amazon Ads Analysis
+
 on:
   schedule:
     # Ogni lunedì alle 07:00 UTC (08:00 ora italiana in inverno, 09:00 in estate)
