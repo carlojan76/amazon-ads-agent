@@ -13,6 +13,8 @@ import sys
 import json
 import smtplib
 import requests
+import threading
+import concurrent.futures
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -591,93 +593,129 @@ def extract_actions(analysis_text, summary):
     return {"actions": validated}, clean_text, warnings
 
 
+# Lock per stampare il log di ogni marketplace come blocco contiguo
+# (senza righe intrecciate tra i thread paralleli).
+_print_lock = threading.Lock()
+
+
+def process_marketplace(mp, days):
+    """Elabora UN marketplace. Pensata per girare in un thread separato:
+    scrive solo file con nomi specifici per marketplace (nessuna collisione)
+    e non muta stato condiviso. Ritorna un dict con l'esito."""
+    mp = (mp or "").strip().upper()
+    result = {"mp": mp, "ok": False, "analysis": None, "summary": {}}
+    if not mp:
+        return result
+
+    log = []
+    log.append("\n" + "=" * 60)
+    log.append(f" MARKETPLACE: {mp}")
+    log.append("=" * 60)
+    try:
+        data = fetch_all_data(marketplace=mp, days=days)
+        summary = build_summary(data)
+        result["summary"] = summary
+
+        log.append(
+            f" Metriche {mp}: Spend {summary['total_spend']:.2f} | "
+            f"Sales {summary['total_sales']:.2f} | ACoS {summary['acos']:.1f}%"
+        )
+        log.append(" Invio a Claude per analisi...")
+
+        prompt = build_claude_prompt(summary, mp, days)
+        analysis = call_claude(prompt)
+        log.append(f" Analisi {mp} completata ({len(analysis)} caratteri)")
+
+        actions_dict, clean_analysis, warns = extract_actions(analysis, summary)
+        for w in (warns or []):
+            log.append(f"    actions: {w}")
+        result["analysis"] = clean_analysis
+
+        out_dir = Path("reports")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+        (out_dir / f"{mp}_{timestamp}_analysis.md").write_text(clean_analysis, encoding="utf-8")
+        if actions_dict is not None:
+            n_act = len(actions_dict.get("actions", []))
+            actions_path = out_dir / f"actions_{mp}_{timestamp}.json"
+            actions_path.write_text(
+                json.dumps(actions_dict, indent=2, ensure_ascii=False), encoding="utf-8"
+            )
+            log.append(f"    Azioni proposte salvate: {actions_path} ({n_act} azioni valide)")
+
+        # Copia "latest" per la UI online (GitHub Pages)
+        latest_dir = out_dir / "latest"
+        publish_payload = dict(data)
+        publish_payload["analysis"] = clean_analysis
+        publish_payload["actions"] = actions_dict or {"actions": []}
+        publish_payload["generated_at"] = datetime.now().isoformat()
+        (latest_dir / f"{mp}.json").write_text(
+            json.dumps(publish_payload, indent=2, ensure_ascii=False, default=str),
+            encoding="utf-8",
+        )
+        result["ok"] = True
+    except Exception as e:
+        log.append(f" Errore su {mp}: {e}")
+        result["analysis"] = f" Errore durante l'analisi: {e}"
+    finally:
+        with _print_lock:
+            print("\n".join(log), flush=True)
+    return result
+
+
 def main():
-    print(f"🚀 Weekly Amazon Ads Analysis — {datetime.now()}")
+    print(f" Weekly Amazon Ads Analysis  {datetime.now()}")
     print(f"   Marketplaces: {MARKETPLACES}")
     print(f"   Giorni: {DAYS}")
+
+    mps = [mp.strip().upper() for mp in MARKETPLACES if mp and mp.strip()]
+
+    # Crea le cartelle UNA volta sola, prima di lanciare i thread
+    # (evita race su mkdir e garantisce che i worker trovino i path pronti).
+    Path("reports/latest").mkdir(parents=True, exist_ok=True)
 
     analyses = {}
     summaries = {}
     published_mps = []
 
-    for mp in MARKETPLACES:
-        mp = mp.strip().upper()
-        if not mp:
+    workers = min(len(mps), int(os.getenv("MAX_PARALLEL_MP", "3"))) or 1
+    print(f"\n Elaborazione di {len(mps)} marketplace IN PARALLELO ({workers} worker)...")
+
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = {ex.submit(process_marketplace, mp, DAYS): mp for mp in mps}
+        for fut in concurrent.futures.as_completed(futures):
+            r = fut.result()
+            results[r["mp"]] = r
+
+    # Ricompone gli esiti nell'ordine di input (l'email resta deterministica)
+    for mp in mps:
+        r = results.get(mp)
+        if not r:
             continue
-        print(f"\n{'='*60}\n🌍 MARKETPLACE: {mp}\n{'='*60}")
-        try:
-            data = fetch_all_data(marketplace=mp, days=DAYS)
-            summary = build_summary(data)
-            summaries[mp] = summary
-
-            print(f"\n📊 Metriche {mp}: Spend €{summary['total_spend']:.2f} | Sales €{summary['total_sales']:.2f} | ACoS {summary['acos']:.1f}%")
-
-            print(f"🤖 Invio a Claude per analisi...")
-            prompt = build_claude_prompt(summary, mp, DAYS)
-            analysis = call_claude(prompt)
-            analyses[mp] = analysis
-
-            print(f"✅ Analisi {mp} completata ({len(analysis)} caratteri)")
-
-            # Estrai il blocco <actions> JSON e valida gli ID contro i dati reali
-            actions_dict, clean_analysis, warns = extract_actions(analysis, summary)
-            if warns:
-                for w in warns:
-                    print(f"   ⚠️ actions: {w}")
-
-            # Sostituisci l'analisi con la versione senza blocco JSON, per l'email
-            analyses[mp] = clean_analysis
-
-            # Salva anche su file per debug/storico
-            out_dir = Path("reports")
-            out_dir.mkdir(exist_ok=True)
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-            (out_dir / f"{mp}_{timestamp}_analysis.md").write_text(clean_analysis, encoding="utf-8")
-            if actions_dict is not None:
-                n_act = len(actions_dict.get("actions", []))
-                actions_path = out_dir / f"actions_{mp}_{timestamp}.json"
-                actions_path.write_text(json.dumps(actions_dict, indent=2, ensure_ascii=False), encoding="utf-8")
-                print(f"   💾 Azioni proposte salvate: {actions_path} ({n_act} azioni valide)")
-
-            # Pubblica una copia "latest" per la UI online (GitHub Pages).
-            # Riusa lo stesso JSON grezzo di fetch_all_data (che l'app React sa già
-            # leggere) aggiungendo analisi Claude e azioni proposte/validate.
-            latest_dir = out_dir / "latest"
-            latest_dir.mkdir(parents=True, exist_ok=True)
-            publish_payload = dict(data)
-            publish_payload["analysis"] = clean_analysis
-            publish_payload["actions"] = actions_dict or {"actions": []}
-            publish_payload["generated_at"] = datetime.now().isoformat()
-            (latest_dir / f"{mp}.json").write_text(
-                json.dumps(publish_payload, indent=2, ensure_ascii=False, default=str), encoding="utf-8"
-            )
+        analyses[mp] = r["analysis"]
+        summaries[mp] = r["summary"]
+        if r["ok"]:
             published_mps.append(mp)
-        except Exception as e:
-            print(f"❌ Errore su {mp}: {e}")
-            analyses[mp] = f"⚠️ Errore durante l'analisi: {e}"
-            summaries[mp] = {}
 
     if published_mps:
         index = {"marketplaces": published_mps, "generated_at": datetime.now().isoformat()}
-        Path("reports/latest").mkdir(parents=True, exist_ok=True)
         Path("reports/latest/index.json").write_text(
             json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8"
         )
-        print(f"   🌐 Dati pubblicati per la UI online: {', '.join(published_mps)}")
+        print(f"    Dati pubblicati per la UI online: {', '.join(published_mps)}")
 
     if not analyses:
-        print("❌ Nessuna analisi prodotta, skip email")
+        print(" Nessuna analisi prodotta, skip email")
         return
 
-    print(f"\n📧 Costruzione email...")
+    print("\n Costruzione email...")
     html = build_email_html(analyses, summaries)
 
-    # Salva anche email su file
     Path("reports").mkdir(exist_ok=True)
     Path("reports/last_email.html").write_text(html, encoding="utf-8")
 
     send_email(html)
-    print("\n✅ Done!")
+    print("\n Done!")
 
 
 if __name__ == "__main__":
