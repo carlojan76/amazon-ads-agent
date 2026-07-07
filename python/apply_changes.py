@@ -73,11 +73,21 @@ def _result_summary(resp, key):
     except Exception:
         return resp.status_code < 300, resp.text[:300]
     ok = body.get(key, {}).get("success", [])
-    ko = body.get(key, {}).get("error", [])
+    ko_all = body.get(key, {}).get("error", [])
+    # I duplicati NON sono errori: la negative/keyword esiste gia', obiettivo raggiunto.
+    def _is_dup(e):
+        return "duplicate" in str(e).lower()
+    dup = [e for e in ko_all if _is_dup(e)]
+    ko = [e for e in ko_all if not _is_dup(e)]
+    parts = [f"{len(ok)} ok"]
+    if dup:
+        parts.append(f"{len(dup)} gia' presenti (skip)")
     if ko:
         msgs = "; ".join(str(e.get("errors", e))[:150] for e in ko)
-        return False, f"{len(ok)} ok, {len(ko)} errori: {msgs}"
-    return True, f"{len(ok)} ok"
+        parts.append(f"{len(ko)} errori: {msgs}")
+        return False, ", ".join(parts)
+    # Solo successi e/o duplicati -> operazione considerata riuscita.
+    return True, ", ".join(parts)
 
 
 # ---------------------------------------------------------------- preview
