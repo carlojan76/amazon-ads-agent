@@ -1,9 +1,9 @@
 /**
  * GitHub integration: OAuth Device Flow (no client secret, no pasted PAT)
- * + helpers to dispatch the "Apply Amazon Ads Changes" workflow and find its run.
+ * + helpers per dispatch dei workflow, stato dei run e lettura file dal repo.
  *
- * Device Flow endpoints (github.com/login/device/code and /login/oauth/access_token)
- * support CORS specifically so browser-only apps (no backend) can use them.
+ * Device Flow endpoints (github.com/login/device/code e /login/oauth/access_token)
+ * supportano CORS, quindi un'app solo-browser (senza backend) puo' usarli.
  */
 
 const GH_API = "https://api.github.com";
@@ -91,4 +91,47 @@ export async function findLatestRun({ token, owner, repo, workflow }) {
   if (!resp.ok) return null;
   const data = await resp.json();
   return data.workflow_runs?.[0] || null;
+}
+
+/** Stato/conclusione di un run specifico. Ritorna { status, conclusion, html_url } o null. */
+export async function getRun({ token, owner, repo, runId }) {
+  const resp = await fetch(
+    `${GH_API}/repos/${owner}/${repo}/actions/runs/${runId}`,
+    { headers: { Authorization: `token ${token}`, Accept: "application/vnd.github+json" } }
+  );
+  if (!resp.ok) return null;
+  const d = await resp.json();
+  return { status: d.status, conclusion: d.conclusion, html_url: d.html_url };
+}
+
+/**
+ * Legge un file dal repo via Contents API (CORS-friendly, funziona anche su
+ * repo privati col token). Ritorna { json, sha } oppure null se 404.
+ * Decodifica il base64 e prova a fare JSON.parse.
+ */
+export async function getRepoFileContents({ token, owner, repo, path, ref = "main" }) {
+  const resp = await fetch(
+    `${GH_API}/repos/${owner}/${repo}/contents/${encodeURI(path)}?ref=${encodeURIComponent(ref)}&t=${Date.now()}`,
+    {
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github+json",
+        "Cache-Control": "no-cache",
+      },
+    }
+  );
+  if (resp.status === 404) return null;
+  if (!resp.ok) throw new Error(`Lettura file fallita (${resp.status})`);
+  const data = await resp.json();
+  let text = "";
+  try {
+    // content e' base64 (con newline). atob gestisce UTF-8 via decodeURIComponent/escape.
+    const raw = atob((data.content || "").replace(/\n/g, ""));
+    text = decodeURIComponent(escape(raw));
+  } catch {
+    text = "";
+  }
+  let json = null;
+  try { json = JSON.parse(text); } catch { /* non-JSON */ }
+  return { json, text, sha: data.sha };
 }

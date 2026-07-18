@@ -1,0 +1,130 @@
+name: Plan New Campaign (from ASIN)
+
+# Workflow MANUALE: genera una PROPOSTA di campagna nuova da un ASIN.
+# Non crea nulla su Amazon: produce un blueprint, lo COMMITTA in plans/<MP>/<ASIN>.json
+# (letto dalla UI via Contents API) e lo carica anche come artefatto.
+#
+# Fonti keyword: storico ads (anche campagne chiuse) + Keyword Recommendations
+# API di Amazon (funziona anche senza storico) + testo listing + recensioni.
+
+on:
+  workflow_dispatch:
+    inputs:
+      marketplace:
+        description: 'Marketplace'
+        type: choice
+        required: true
+        options: [IT, FR, DE, ES, UK, NL, SE, PL, BE, IE]
+      asin:
+        description: 'ASIN principale (parent o child hero)'
+        required: true
+      children:
+        description: 'ASIN child aggiuntivi (separati da virgola)'
+        required: false
+        default: ''
+      skus:
+        description: 'Mappa ASIN=SKU (es. B0X=SKU-A,B0Y=SKU-B) - necessaria da seller'
+        required: false
+        default: ''
+      budget:
+        description: 'Budget giornaliero indicativo (EUR)'
+        required: false
+        default: '8'
+      target_acos:
+        description: 'Target ACoS (%)'
+        required: false
+        default: '30'
+      child_note:
+        description: 'Come differiscono i child? (es. "solo colore" oppure "misure S/M/L")'
+        required: false
+        default: ''
+      listing_text:
+        description: 'Testo del listing: titolo + bullet + descrizione (incolla)'
+        required: false
+        default: ''
+      reviews_text:
+        description: 'Estratti di recensioni (incolla, opzionale)'
+        required: false
+        default: ''
+      seed_keywords:
+        description: 'Keyword note a mano (opzionale)'
+        required: false
+        default: ''
+      no_amazon_recs:
+        description: 'Salta le keyword recommendations di Amazon'
+        type: boolean
+        required: false
+        default: false
+      days:
+        description: 'Giorni di storico da analizzare'
+        required: false
+        default: '60'
+
+permissions:
+  contents: write   # per committare plans/<MP>/<ASIN>.json
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Genera blueprint
+        env:
+          AMAZON_ADS_CLIENT_ID: ${{ secrets.AMAZON_ADS_CLIENT_ID }}
+          AMAZON_ADS_CLIENT_SECRET: ${{ secrets.AMAZON_ADS_CLIENT_SECRET }}
+          AMAZON_ADS_REFRESH_TOKEN: ${{ secrets.AMAZON_ADS_REFRESH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+          LISTING_TEXT: ${{ github.event.inputs.listing_text }}
+          REVIEWS_TEXT: ${{ github.event.inputs.reviews_text }}
+        run: |
+          cd python
+          printf '%s' "$LISTING_TEXT" > _listing.txt
+          printf '%s' "$REVIEWS_TEXT" > _reviews.txt
+          EXTRA=""
+          if [ "${{ github.event.inputs.no_amazon_recs }}" = "true" ]; then EXTRA="--no-amazon-recs"; fi
+          python campaign_planner.py \
+            --marketplace "${{ github.event.inputs.marketplace }}" \
+            --asin "${{ github.event.inputs.asin }}" \
+            --children "${{ github.event.inputs.children }}" \
+            --skus "${{ github.event.inputs.skus }}" \
+            --budget "${{ github.event.inputs.budget }}" \
+            --target-acos "${{ github.event.inputs.target_acos }}" \
+            --child-note "${{ github.event.inputs.child_note }}" \
+            --seed-keywords "${{ github.event.inputs.seed_keywords }}" \
+            --listing-file _listing.txt \
+            --reviews-file _reviews.txt \
+            --days "${{ github.event.inputs.days }}" \
+            --publish-dir ../plans \
+            --fetch $EXTRA
+
+      - name: Commit blueprint per la UI
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add plans/ || true
+          if git diff --staged --quiet; then
+            echo "Nessun blueprint da committare."
+          else
+            git commit -m "plan: ${{ github.event.inputs.marketplace }}/${{ github.event.inputs.asin }} [skip ci]"
+            git push
+          fi
+
+      - name: Upload blueprint (artefatto)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: campaign-plan-${{ github.event.inputs.marketplace }}-${{ github.run_number }}
+          path: python/plans/*
+          retention-days: 90

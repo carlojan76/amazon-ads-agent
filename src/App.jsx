@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { C } from "./theme";
 import ActionsPanel from "./ActionsPanel";
+import CampaignPlanner from "./CampaignPlanner";
 
 const ENV_KEY = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_ANTHROPIC_API_KEY : '';
 const BASE_URL = typeof import.meta !== 'undefined' ? import.meta.env.BASE_URL : '/';
@@ -302,6 +303,7 @@ export default function App() {
   const [publishedIndex, setPublishedIndex] = useState(null);
   const [publishedError, setPublishedError] = useState(false);
   const [loadingMp, setLoadingMp] = useState(null);
+  const [showPlanner, setShowPlanner] = useState(false);
   const fileRef = useRef();
 
   // Dati pubblicati automaticamente ogni settimana da weekly_analysis.py (se presenti)
@@ -351,6 +353,10 @@ export default function App() {
     };
     reader.readAsText(file);
   }, []);
+
+  if (showPlanner) {
+    return <CampaignPlanner onClose={() => setShowPlanner(false)} />;
+  }
 
   if (!metrics) {
     return (
@@ -405,6 +411,15 @@ export default function App() {
             <input ref={fileRef} type="file" accept=".json,.csv,.tsv,.txt" hidden onChange={e => handleFile(e.target.files[0])} />
           </div>
 
+          {/* Nuova campagna da ASIN (flusso indipendente dai dati caricati) */}
+          <button onClick={() => setShowPlanner(true)}
+            style={{ width: "100%", background: C.accentGlow, border: `1px solid ${C.accent}`, borderRadius: 12, padding: "16px", color: C.accent, fontWeight: 700, fontSize: 14, cursor: "pointer", marginBottom: 24, fontFamily: "inherit" }}>
+            ➕ Crea una campagna nuova da un ASIN
+            <div style={{ fontSize: 11, color: C.textMuted, fontWeight: 400, marginTop: 4 }}>
+              Usa storico (anche campagne chiuse), recommendations Amazon e testo del listing
+            </div>
+          </button>
+
           <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
             {["JSON API", "Bulk Sheet", "Search Term", "SP Report"].map(t => (
               <span key={t} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 5, padding: "3px 9px", fontSize: 10, color: C.textDim }}>{t}</span>
@@ -449,6 +464,7 @@ export default function App() {
             <div style={{ fontSize: 11, color: C.textDim, marginTop: 3 }}>📄 {fileName} • {sourceType} • {metrics.keywords.length} keywords</div>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => setShowPlanner(true)} style={{ background: C.accentGlow, border: `1px solid ${C.accent}`, borderRadius: 6, padding: "6px 12px", color: C.accent, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>➕ Nuova campagna</button>
             <button onClick={() => setShowSettings(!showSettings)} style={{ background: "transparent", border: `1px solid ${C.border}`, borderRadius: 6, padding: "6px 12px", color: C.textMuted, fontSize: 11, cursor: "pointer" }}>⚙️</button>
             <button onClick={() => { setMetrics(null); setTab("overview"); }} style={{ background: "transparent", border: `1px solid ${C.border}`, borderRadius: 6, padding: "6px 12px", color: C.textMuted, fontSize: 11, cursor: "pointer" }}>✕ Reset</button>
           </div>
