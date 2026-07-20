@@ -200,7 +200,9 @@ export default function CampaignPlanner({ onClose }) {
   const [plan, setPlan] = useState(null); // { actions, _meta }
   const [actions, setActions] = useState([]);
   const [applyMsg, setApplyMsg] = useState("");
+  const [debug, setDebug] = useState([]);
   const pollRef = useRef(null);
+  const addDebug = (msg) => setDebug(d => [...d, `[${new Date().toLocaleTimeString()}] ${msg}`].slice(-20));
 
   useEffect(() => { localStorage.setItem("gh_owner", owner); }, [owner]);
   useEffect(() => { localStorage.setItem("gh_repo", repo); }, [repo]);
@@ -228,6 +230,7 @@ export default function CampaignPlanner({ onClose }) {
     if (!token || !owner || !repo) { setStatus("Configura e connetti GitHub prima."); return; }
     if (!f.asin.trim()) { setStatus("Inserisci un ASIN."); return; }
     setPhase("waiting"); setStatus("Leggo lo stato attuale del file..."); setPlan(null); setActions([]);
+    setDebug([`start: ${new Date().toLocaleTimeString()}`]);
 
     // Prendo l'ultimo commit che ha toccato il file: la Commits API e' fresca,
     // la Contents API ha cache lunga e non e' affidabile per rilevare cambi.
@@ -236,6 +239,7 @@ export default function CampaignPlanner({ onClose }) {
       const prev = await getLatestCommitForPath({ token, owner, repo, path: planPath });
       beforeCommitSha = prev?.sha || null;
     } catch { /* file non esiste ancora */ }
+    addDebug(`beforeCommitSha=${beforeCommitSha ? beforeCommitSha.substring(0, 7) : "(none)"}`);
 
     setStatus("Avvio del workflow di generazione...");
     try {
@@ -249,58 +253,88 @@ export default function CampaignPlanner({ onClose }) {
         },
       });
     } catch (e) { setPhase("error"); setStatus(String(e.message || e)); return; }
+    addDebug("workflow dispatched");
 
     // trova il run (per link + rilevare fallimenti)
     let runId = null;
+    let runSucceeded = false;
     setTimeout(async () => {
       const run = await findLatestRun({ token, owner, repo, workflow: PLAN_WORKFLOW });
-      if (run) { runId = run.id; setRunUrl(run.html_url); }
+      if (run) { runId = run.id; setRunUrl(run.html_url); addDebug(`runId=${run.id}`); }
     }, 4000);
 
     const start = Date.now();
     const TIMEOUT = 8 * 60 * 1000;
     setStatus("Generazione in corso (fetch dati + recommendations + Claude)... puo' richiedere 1-3 minuti.");
     clearInterval(pollRef.current);
+    let tickCount = 0;
+
+    const loadPlan = async (fromLabel) => {
+      // Legge il file con retry (Contents API ha cache di 60-90s).
+      addDebug(`loadPlan(${fromLabel}): reading file`);
+      let res = null;
+      for (let attempt = 0; attempt < 8; attempt++) {
+        try { res = await getRepoFileContents({ token, owner, repo, path: planPath }); }
+        catch (e) { addDebug(`read err: ${e.message}`); }
+        if (res && res.json) break;
+        await new Promise(r => setTimeout(r, 3000));
+      }
+      if (!res || !res.json) { addDebug("read: nessun JSON dopo retry"); return false; }
+
+      const pl = res.json;
+      addDebug(`read OK: ${pl.actions?.length || 0} actions, status=${pl._meta?.status}`);
+      clearInterval(pollRef.current);
+      if (!pl.actions || pl.actions.length === 0) {
+        setPhase("error");
+        setStatus("Il planner non ha prodotto azioni valide. Spiegazione: " + (pl._meta?.explanation || "").slice(0, 400));
+        return true;
+      }
+      setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
+      return true;
+    };
+
     pollRef.current = setInterval(async () => {
+      tickCount++;
       if (Date.now() - start > TIMEOUT) {
         clearInterval(pollRef.current); setPhase("error");
         setStatus("Timeout: il workflow non ha prodotto il blueprint in tempo. Controlla i log del run.");
         return;
       }
-      // fallimento del run?
+
+      // Stato del run
+      let runStatus = null;
       if (runId) {
-        const r = await getRun({ token, owner, repo, runId });
-        if (r && r.status === "completed" && r.conclusion && r.conclusion !== "success") {
-          clearInterval(pollRef.current); setPhase("error");
-          setStatus(`Il workflow e' terminato con esito "${r.conclusion}". Controlla i log.`);
-          return;
+        try {
+          const r = await getRun({ token, owner, repo, runId });
+          if (r) runStatus = r;
+        } catch (e) { addDebug(`getRun err: ${e.message}`); }
+        if (runStatus?.status === "completed") {
+          if (runStatus.conclusion && runStatus.conclusion !== "success") {
+            clearInterval(pollRef.current); setPhase("error");
+            setStatus(`Il workflow e' terminato con esito "${runStatus.conclusion}". Controlla i log.`);
+            return;
+          }
+          runSucceeded = true;
         }
       }
-      // C'e' un commit nuovo sul path? (Commits API = sempre fresca)
+      addDebug(`tick ${tickCount}: run=${runStatus?.status || "?"} conc=${runStatus?.conclusion || "?"}`);
+
+      // Se il run e' finito con successo, carica direttamente il file
+      // (a prescindere dalla Commits API, che potrebbe essere in ritardo).
+      if (runSucceeded) {
+        const ok = await loadPlan("run-success");
+        if (ok) return;
+      }
+
+      // Altrimenti verifica se c'e' un commit nuovo
       let commit = null;
       try { commit = await getLatestCommitForPath({ token, owner, repo, path: planPath }); }
-      catch { /* retry */ }
-      if (!commit || commit.sha === beforeCommitSha) return; // niente ancora
+      catch (e) { addDebug(`getCommit err: ${e.message}`); }
+      if (!commit) { addDebug("commit=null"); return; }
+      addDebug(`latestCommit=${commit.sha.substring(0, 7)}`);
+      if (commit.sha === beforeCommitSha) return; // niente ancora
 
-      // C'e' un commit nuovo: leggo il contenuto (potrebbe volerci qualche
-      // secondo perche' la Contents API ha cache; provo con backoff).
-      let res = null;
-      for (let attempt = 0; attempt < 6; attempt++) {
-        try { res = await getRepoFileContents({ token, owner, repo, path: planPath }); }
-        catch { /* retry */ }
-        if (res && res.json) break;
-        await new Promise(r => setTimeout(r, 2000));
-      }
-      if (!res || !res.json) return; // riprovero' al prossimo tick
-
-      clearInterval(pollRef.current);
-      const pl = res.json;
-      if (!pl.actions || pl.actions.length === 0) {
-        setPhase("error");
-        setStatus("Il planner non ha prodotto azioni valide. Spiegazione: " + (pl._meta?.explanation || "").slice(0, 400));
-        return;
-      }
-      setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
+      await loadPlan("new-commit");
     }, 8000);
   };
 
@@ -415,6 +449,18 @@ export default function CampaignPlanner({ onClose }) {
             <button onClick={generate} disabled={!connected} style={{ ...btn(connected ? C.accent : C.border, connected ? "#fff" : C.textDim), padding: "11px 22px", fontSize: 13 }}>
               ⚡ Genera piano
             </button>
+            <button onClick={async () => {
+              if (!connected || !f.asin.trim()) { setStatus("Serve connessione e ASIN."); return; }
+              setStatus("Cerco piano esistente nel repo...");
+              addDebug("load-existing");
+              const res = await getRepoFileContents({ token, owner, repo, path: planPath }).catch(() => null);
+              if (!res || !res.json) { setStatus(`Nessun piano trovato per ${f.marketplace}/${f.asin}. Genera un piano nuovo.`); return; }
+              const pl = res.json;
+              if (!pl.actions?.length) { setStatus("Piano esistente vuoto. " + (pl._meta?.explanation || "").slice(0, 200)); return; }
+              setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
+            }} style={{ ...btn("transparent", C.accent), border: `1px solid ${C.accent}`, padding: "11px 20px", fontSize: 12, marginLeft: 8 }}>
+              📂 Carica ultimo piano
+            </button>
             {status && <div style={{ marginTop: 10, fontSize: 12, color: C.red }}>{status}</div>}
           </div>
         )}
@@ -424,6 +470,29 @@ export default function CampaignPlanner({ onClose }) {
             <div style={{ width: 34, height: 34, border: `3px solid ${C.border}`, borderTopColor: C.accent, borderRadius: "50%", animation: "spin .7s linear infinite", margin: "0 auto 14px" }} />
             <div style={{ color: C.accent, fontWeight: 600, fontSize: 13 }}>{status}</div>
             {runUrl && <div style={{ marginTop: 8, fontSize: 11 }}><a href={runUrl} target="_blank" rel="noreferrer" style={{ color: C.accent }}>apri il run su GitHub →</a></div>}
+            <div style={{ marginTop: 14, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+              <button onClick={async () => {
+                clearInterval(pollRef.current);
+                setStatus("Lettura diretta del file dal repo...");
+                addDebug("MANUAL: forced load");
+                const res = await getRepoFileContents({ token, owner, repo, path: planPath }).catch(() => null);
+                if (!res || !res.json) { setPhase("error"); setStatus("File non trovato nel repo. Il workflow potrebbe non essere ancora finito."); return; }
+                const pl = res.json;
+                if (!pl.actions?.length) { setPhase("error"); setStatus("Nessuna azione nel piano. " + (pl._meta?.explanation || "").slice(0, 300)); return; }
+                setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
+              }} style={{ ...btn("transparent", C.accent), border: `1px solid ${C.accent}`, fontSize: 11 }}>
+                📥 Carica direttamente (bypassa attesa)
+              </button>
+              <button onClick={() => { clearInterval(pollRef.current); setPhase("form"); setStatus(""); }} style={{ ...btn("transparent", C.textMuted), border: `1px solid ${C.border}`, fontSize: 11 }}>
+                ✕ Annulla
+              </button>
+            </div>
+            {debug.length > 0 && (
+              <details style={{ marginTop: 14, textAlign: "left" }}>
+                <summary style={{ fontSize: 10, color: C.textDim, cursor: "pointer" }}>Debug ({debug.length})</summary>
+                <pre style={{ fontSize: 10, color: C.textDim, background: C.bg, padding: 8, borderRadius: 6, marginTop: 6, maxHeight: 200, overflow: "auto" }}>{debug.join("\n")}</pre>
+              </details>
+            )}
             <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
           </div>
         )}
