@@ -116,7 +116,6 @@ export async function getRepoFileContents({ token, owner, repo, path, ref = "mai
       headers: {
         Authorization: `token ${token}`,
         Accept: "application/vnd.github+json",
-        "Cache-Control": "no-cache",
       },
     }
   );
@@ -148,7 +147,6 @@ export async function getLatestCommitForPath({ token, owner, repo, path, ref = "
     headers: {
       Authorization: `token ${token}`,
       Accept: "application/vnd.github+json",
-      "Cache-Control": "no-cache",
     },
   });
   if (!resp.ok) return null;
