@@ -135,3 +135,25 @@ export async function getRepoFileContents({ token, owner, repo, path, ref = "mai
   try { json = JSON.parse(text); } catch { /* non-JSON */ }
   return { json, text, sha: data.sha };
 }
+
+/**
+ * Trova l'ultimo commit che ha toccato un dato path. La Commits API e' sempre
+ * fresca (nessuna cache aggressiva come la Contents API), quindi e' affidabile
+ * per rilevare la presenza di un commit nuovo.
+ * Ritorna { sha, date, message } dell'ultimo commit, o null se il path non esiste.
+ */
+export async function getLatestCommitForPath({ token, owner, repo, path, ref = "main" }) {
+  const url = `${GH_API}/repos/${owner}/${repo}/commits?path=${encodeURIComponent(path)}&sha=${encodeURIComponent(ref)}&per_page=1&t=${Date.now()}`;
+  const resp = await fetch(url, {
+    headers: {
+      Authorization: `token ${token}`,
+      Accept: "application/vnd.github+json",
+      "Cache-Control": "no-cache",
+    },
+  });
+  if (!resp.ok) return null;
+  const arr = await resp.json();
+  if (!Array.isArray(arr) || arr.length === 0) return null;
+  const c = arr[0];
+  return { sha: c.sha, date: c.commit?.author?.date, message: c.commit?.message };
+}

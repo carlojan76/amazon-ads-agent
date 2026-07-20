@@ -3,6 +3,7 @@ import { C } from "./theme";
 import {
   getUser,
   dispatchWorkflow, findLatestRun, getRun, getRepoFileContents,
+  getLatestCommitForPath,
 } from "./github";
 
 const MARKETPLACES = ["IT", "FR", "DE", "ES", "UK", "NL", "SE", "PL", "BE", "IE"];
@@ -228,11 +229,12 @@ export default function CampaignPlanner({ onClose }) {
     if (!f.asin.trim()) { setStatus("Inserisci un ASIN."); return; }
     setPhase("waiting"); setStatus("Leggo lo stato attuale del file..."); setPlan(null); setActions([]);
 
-    // sha precedente (per capire quando il file cambia)
-    let beforeSha = null;
+    // Prendo l'ultimo commit che ha toccato il file: la Commits API e' fresca,
+    // la Contents API ha cache lunga e non e' affidabile per rilevare cambi.
+    let beforeCommitSha = null;
     try {
-      const prev = await getRepoFileContents({ token, owner, repo, path: planPath });
-      beforeSha = prev?.sha || null;
+      const prev = await getLatestCommitForPath({ token, owner, repo, path: planPath });
+      beforeCommitSha = prev?.sha || null;
     } catch { /* file non esiste ancora */ }
 
     setStatus("Avvio del workflow di generazione...");
@@ -274,20 +276,31 @@ export default function CampaignPlanner({ onClose }) {
           return;
         }
       }
-      // file aggiornato?
-      let res = null;
-      try { res = await getRepoFileContents({ token, owner, repo, path: planPath }); }
+      // C'e' un commit nuovo sul path? (Commits API = sempre fresca)
+      let commit = null;
+      try { commit = await getLatestCommitForPath({ token, owner, repo, path: planPath }); }
       catch { /* retry */ }
-      if (res && res.sha && res.sha !== beforeSha && res.json) {
-        clearInterval(pollRef.current);
-        const pl = res.json;
-        if (!pl.actions || pl.actions.length === 0) {
-          setPhase("error");
-          setStatus("Il planner non ha prodotto azioni valide. Spiegazione: " + (pl._meta?.explanation || "").slice(0, 400));
-          return;
-        }
-        setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
+      if (!commit || commit.sha === beforeCommitSha) return; // niente ancora
+
+      // C'e' un commit nuovo: leggo il contenuto (potrebbe volerci qualche
+      // secondo perche' la Contents API ha cache; provo con backoff).
+      let res = null;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        try { res = await getRepoFileContents({ token, owner, repo, path: planPath }); }
+        catch { /* retry */ }
+        if (res && res.json) break;
+        await new Promise(r => setTimeout(r, 2000));
       }
+      if (!res || !res.json) return; // riprovero' al prossimo tick
+
+      clearInterval(pollRef.current);
+      const pl = res.json;
+      if (!pl.actions || pl.actions.length === 0) {
+        setPhase("error");
+        setStatus("Il planner non ha prodotto azioni valide. Spiegazione: " + (pl._meta?.explanation || "").slice(0, 400));
+        return;
+      }
+      setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
     }, 8000);
   };
 
