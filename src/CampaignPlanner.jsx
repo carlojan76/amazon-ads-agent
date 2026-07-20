@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { C } from "./theme";
 import {
-  startDeviceFlow, pollForToken, getUser,
+  getUser,
   dispatchWorkflow, findLatestRun, getRun, getRepoFileContents,
 } from "./github";
 
@@ -178,12 +178,10 @@ function AdGroupEditor({ g, onChange, onRemove, isAuto }) {
 // ---- componente principale -------------------------------------------------
 export default function CampaignPlanner({ onClose }) {
   // GitHub config (condivisa con ActionsPanel via localStorage)
-  const [clientId, setClientId] = useState(() => ls("gh_client_id"));
   const [owner, setOwner] = useState(() => ls("gh_owner"));
   const [repo, setRepo] = useState(() => ls("gh_repo"));
   const [token, setToken] = useState(() => ls("gh_token"));
   const [ghUser, setGhUser] = useState(null);
-  const [device, setDevice] = useState(null);
   const [connecting, setConnecting] = useState(false);
 
   // form
@@ -203,7 +201,6 @@ export default function CampaignPlanner({ onClose }) {
   const [applyMsg, setApplyMsg] = useState("");
   const pollRef = useRef(null);
 
-  useEffect(() => { localStorage.setItem("gh_client_id", clientId); }, [clientId]);
   useEffect(() => { localStorage.setItem("gh_owner", owner); }, [owner]);
   useEffect(() => { localStorage.setItem("gh_repo", repo); }, [repo]);
   useEffect(() => { if (token) localStorage.setItem("gh_token", token); }, [token]);
@@ -213,16 +210,14 @@ export default function CampaignPlanner({ onClose }) {
   }, [token]); // eslint-disable-line
 
   const connect = async () => {
-    if (!clientId) { setStatus("Inserisci prima il GitHub OAuth Client ID."); return; }
+    if (!token.trim()) { setStatus("Incolla il Personal Access Token (PAT) di GitHub."); return; }
+    if (!owner.trim() || !repo.trim()) { setStatus("Inserisci owner e repo."); return; }
     setConnecting(true); setStatus("");
     try {
-      const d = await startDeviceFlow(clientId, "repo");
-      setDevice(d);
-      const t = await pollForToken(clientId, d.device_code, d.interval, d.expires_in);
-      setToken(t);
-      setGhUser(await getUser(t));
-      setDevice(null);
-    } catch (e) { setStatus(String(e.message || e)); }
+      const user = await getUser(token.trim());
+      setGhUser(user);
+      localStorage.setItem("gh_token", token.trim());
+    } catch (e) { setStatus("Token non valido o scaduto. Rigenera il PAT su GitHub."); setToken(""); localStorage.removeItem("gh_token"); }
     finally { setConnecting(false); }
   };
 
@@ -342,20 +337,28 @@ export default function CampaignPlanner({ onClose }) {
           <div style={{ fontSize: 12, fontWeight: 600, color: C.text, marginBottom: 8 }}>
             {connected ? `🟢 GitHub: ${ghUser.login}` : "🔗 Connetti GitHub"}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
-            <input placeholder="OAuth Client ID" style={inputStyle} value={clientId} onChange={e => setClientId(e.target.value)} />
-            <input placeholder="owner (utente/org)" style={inputStyle} value={owner} onChange={e => setOwner(e.target.value)} />
-            <input placeholder="repo" style={inputStyle} value={repo} onChange={e => setRepo(e.target.value)} />
+          {!connected && (
+            <div style={{ fontSize: 10, color: C.textDim, marginBottom: 8, lineHeight: 1.5 }}>
+              Serve un Personal Access Token (PAT). Crealo su GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens. Permessi: Contents (read/write) + Actions (read/write) sul repo.
+            </div>
+          )}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+            <input placeholder="owner (il tuo username GitHub)" style={inputStyle} value={owner} onChange={e => setOwner(e.target.value)} />
+            <input placeholder="repo (es. amazon-ads-agent)" style={inputStyle} value={repo} onChange={e => setRepo(e.target.value)} />
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <input placeholder="Incolla qui il Personal Access Token (github_pat_...)" type="password" style={inputStyle} value={token} onChange={e => setToken(e.target.value)} />
+            <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>Il token resta solo nel tuo browser (localStorage), non viene inviato da nessuna parte.</div>
           </div>
           {!connected && (
             <button onClick={connect} disabled={connecting} style={btn(C.accent)}>
-              {connecting ? "In attesa di autorizzazione..." : "Connetti con GitHub"}
+              {connecting ? "Verifica in corso..." : "Connetti"}
             </button>
           )}
-          {device && (
-            <div style={{ marginTop: 8, fontSize: 12, color: C.textMuted }}>
-              Vai su <a href={device.verification_uri} target="_blank" rel="noreferrer" style={{ color: C.accent }}>{device.verification_uri}</a> e inserisci il codice: <b style={{ color: C.text }}>{device.user_code}</b>
-            </div>
+          {connected && (
+            <button onClick={() => { setToken(""); setGhUser(null); localStorage.removeItem("gh_token"); }} style={{ ...btn("transparent", C.textMuted), border: `1px solid ${C.border}`, fontSize: 11 }}>
+              Disconnetti
+            </button>
           )}
         </div>
 
