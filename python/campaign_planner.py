@@ -338,7 +338,7 @@ def call_claude(prompt):
     resp = requests.post(
         "https://api.anthropic.com/v1/messages",
         headers={"Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01"},
-        json={"model": ANTHROPIC_MODEL, "max_tokens": 4000, "messages": [{"role": "user", "content": prompt}]},
+        json={"model": ANTHROPIC_MODEL, "max_tokens": 8000, "messages": [{"role": "user", "content": prompt}]},
         timeout=120,
     )
     if resp.status_code != 200:
@@ -349,11 +349,38 @@ def call_claude(prompt):
 def extract_plan(text, seed):
     warnings = []
     m = re.search(r"<campaign_plan>(.*?)</campaign_plan>", text, re.DOTALL)
-    if not m:
-        return None, text, ["Nessun blocco <campaign_plan> trovato"]
-    clean = (text[:m.start()] + text[m.end():]).strip()
+    body = None
+    if m:
+        body = m.group(1).strip()
+        clean = (text[:m.start()] + text[m.end():]).strip()
+    else:
+        # Fallback: apertura c'e' ma la chiusura manca (troncamento max_tokens).
+        # Prendo tutto dopo l'apertura e tento di chiudere il JSON.
+        open_m = re.search(r"<campaign_plan>", text)
+        if not open_m:
+            return None, text, ["Nessun blocco <campaign_plan> trovato"]
+        body = text[open_m.end():].strip()
+        clean = text[:open_m.start()].strip()
+        # tento di trovare l'ultima parentesi bilanciata
+        try:
+            depth = 0
+            last_good = -1
+            for i, ch in enumerate(body):
+                if ch == "{": depth += 1
+                elif ch == "}":
+                    depth -= 1
+                    if depth == 0:
+                        last_good = i + 1
+            if last_good > 0:
+                body = body[:last_good]
+                warnings.append("Risposta troncata dal modello: recuperato il JSON parziale.")
+            else:
+                return None, clean, ["Blocco <campaign_plan> aperto ma non chiuso e JSON non recuperabile."]
+        except Exception:
+            return None, clean, ["Blocco <campaign_plan> aperto ma non chiuso."]
+
     try:
-        plan = json.loads(m.group(1).strip())
+        plan = json.loads(body)
     except json.JSONDecodeError as e:
         return None, clean, [f"JSON <campaign_plan> non valido: {e}"]
 
@@ -364,6 +391,9 @@ def extract_plan(text, seed):
                 asin = str(p.get("asin", "")).upper()
                 if not p.get("sku") and asin in sku_map:
                     p["sku"] = sku_map[asin]
+                # normalizzo sku=null -> rimosso, cosi' la validazione accetta il fallback su asin
+                if p.get("sku") is None:
+                    p.pop("sku", None)
                 if not p.get("sku"):
                     warnings.append(f"prodotto {asin or '?'} senza SKU: da seller aggiungilo prima di applicare")
 
