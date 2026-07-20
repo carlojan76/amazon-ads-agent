@@ -43,7 +43,7 @@ from amazon_ads_api import fetch_all_data, AmazonAdsAPI, CONFIG  # noqa: E402
 from apply_changes import validate  # riusa la validazione del blueprint  # noqa: E402
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-6"
 
 # La v5 delle recommendations NON copre IT: per sicurezza sui marketplace del
 # seller (IT/FR/DE) usiamo la v4, disponibile ovunque.
@@ -398,7 +398,7 @@ def main():
     ap.add_argument("--reviews-file", default="", help="File con estratti di recensioni")
     ap.add_argument("--data-file", default="", help="JSON gia' scaricato (consigliato)")
     ap.add_argument("--fetch", action="store_true", help="Scarica dati freschi (richiede secret Ads)")
-    ap.add_argument("--days", type=int, default=60)
+    ap.add_argument("--days", type=int, default=30)
     ap.add_argument("--no-amazon-recs", action="store_true", help="Salta la Keyword Recommendations API")
     ap.add_argument("--publish-dir", default="", help="Se impostato, scrive un file stabile <dir>/<MP>/<ASIN>.json per la UI")
     args = ap.parse_args()

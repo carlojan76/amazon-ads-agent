@@ -1,12 +1,5 @@
 name: Plan New Campaign (from ASIN)
 
-# Workflow MANUALE: genera una PROPOSTA di campagna nuova da un ASIN.
-# Non crea nulla su Amazon: produce un blueprint, lo COMMITTA in plans/<MP>/<ASIN>.json
-# (letto dalla UI via Contents API) e lo carica anche come artefatto.
-#
-# Fonti keyword: storico ads (anche campagne chiuse) + Keyword Recommendations
-# API di Amazon (funziona anche senza storico) + testo listing + recensioni.
-
 on:
   workflow_dispatch:
     inputs:
@@ -56,12 +49,12 @@ on:
         required: false
         default: false
       days:
-        description: 'Giorni di storico da analizzare'
+        description: 'Giorni di storico da analizzare (max 31)'
         required: false
-        default: '60'
+        default: '30'
 
 permissions:
-  contents: write   # per committare plans/<MP>/<ASIN>.json
+  contents: write
 
 jobs:
   plan:
@@ -113,7 +106,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add plans/ || true
+          git add -f plans/ 2>/dev/null || true
+          echo "File in plans/:"
+          find plans/ -type f 2>/dev/null || echo "(nessuno)"
+          git status --short
           if git diff --staged --quiet; then
             echo "Nessun blueprint da committare."
           else
