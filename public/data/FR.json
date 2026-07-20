@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "fetched_at": "2026-07-13T10:40:50.456135",
+    "fetched_at": "2026-07-20T10:08:26.091801",
     "profile_id": "4093691005399804",
     "marketplace": "FR",
     "days": 14,
@@ -78,7 +78,7 @@
     {
       "campaignId": "176086942618530",
       "name": "FR_Amaca_Auto_Jun",
-      "state": "ENABLED",
+      "state": "PAUSED",
       "budget": 3.0,
       "budgetType": "DAILY",
       "targetingType": "AUTO",
@@ -89,7 +89,7 @@
     {
       "campaignId": "128021223208209",
       "name": "FR Amaca Manuale",
-      "state": "ENABLED",
+      "state": "PAUSED",
       "budget": 3.0,
       "budgetType": "DAILY",
       "targetingType": "MANUAL",
@@ -1348,26 +1348,26 @@
   "reports": {
     "campaigns": [
       {
-        "purchases7d": 1,
-        "costPerClick": 0.28,
+        "purchases7d": 0,
+        "costPerClick": 0.27,
         "campaignId": 176086942618530,
-        "spend": 7.45,
-        "campaignStatus": "ENABLED",
-        "clicks": 27,
-        "impressions": 1030,
-        "sales7d": 34.9,
+        "spend": 2.45,
+        "campaignStatus": "PAUSED",
+        "clicks": 9,
+        "impressions": 323,
+        "sales7d": 0,
         "campaignName": "FR_Amaca_Auto_Jun",
         "campaignBudgetAmount": 3.0,
-        "unitsSoldClicks7d": 1
+        "unitsSoldClicks7d": 0
       },
       {
         "purchases7d": 0,
-        "costPerClick": 0.44,
+        "costPerClick": 0.0,
         "campaignId": 128021223208209,
-        "spend": 12.76,
-        "campaignStatus": "ENABLED",
-        "clicks": 29,
-        "impressions": 1528,
+        "spend": 0,
+        "campaignStatus": "PAUSED",
+        "clicks": 0,
+        "impressions": 1,
         "sales7d": 0,
         "campaignName": "FR Amaca Manuale",
         "campaignBudgetAmount": 3.0,
@@ -1383,43 +1383,14 @@
         "matchType": "EXACT",
         "campaignId": 128021223208209,
         "clicks": 0,
-        "impressions": 5,
+        "impressions": 1,
         "keyword": "lit en bois pour chat",
-        "sales7d": 0,
-        "adGroupId": 151082890508206,
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "keywordId": 69737775797390,
-        "cost": 12.76,
-        "adGroupName": "FR Amaca Manuale",
-        "matchType": "EXACT",
-        "campaignId": 128021223208209,
-        "clicks": 29,
-        "impressions": 1523,
-        "keyword": "hamac chat",
         "sales7d": 0,
         "adGroupId": 151082890508206,
         "unitsSoldClicks7d": 0
       }
     ],
     "searchTerms": [
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 1,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "arbre a chat bureau",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
       {
         "purchases7d": 0,
         "costPerClick": 0.28,
@@ -1437,36 +1408,6 @@
       },
       {
         "purchases7d": 0,
-        "costPerClick": 0.26,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 53,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "fukumaru",
-        "spend": 0.78,
-        "clicks": 3,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 234,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "grattoir chat",
-        "spend": 1.96,
-        "clicks": 7,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
         "costPerClick": 0.28,
         "adGroupName": "FR_Amaca_Auto_Jun",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
@@ -1475,51 +1416,6 @@
         "sales7d": 0,
         "adGroupId": 416144329258343,
         "searchTerm": "grattoir chat lit",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.43,
-        "adGroupName": "FR Amaca Manuale",
-        "matchType": "EXACT",
-        "campaignId": 128021223208209,
-        "impressions": 1119,
-        "sales7d": 0,
-        "adGroupId": 151082890508206,
-        "searchTerm": "hamac chat",
-        "spend": 8.12,
-        "clicks": 19,
-        "keyword": "hamac chat",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 4,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "hamac chat",
-        "spend": 0.55,
-        "clicks": 2,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 2,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "hamac chat bois",
         "spend": 0.28,
         "clicks": 1,
         "keyword": "close-match",
@@ -1542,31 +1438,16 @@
       },
       {
         "purchases7d": 0,
-        "costPerClick": 0.46,
-        "adGroupName": "FR Amaca Manuale",
-        "matchType": "EXACT",
-        "campaignId": 128021223208209,
-        "impressions": 216,
-        "sales7d": 0,
-        "adGroupId": 151082890508206,
-        "searchTerm": "hamac pour chat",
-        "spend": 4.64,
-        "clicks": 10,
-        "keyword": "hamac chat",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
         "costPerClick": 0.28,
         "adGroupName": "FR_Amaca_Auto_Jun",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 176086942618530,
-        "impressions": 11,
+        "impressions": 4,
         "sales7d": 0,
         "adGroupId": 416144329258343,
         "searchTerm": "hamac pour chat",
-        "spend": 0.56,
-        "clicks": 2,
+        "spend": 0.28,
+        "clicks": 1,
         "keyword": "close-match",
         "unitsSoldClicks7d": 0
       },
@@ -1586,30 +1467,15 @@
         "unitsSoldClicks7d": 0
       },
       {
-        "purchases7d": 1,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 1,
-        "sales7d": 34.9,
-        "adGroupId": 416144329258343,
-        "searchTerm": "lit canapé surélevé grattoir en sisal naturel pour chat",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 1
-      },
-      {
         "purchases7d": 0,
         "costPerClick": 0.28,
         "adGroupName": "FR_Amaca_Auto_Jun",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 176086942618530,
-        "impressions": 4,
+        "impressions": 1,
         "sales7d": 0,
         "adGroupId": 416144329258343,
-        "searchTerm": "lit pour chat",
+        "searchTerm": "lit grattoir chat sisal",
         "spend": 0.28,
         "clicks": 1,
         "keyword": "close-match",
@@ -1632,30 +1498,15 @@
       },
       {
         "purchases7d": 0,
-        "costPerClick": 0.26,
+        "costPerClick": 0.23,
         "adGroupName": "FR_Amaca_Auto_Jun",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 176086942618530,
-        "impressions": 3,
+        "impressions": 1,
         "sales7d": 0,
         "adGroupId": 416144329258343,
-        "searchTerm": "lit surélevé pour chat",
-        "spend": 0.26,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 2,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "pouf chat surélevé",
-        "spend": 0.28,
+        "searchTerm": "niche sisal",
+        "spend": 0.23,
         "clicks": 1,
         "keyword": "close-match",
         "unitsSoldClicks7d": 0
@@ -1674,37 +1525,22 @@
         "clicks": 1,
         "keyword": "close-match",
         "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 2,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "transat pour chat",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
       }
     ],
     "targeting": [
       {
-        "purchases7d": 1,
-        "cost": 7.45,
-        "costPerClick": 0.28,
+        "purchases7d": 0,
+        "cost": 2.45,
+        "costPerClick": 0.27,
         "adGroupName": "FR_Amaca_Auto_Jun",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 176086942618530,
-        "clicks": 27,
-        "impressions": 1030,
+        "clicks": 9,
+        "impressions": 323,
         "keyword": "close-match",
-        "sales7d": 34.9,
+        "sales7d": 0,
         "adGroupId": 416144329258343,
-        "unitsSoldClicks7d": 1
+        "unitsSoldClicks7d": 0
       },
       {
         "purchases7d": 0,
@@ -1714,22 +1550,8 @@
         "matchType": "EXACT",
         "campaignId": 128021223208209,
         "clicks": 0,
-        "impressions": 5,
+        "impressions": 1,
         "keyword": "lit en bois pour chat",
-        "sales7d": 0,
-        "adGroupId": 151082890508206,
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "cost": 12.76,
-        "costPerClick": 0.44,
-        "adGroupName": "FR Amaca Manuale",
-        "matchType": "EXACT",
-        "campaignId": 128021223208209,
-        "clicks": 29,
-        "impressions": 1523,
-        "keyword": "hamac chat",
         "sales7d": 0,
         "adGroupId": 151082890508206,
         "unitsSoldClicks7d": 0
@@ -1737,84 +1559,36 @@
     ],
     "products": [
       {
-        "purchases7d": 1,
-        "cost": 7.45,
+        "purchases7d": 0,
+        "cost": 2.45,
         "adGroupName": "FR_Amaca_Auto_Jun",
         "campaignId": 176086942618530,
         "advertisedAsin": "B0G5JC2YZ2",
-        "clicks": 27,
+        "clicks": 9,
         "advertisedSku": "FR-4DCI-RB8W",
-        "impressions": 1030,
-        "sales7d": 34.9,
+        "impressions": 323,
+        "sales7d": 0,
         "adGroupId": 416144329258343,
-        "unitsSoldClicks7d": 1
+        "unitsSoldClicks7d": 0
       },
       {
         "purchases7d": 0,
-        "cost": 12.76,
+        "cost": 0,
         "adGroupName": "FR Amaca Manuale",
         "campaignId": 128021223208209,
         "advertisedAsin": "B0G5JC2YZ2",
-        "clicks": 29,
+        "clicks": 0,
         "advertisedSku": "FR-4DCI-RB8W",
-        "impressions": 1528,
+        "impressions": 1,
         "sales7d": 0,
         "adGroupId": 151082890508206,
         "unitsSoldClicks7d": 0
       }
     ]
   },
-  "analysis": "# 📊 Stato Generale\n\nIl marketplace FR mostra performance polarizzate: una campagna automatica (FR_Amaca_Auto_Jun) genera l'unica vendita con ACoS eccellente al 21.3%, mentre la campagna manuale (FR Amaca Manuale) brucia €12.76 senza un singolo ordine. Con solo 1 ordine in 14 giorni e ACoS complessivo al 57.9%, il volume è critico. Il problema principale è la keyword \"hamac chat\" [EXACT] che consuma il 63% del budget totale senza conversioni — va fermata immediatamente.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Pausa keyword \"hamac chat\" [EXACT]**\n- **Azione**: Mettere in pausa `kwId:69737775797390` nella campagna `128021223208209`\n- **Motivo**: €12.76 spesi, 29 click, 0 ordini in 14 giorni. CTR-to-conversion nullo. È il singolo maggiore spreco dell'account, rappresenta il 63% della spesa totale.\n- **Impatto stimato**: Risparmio immediato di ~€12-13/settimana; ACoS globale scenderebbe a 21.3% (allineato alla sola campagna auto che funziona)\n\n**2. Aggiungere come keyword EXACT il search term vincente \"lit canapé surélevé grattoir en sisal naturel pour chat\"**\n- **Azione**: `add_keyword` su `campId:176086942618530` / `adGroupId:416144329258343`, match EXACT, bid €0.28 (CPC attuale)\n- **Motivo**: Ha generato 1 ordine con ACoS dell'1% e CPC di €0.28 — il termine più performante dell'intero account. Non è ancora una keyword targetizzata, quindi la cattura è casuale e a rischio.\n- **Impatto stimato**: Consolidamento della fonte di vendita principale; potenziale aumento ordini con ACoS sotto il 25%\n\n**3. Negativizzare i search terms spreconi nella campagna Auto**\n- **Azione**: Aggiungere negative EXACT per \"grattoir chat\", \"fukumaru\", \"hamac pour chat\", \"hamac chat\" in `campId:176086942618530`\n- **Motivo**: €3.85 spesi collettivamente con 0 ordini nella campagna auto. \"Grattoir chat\" da solo costa €1.96 per 7 click senza conversioni — non è il prodotto venduto.\n- **Impatto stimato**: Riduzione spreco ~€3-4/settimana, budget auto reindirizzato verso termini rilevanti\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n| Search Term | Campagna | Spesa | Azione |\n|---|---|---|---|\n| \"hamac chat\" | 128021223208209 | €8.12 | NEGATIVE_EXACT |\n| \"hamac pour chat\" | 128021223208209 | €4.64 | NEGATIVE_EXACT |\n| \"grattoir chat\" | 176086942618530 | €1.96 | NEGATIVE_EXACT |\n| \"fukumaru\" | 176086942618530 | €0.78 | NEGATIVE_EXACT |\n| \"hamac pour chat\" | 176086942618530 | €0.56 | NEGATIVE_EXACT |\n| \"hamac chat\" | 176086942618530 | €0.55 | NEGATIVE_EXACT |\n\n> ⚠️ Nota: \"hamac chat\" e \"hamac pour chat\" vanno negativizzati in ENTRAMBE le campagne — il prodotto (amaca/grattaio sopraelevato) non converte su query hammock-oriented.\n\n**🟢 SEARCH TERMS VINCENTI → NUOVE KEYWORD:**\n\n| Search Term | Ordini | ACoS | Azione |\n|---|---|---|---|\n| \"lit canapé surélevé grattoir en sisal naturel pour chat\" | 1 | 1% | `add_keyword` EXACT, bid €0.28 in adGroup 416144329258343 |\n\n---\n\n# 🟢 Keywords da Scalare\n\n**Nessuna keyword manuale attiva ha ACoS positivo** — l'unica campagna che performa è l'automatica `FR_Amaca_Auto_Jun` (ACoS 21.3%).\n\n**Azione consigliata sulla campagna Auto:**\n- Dopo aver negativizzato i termini spreconi, valutare un aumento del budget giornaliero del 20-30% per amplificare la scoperta di nuovi search term rilevanti simili al vincitore \"lit canapé surélevé...\".\n- Una volta aggiunta la keyword EXACT del termine vincente, monitorare il bid: se ACoS resta sotto 25% dopo 7 giorni, aumentare il bid da €0.28 a €0.35.\n\n---\n\n# 💡 Quick Wins\n\n1. **Rivalutare l'intera campagna manuale FR Amaca Manuale**: Con €12.76 spesi e zero vendite, e una sola keyword attiva (\"hamac chat\") ora in pausa, la campagna resterà sostanzialmente vuota. Valuta di aggiungere nuove keyword EXACT ispirate al termine vincente (es. \"grattoir sisal chat\", \"lit surélevé chat\", \"arbre à chat grattoir sisal\") o di mettere temporaneamente in pausa l'intera campagna manuale finché non hai keyword testate.\n\n2. **Analizzare il titolo/listing del prodotto**: Il fatto che \"hamac chat\" porti 29 click e zero ordini suggerisce che la pagina prodotto non soddisfa l'intento di ricerca. Verifica che le immagini e il titolo comunichino chiaramente che NON è solo un'amaca ma un grattaio/lettino sopraelevato.\n\n3. **Costruire un cluster di keyword dal search term vincente**: Il termine long-tail vincente (\"lit canapé surélevé grattoir en sisal naturel pour chat\") suggerisce keyword correlate da testare: \"grattoir sisal naturel chat\", \"lit surélevé chat sisal\", \"canapé grattoir chat\". Aggiungile in BROAD nella campagna auto o in una nuova ad group manuale con bid conservativo (€0.25-0.30).\n\n4. **Impostare un bid cap sulla campagna Auto**: La campagna auto ha performato bene ma senza controllo sui termini irrilevanti. Dopo le negativizzazioni, imposta un CPC massimo di €0.40 per evitare click costosi su termini non testati.\n\n5. **Monitoraggio a 7 giorni**: Con un account così piccolo (1 ordine/14gg), le decisioni vanno prese su cicli brevi. Rivedi le performance tra 7 giorni dopo le negativizzazioni per vedere se la campagna auto aumenta il conversion rate sul budget rimasto.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)",
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace FR è attualmente **completamente inattivo** sul fronte campagne attive: zero spesa, zero impression, zero click, zero ordini negli ultimi 14 giorni. Le uniche due campagne esistenti (FR_Amaca_Auto_Jun e FR Amaca Manuale) sono entrambe in pausa, il che significa che il prodotto **non ha alcuna visibilità pubblicitaria** su Amazon Francia in questo momento. Non ci sono dati storici di conversione recuperabili da campagne spente. La priorità assoluta è ricostruire la presenza pubblicitaria da zero.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Riattivare o creare una campagna Auto attiva per il mercato FR**\n- **Azione**: Valutare se riattivare `FR_Amaca_Auto_Jun` (attualmente in pausa) oppure creare una nuova campagna Auto per l'ASIN dell'amaca. Budget iniziale consigliato: €5-8/giorno. Bid dinamico \"Down Only\" per limitare il rischio.\n- **Motivo**: Zero campagne attive = zero visibilità organica amplificata, zero raccolta dati su search terms FR, zero vendite attribuite ad ADS. Il marketplace FR è completamente cieco in questo momento.\n- **Impatto stimato**: Anche con budget minimo, in 7-14 giorni si raccolgono search terms reali del mercato francese, fondamentali per costruire campagne manual efficaci.\n\n**2. Creare una campagna Manual Exact/Phrase con le keyword core del prodotto**\n- **Azione**: Lanciare una campagna manuale con le keyword principali in francese per \"amaca\": `hamac`, `hamac de jardin`, `hamac avec support`, `hamac coton`, `hamac suspendu`. Bid di partenza: €0.35-0.50. Budget: €5/giorno.\n- **Motivo**: `FR Amaca Manuale` è in pausa e non ha mai generato spesa (€0.00). Non ci sono dati storici da cui attingere: serve ricominciare con keyword di base ad alta rilevanza per il prodotto.\n- **Impatto stimato**: Prime impressioni e click qualificati entro 48-72h dall'attivazione; dati sufficienti per ottimizzare entro 2 settimane.\n\n**3. Analizzare il motivo della pausa delle campagne esistenti prima di riattivarle**\n- **Azione**: Verificare manualmente su Seller Central FR se le campagne sono in pausa per scelta strategica, problemi con il listing (soppressione, Buy Box assente, prezzo non competitivo) o mancanza di budget. Controllare che l'ASIN sia buyable sul marketplace FR.\n- **Motivo**: `FR_Amaca_Auto_Jun` ha speso €2.45 senza generare alcuna vendita prima di essere messa in pausa. Riattivare ciecamente senza capire il problema potrebbe bruciare budget inutilmente.\n- **Impatto stimato**: Evita sprechi su un listing potenzialmente non ottimizzato; se il listing è OK, sblocca immediatamente il potenziale del marketplace FR.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n**Nessun search term da negativizzare** — non ci sono campagne attive né dati di search term disponibili.\n\n> ⚠️ **SEARCH TERMS VINCENTI → NUOVE KEYWORD**: Non ci sono search term con ordini da promuovere ad EXACT. Una volta riattivata la campagna Auto, monitorare settimanalmente il Search Term Report FR e promuovere ad EXACT ogni termine con ≥1 ordine e ACoS < 40%.\n\n---\n\n# 🟢 Keywords da Scalare\n\n**Nessuna keyword attiva da scalare** — il marketplace FR non ha campagne attive.\n\n**Keyword-idee da testare (basate su ricerca di prodotto, non da campagne spente):**\nUna volta create le nuove campagne, testare questi termini ad alta rilevanza per il mercato francese:\n\n| Keyword | Match Type | Bid Iniziale Suggerito |\n|---|---|---|\n| `hamac` | BROAD | €0.40 |\n| `hamac de jardin` | PHRASE | €0.45 |\n| `hamac avec support` | EXACT | €0.50 |\n| `hamac coton` | EXACT | €0.40 |\n| `hamac brésilien` | PHRASE | €0.35 |\n| `hamac extérieur` | PHRASE | €0.40 |\n| `hamac suspendu` | EXACT | €0.45 |\n\n---\n\n# 💡 Quick Wins\n\n1. **Controlla il listing FR prima di tutto**: Verifica titolo, bullet points e immagini in francese. Un listing non tradotto o soppresso vanifica qualsiasi budget pubblicitario. Usa il \"Listing Quality Dashboard\" su Seller Central FR.\n\n2. **Imposta un budget giornaliero conservativo (€5-8/giorno)**: Con zero dati storici, è inutile partire con budget alti. Meglio raccogliere dati per 2 settimane e poi scalare sulla base dei risultati reali.\n\n3. **Abilita il report Search Term automatico**: Programma un download settimanale del Search Term Report per FR. Dopo 7 giorni di campagna Auto attiva avrai i primi dati su cui costruire negative e promuovere keyword vincenti.\n\n4. **Verifica la stagionalità FR per le amache**: Il mercato francese per prodotti outdoor (amache) ha picchi tra aprile e agosto. Se siamo fuori stagione, valuta budget ridotti (€3/giorno) e investi in ottimizzazione del listing in attesa del picco. Se siamo in stagione, agisci immediatamente.\n\n5. **Separa Auto e Manual fin dall'inizio**: Crea due campagne distinte — una Auto (scoperta search terms FR) e una Manual (controllo sui termini già noti). Questo evita di mischiare dati e rende l'ottimizzazione molto più precisa.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n> ⚠️ Non ci sono campagne attive con ID utilizzabili per azioni automatiche. Le due campagne esistenti sono in pausa e non devono essere riattivate automaticamente (decisione da prendere manualmente dopo verifica del listing). Non esistono keyword attive, search terms, né ad group attivi con ID reali da cui generare azioni sicure.\n> \n> **Azione manuale raccomandata**: Riattivare o creare campagne per FR direttamente su Seller Central dopo verifica del listing.",
   "actions": {
-    "actions": [
-      {
-        "type": "pause_keyword",
-        "keywordId": "69737775797390",
-        "keyword": "hamac chat [EXACT]"
-      },
-      {
-        "type": "add_negative",
-        "campaignId": "128021223208209",
-        "adGroupId": "151082890508206",
-        "keywordText": "hamac chat",
-        "matchType": "NEGATIVE_EXACT"
-      },
-      {
-        "type": "add_negative",
-        "campaignId": "128021223208209",
-        "adGroupId": "151082890508206",
-        "keywordText": "hamac pour chat",
-        "matchType": "NEGATIVE_EXACT"
-      },
-      {
-        "type": "add_negative",
-        "campaignId": "176086942618530",
-        "adGroupId": "416144329258343",
-        "keywordText": "grattoir chat",
-        "matchType": "NEGATIVE_EXACT"
-      },
-      {
-        "type": "add_negative",
-        "campaignId": "176086942618530",
-        "adGroupId": "416144329258343",
-        "keywordText": "fukumaru",
-        "matchType": "NEGATIVE_EXACT"
-      },
-      {
-        "type": "add_negative",
-        "campaignId": "176086942618530",
-        "adGroupId": "416144329258343",
-        "keywordText": "hamac pour chat",
-        "matchType": "NEGATIVE_EXACT"
-      },
-      {
-        "type": "add_negative",
-        "campaignId": "176086942618530",
-        "adGroupId": "416144329258343",
-        "keywordText": "hamac chat",
-        "matchType": "NEGATIVE_EXACT"
-      }
-    ]
+    "actions": []
   },
-  "generated_at": "2026-07-13T10:41:32.381507"
+  "generated_at": "2026-07-20T10:09:03.597470"
 }
