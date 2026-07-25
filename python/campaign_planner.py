@@ -40,7 +40,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).parent))
 from amazon_ads_api import fetch_all_data, AmazonAdsAPI, CONFIG  # noqa: E402
-from apply_changes import validate  # riusa la validazione del blueprint  # noqa: E402
+from apply_changes import validate, normalize_actions  # riusa validazione+normalizzazione del blueprint  # noqa: E402
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-6"
@@ -308,6 +308,13 @@ principale per un prodotto mai pubblicizzato. Filtra le poco pertinenti.
   PHRASE/BROAD con bid piu' bassi. AUTO con bid conservativi.
 - Genera 3-6 negative di partenza da search term sprecati e da termini fuori
   intento evidenti nel listing/recensioni.
+- VALORI AMMESSI (enum ESATTI dell'API, qualsiasi altro valore viene rifiutato):
+  * negatives.matchType: SOLO "NEGATIVE_EXACT" o "NEGATIVE_PHRASE"
+    (il negative broad NON esiste su Amazon: usa NEGATIVE_PHRASE).
+  * autoTargets.expressionType: SOLO "QUERY_HIGH_REL_MATCHES" (close match),
+    "QUERY_BROAD_REL_MATCHES" (loose match), "ASIN_SUBSTITUTE_RELATED"
+    (substitutes), "ASIN_ACCESSORY_RELATED" (complements). NON usare i nomi
+    della console come "SUBSTITUTES" o "COMPLEMENTS".
 - Ogni prodotto DEVE avere lo SKU se presente nella mappa; se manca, mettilo con
   "asin" e segnalalo (da seller potrebbe servire lo SKU).
 
@@ -397,6 +404,8 @@ def extract_plan(text, seed):
                 if not p.get("sku"):
                     warnings.append(f"prodotto {asin or '?'} senza SKU: da seller aggiungilo prima di applicare")
 
+    fixes = normalize_actions(plan.get("actions", []))
+    warnings.extend(f"[auto-fix] {fx}" for fx in fixes)
     errs = validate(plan.get("actions", []))
     warnings.extend(errs)
     return plan, clean, warnings

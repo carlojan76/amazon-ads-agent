@@ -103,6 +103,56 @@ AUTO_EXPRESSION_TYPES = {
     "ASIN_SUBSTITUTE_RELATED", "ASIN_ACCESSORY_RELATED",
 }
 
+# Alias comuni (nomi console/report o inventati dal modello) -> enum API v3
+_AUTO_EXPRESSION_ALIASES = {
+    "CLOSE_MATCH": "QUERY_HIGH_REL_MATCHES",
+    "QUERY_HIGH_REL": "QUERY_HIGH_REL_MATCHES",
+    "LOOSE_MATCH": "QUERY_BROAD_REL_MATCHES",
+    "QUERY_BROAD_REL": "QUERY_BROAD_REL_MATCHES",
+    "SUBSTITUTES": "ASIN_SUBSTITUTE_RELATED",
+    "ASIN_SUBSTITUTE": "ASIN_SUBSTITUTE_RELATED",
+    "COMPLEMENTS": "ASIN_ACCESSORY_RELATED",
+    "ASIN_ACCESSORY": "ASIN_ACCESSORY_RELATED",
+}
+
+# L'API SP supporta solo NEGATIVE_EXACT e NEGATIVE_PHRASE:
+# il "negative broad" non esiste, lo degradiamo a PHRASE (esclusione piu' ampia disponibile)
+_NEGATIVE_MATCH_ALIASES = {
+    "NEGATIVE_BROAD": "NEGATIVE_PHRASE",
+    "BROAD": "NEGATIVE_PHRASE",
+    "PHRASE": "NEGATIVE_PHRASE",
+    "EXACT": "NEGATIVE_EXACT",
+}
+
+
+def normalize_actions(actions):
+    """Corregge in-place gli alias non-API prodotti dal planner (LLM).
+
+    Ritorna la lista di correzioni applicate (per log/UI)."""
+    fixes = []
+    for i, a in enumerate(actions):
+        if a.get("type") == "add_negative":
+            mt = str(a.get("matchType", "NEGATIVE_EXACT")).upper()
+            if mt in _NEGATIVE_MATCH_ALIASES:
+                a["matchType"] = _NEGATIVE_MATCH_ALIASES[mt]
+                if mt != a["matchType"]:
+                    fixes.append(f"azione {i}: matchType negativa '{mt}' -> '{a['matchType']}'")
+        for j, g in enumerate(a.get("adGroups", []) or []):
+            for n in g.get("negatives", []) or []:
+                mt = str(n.get("matchType", "NEGATIVE_EXACT")).upper()
+                if mt in _NEGATIVE_MATCH_ALIASES:
+                    new = _NEGATIVE_MATCH_ALIASES[mt]
+                    if new != mt:
+                        fixes.append(f"azione {i}.adGroup{j}: negativa '{n.get('keywordText')}' {mt} -> {new}")
+                    n["matchType"] = new
+            for x in g.get("autoTargets", []) or []:
+                et = str(x.get("expressionType", "")).upper()
+                if et in _AUTO_EXPRESSION_ALIASES:
+                    new = _AUTO_EXPRESSION_ALIASES[et]
+                    fixes.append(f"azione {i}.adGroup{j}: expressionType {et} -> {new}")
+                    x["expressionType"] = new
+    return fixes
+
 
 # ---------------------------------------------------------------- helpers
 def _put(api, path, payload, vnd):
@@ -522,6 +572,12 @@ def main():
 
     if not actions:
         sys.exit("Nessuna azione nel file.")
+
+    fixes = normalize_actions(actions)
+    if fixes:
+        print("Correzioni automatiche applicate:")
+        for fx in fixes:
+            print("   -", fx)
 
     errors = validate(actions)
     if errors:
