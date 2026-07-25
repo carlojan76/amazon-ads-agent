@@ -1,0 +1,490 @@
+{
+  "actions": [
+    {
+      "type": "create_campaign",
+      "campaign": {
+        "name": "SP-Auto-AmacaGatto",
+        "targetingType": "AUTO",
+        "dailyBudget": 4.0,
+        "biddingStrategy": "LEGACY_FOR_SALES",
+        "state": "PAUSED"
+      },
+      "adGroups": [
+        {
+          "name": "AG-auto-all",
+          "defaultBid": 0.45,
+          "products": [
+            {
+              "asin": "B0G5JC2YZ2"
+            }
+          ],
+          "autoTargets": [
+            {
+              "expressionType": "QUERY_HIGH_REL_MATCHES",
+              "bid": 0.55
+            },
+            {
+              "expressionType": "QUERY_BROAD_REL_MATCHES",
+              "bid": 0.35
+            },
+            {
+              "expressionType": "ASIN_SUBSTITUTE_RELATED",
+              "bid": 0.4
+            },
+            {
+              "expressionType": "ASIN_ACCESSORY_RELATED",
+              "bid": 0.35
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "cane",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "dog",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "amaca campeggio",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "amaca da giardino",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia chiusa",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "albero gatto",
+              "matchType": "NEGATIVE_PHRASE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "create_campaign",
+      "campaign": {
+        "name": "SP-Manual-AmacaGatto",
+        "targetingType": "MANUAL",
+        "dailyBudget": 4.0,
+        "biddingStrategy": "LEGACY_FOR_SALES",
+        "state": "PAUSED"
+      },
+      "adGroups": [
+        {
+          "name": "AG-AmacaTiragraffi-EXACT",
+          "defaultBid": 0.9,
+          "products": [
+            {
+              "asin": "B0G5JC2YZ2"
+            }
+          ],
+          "keywords": [
+            {
+              "keywordText": "amaca gatti tiragraffi",
+              "matchType": "EXACT",
+              "bid": 1.1
+            },
+            {
+              "keywordText": "amaca tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 1.1
+            },
+            {
+              "keywordText": "poltroncina tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "sdraietta tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "sdraio tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 0.9
+            },
+            {
+              "keywordText": "tiragraffi gatto con amaca",
+              "matchType": "EXACT",
+              "bid": 0.9
+            },
+            {
+              "keywordText": "sedia tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 0.8
+            },
+            {
+              "keywordText": "lettino tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 0.8
+            },
+            {
+              "keywordText": "poltrona tiragraffi",
+              "matchType": "EXACT",
+              "bid": 0.75
+            },
+            {
+              "keywordText": "amaca tiragraffi",
+              "matchType": "EXACT",
+              "bid": 0.75
+            },
+            {
+              "keywordText": "amaca per gatto",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "amaca gatto",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "amaca gatti",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "amaca per gatti",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "amache per gatti",
+              "matchType": "EXACT",
+              "bid": 0.75
+            },
+            {
+              "keywordText": "amaca x gatti",
+              "matchType": "EXACT",
+              "bid": 0.8
+            },
+            {
+              "keywordText": "cat hammock",
+              "matchType": "EXACT",
+              "bid": 0.8
+            },
+            {
+              "keywordText": "cat lounger",
+              "matchType": "EXACT",
+              "bid": 0.75
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "finestra",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "termosifone",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "esterno",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cane",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "albero",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cat tree",
+              "matchType": "NEGATIVE_EXACT"
+            }
+          ]
+        },
+        {
+          "name": "AG-SdraiettaLettino-EXACT",
+          "defaultBid": 0.85,
+          "products": [
+            {
+              "asin": "B0G5JC2YZ2"
+            }
+          ],
+          "keywords": [
+            {
+              "keywordText": "sdraietta gatto",
+              "matchType": "EXACT",
+              "bid": 1.1
+            },
+            {
+              "keywordText": "sdraietta gatti",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "sdraietta per gatti",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "sdraio gatto",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "sdraio gatti",
+              "matchType": "EXACT",
+              "bid": 1.0
+            },
+            {
+              "keywordText": "sdraio per gatti",
+              "matchType": "EXACT",
+              "bid": 0.9
+            },
+            {
+              "keywordText": "lettino gatto rialzato",
+              "matchType": "EXACT",
+              "bid": 0.9
+            },
+            {
+              "keywordText": "lettino per gatti rialzato",
+              "matchType": "EXACT",
+              "bid": 0.9
+            },
+            {
+              "keywordText": "lettino gatti",
+              "matchType": "EXACT",
+              "bid": 0.85
+            },
+            {
+              "keywordText": "lettino per gatti",
+              "matchType": "EXACT",
+              "bid": 0.85
+            },
+            {
+              "keywordText": "lettino gatto",
+              "matchType": "EXACT",
+              "bid": 0.85
+            },
+            {
+              "keywordText": "lettino per gatto",
+              "matchType": "EXACT",
+              "bid": 0.85
+            },
+            {
+              "keywordText": "lettini per gatti",
+              "matchType": "EXACT",
+              "bid": 0.8
+            },
+            {
+              "keywordText": "lettino gatto estivo",
+              "matchType": "EXACT",
+              "bid": 0.8
+            },
+            {
+              "keywordText": "letto per gatti",
+              "matchType": "EXACT",
+              "bid": 0.8
+            },
+            {
+              "keywordText": "sedia gatto",
+              "matchType": "EXACT",
+              "bid": 0.85
+            },
+            {
+              "keywordText": "divano per gatti",
+              "matchType": "EXACT",
+              "bid": 0.8
+            },
+            {
+              "keywordText": "divano per gatto",
+              "matchType": "EXACT",
+              "bid": 0.8
+            },
+            {
+              "keywordText": "cuccia gatto rialzata",
+              "matchType": "EXACT",
+              "bid": 0.8
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "finestra",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "termosifone",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cane",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "albero",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cat tree",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "cuccia chiusa",
+              "matchType": "NEGATIVE_PHRASE"
+            }
+          ]
+        },
+        {
+          "name": "AG-LongTail-PHRASE",
+          "defaultBid": 0.5,
+          "products": [
+            {
+              "asin": "B0G5JC2YZ2"
+            }
+          ],
+          "keywords": [
+            {
+              "keywordText": "amaca gatto legno sisal",
+              "matchType": "PHRASE",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "tiragraffi gatto sisal legno",
+              "matchType": "PHRASE",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "amaca gatto gatti adulti grandi",
+              "matchType": "BROAD",
+              "bid": 0.5
+            },
+            {
+              "keywordText": "tiragraffi per gatti adulti",
+              "matchType": "EXACT",
+              "bid": 0.65
+            },
+            {
+              "keywordText": "tiragraffi per gatti adulti xxl",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "tiragraffi per gatti grandi",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "tiragraffi gatto",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 0.65
+            },
+            {
+              "keywordText": "lettino gatto balcone",
+              "matchType": "PHRASE",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "sdraietta gatto balcone",
+              "matchType": "PHRASE",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "amaca gatto complemento arredo",
+              "matchType": "BROAD",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "accessori gatto salva divano",
+              "matchType": "BROAD",
+              "bid": 0.5
+            },
+            {
+              "keywordText": "gatti accessori",
+              "matchType": "PHRASE",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "giochi per gatti in casa",
+              "matchType": "PHRASE",
+              "bid": 0.5
+            },
+            {
+              "keywordText": "amaca gatto sisal naturale",
+              "matchType": "PHRASE",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "cuccia gatti",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "amaca per gatti termosifone",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "amaca gatti finestra",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "amaca per gatti da finestra",
+              "matchType": "EXACT",
+              "bid": 0.55
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "cane",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "dog",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cat tree",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "albero tiragraffi",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "amaca campeggio",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia chiusa",
+              "matchType": "NEGATIVE_PHRASE"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-07-25T07:17:28.643752",
+    "marketplace": "IT",
+    "asin": "B0G5JC2YZ2",
+    "children": [
+      "B0G5JC2YZ2"
+    ],
+    "explanation": "## Spiegazione della struttura proposta\n\nIl prodotto B0G5JC2YZ2 è un **unico ASIN** (nessun child noto dallo storico, nessuno SKU mappato): verrà referenziato con `\"asin\"` come fallback — **segnalo che il seller dovrà fornire lo SKU reale** prima del lancio.\n\n**Struttura scelta: 2 campagne + budget 8 €/giorno.**\n\n1. **SP-Auto-AmacaGatto** (4 €/giorno) — AUTO con tutti e 4 i target type, bid conservativi (0,40 €). Serve per discovery e raccolta search term su un prodotto senza storico.\n2. **SP-Manual-AmacaGatto** (4 €/giorno) — MANUAL con 3 ad group tematici:\n - **AG-Amaca-Tiragraffi** (EXACT): keyword ibride amaca+tiragraffi con impression share altissimo (100% su \"amaca gatti tiragraffi\", \"poltroncina tiragraffi per gatti\", ecc.) — bid allineati al suggerito Amazon, cappati a massimo ~1,20 € per non bruciare il budget.\n - **AG-Sdraio-Lettino** (EXACT): keyword lettino/sdraio/sdraietta rialzato con imp.share elevato — stesso approccio bid.\n - **AG-Broad-LongTail** (PHRASE/BROAD): termini long-tail da listing e recensioni (gatto grosso, balcone, sisal, complemento arredo, ecc.) con bid bassi 0,40–0,60 €.\n\n**Fonti keyword**: Fonte 2 (recommendations Amazon) è la base principale. Ho **escluso** termini fuori intento (\"cat tree\", \"albero tiragraffi\", \"gioco gatto\", \"casa gatti\", \"amaca per gatti da esterno\", \"amaca legno\" generica). **Negative di partenza** dedotte da termini troppo generici o fuori prodotto (cane, albero, finestra, esterno, cuccia chiusa, amaca da campeggio).\n\nI bid EXACT sono compresi tra 0,75 € e 1,20 € (sotto il suggerito Amazon che è irrealistico per un budget di 8 €/giorno ma sopra il CPC storico di 0,40 € dichiarato, che è probabilmente di categoria diversa). I target ACoS del 30% verranno raggiunti ottimizzando dopo le prime 2 settimane di dati.\n\n---",
+    "warnings": [
+      "prodotto B0G5JC2YZ2 senza SKU: da seller aggiungilo prima di applicare",
+      "prodotto B0G5JC2YZ2 senza SKU: da seller aggiungilo prima di applicare",
+      "prodotto B0G5JC2YZ2 senza SKU: da seller aggiungilo prima di applicare",
+      "prodotto B0G5JC2YZ2 senza SKU: da seller aggiungilo prima di applicare"
+    ],
+    "recs_count": 150,
+    "had_history": false,
+    "status": "ok"
+  }
+}
