@@ -3,15 +3,15 @@
     {
       "type": "create_campaign",
       "campaign": {
-        "name": "SP-Auto-TiragraffAdesivo",
+        "name": "SP-Auto-TiragraffAdes",
         "targetingType": "AUTO",
-        "dailyBudget": 3.0,
+        "dailyBudget": 2.5,
         "biddingStrategy": "LEGACY_FOR_SALES",
         "state": "PAUSED"
       },
       "adGroups": [
         {
-          "name": "AG-auto-all-colors",
+          "name": "AG-auto-all",
           "defaultBid": 0.4,
           "products": [
             {
@@ -61,12 +61,12 @@
               "bid": 0.3
             },
             {
-              "expressionType": "SUBSTITUTES",
+              "expressionType": "COMPLEMENTS",
               "bid": 0.25
             },
             {
-              "expressionType": "COMPLEMENTS",
-              "bid": 0.2
+              "expressionType": "SUBSTITUTES",
+              "bid": 0.3
             }
           ],
           "negatives": [
@@ -75,24 +75,24 @@
               "matchType": "NEGATIVE_BROAD"
             },
             {
-              "keywordText": "sisal",
-              "matchType": "NEGATIVE_BROAD"
-            },
-            {
-              "keywordText": "gambe tavolo",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
               "keywordText": "torre",
               "matchType": "NEGATIVE_BROAD"
             },
             {
-              "keywordText": "zerbino",
+              "keywordText": "sisal",
               "matchType": "NEGATIVE_BROAD"
             },
             {
-              "keywordText": "guinzaglio",
+              "keywordText": "albero gatto",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia",
               "matchType": "NEGATIVE_BROAD"
+            },
+            {
+              "keywordText": "graffiatore legno",
+              "matchType": "NEGATIVE_PHRASE"
             }
           ]
         }
@@ -101,15 +101,15 @@
     {
       "type": "create_campaign",
       "campaign": {
-        "name": "SP-Manual-TiragraffAdesivo",
+        "name": "SP-Manual-Exact-TiragraffAdes",
         "targetingType": "MANUAL",
-        "dailyBudget": 5.0,
+        "dailyBudget": 3.0,
         "biddingStrategy": "LEGACY_FOR_SALES",
         "state": "PAUSED"
       },
       "adGroups": [
         {
-          "name": "AG-core-exact",
+          "name": "AG-exact-core",
           "defaultBid": 0.4,
           "products": [
             {
@@ -153,45 +153,20 @@
             {
               "keywordText": "tiragraffi adesivi per divano",
               "matchType": "EXACT",
-              "bid": 0.6
+              "bid": 0.55
             },
             {
               "keywordText": "tappetino tiragraffi adesivo",
               "matchType": "EXACT",
-              "bid": 0.55
-            },
-            {
-              "keywordText": "tiragraffi da divano",
-              "matchType": "EXACT",
               "bid": 0.5
-            },
-            {
-              "keywordText": "tappeto tiragraffi",
-              "matchType": "EXACT",
-              "bid": 0.5
-            },
-            {
-              "keywordText": "tappeto tiragraffi adesivo",
-              "matchType": "EXACT",
-              "bid": 0.45
-            },
-            {
-              "keywordText": "tappeto tiragraffi divano",
-              "matchType": "EXACT",
-              "bid": 0.45
-            },
-            {
-              "keywordText": "tiragraffi divano",
-              "matchType": "EXACT",
-              "bid": 0.45
-            },
-            {
-              "keywordText": "tiragraffi per divano",
-              "matchType": "EXACT",
-              "bid": 0.45
             },
             {
               "keywordText": "tiragraffi adesivo",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "tappeto tiragraffi adesivo",
               "matchType": "EXACT",
               "bid": 0.45
             },
@@ -201,9 +176,9 @@
               "bid": 0.45
             },
             {
-              "keywordText": "tiragraffi per gatti divano adesivo",
+              "keywordText": "tappeto tiragraffi",
               "matchType": "EXACT",
-              "bid": 0.4
+              "bid": 0.45
             },
             {
               "keywordText": "tappetino tiragraffi",
@@ -211,7 +186,72 @@
               "bid": 0.45
             },
             {
+              "keywordText": "tiragraffi per divano",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "tiragraffi divano",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "tiragraffi per gatti divano adesivo",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "tappeto tiragraffi divano",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "tiragraffi per divano per gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "tappetino tiragraffi per divano",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
               "keywordText": "tappetino tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "tappetino tiragraffi per gatti divano",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "tiragraffi da divano",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "tiragraffi divano per gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "antigraffio divano",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "antigraffio gatto divano",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "protezione divano graffi gatto",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "anti graffio gatti divano",
               "matchType": "EXACT",
               "bid": 0.4
             },
@@ -221,67 +261,12 @@
               "bid": 0.4
             },
             {
-              "keywordText": "protezione divano graffi gatto",
-              "matchType": "EXACT",
-              "bid": 0.6
-            },
-            {
-              "keywordText": "anti graffio gatti divano",
-              "matchType": "EXACT",
-              "bid": 0.55
-            },
-            {
-              "keywordText": "antigraffio divano",
-              "matchType": "EXACT",
-              "bid": 0.5
-            },
-            {
-              "keywordText": "antigraffio gatto divano",
-              "matchType": "EXACT",
-              "bid": 0.5
-            },
-            {
-              "keywordText": "antigraffio gatto",
-              "matchType": "EXACT",
-              "bid": 0.45
-            },
-            {
-              "keywordText": "antigraffio",
-              "matchType": "EXACT",
-              "bid": 0.45
-            },
-            {
-              "keywordText": "tiragraffi per divano per gatti",
-              "matchType": "EXACT",
-              "bid": 0.45
-            },
-            {
-              "keywordText": "tiragraffi divano per gatti",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "proteggi divano gatti graffi",
-              "matchType": "EXACT",
-              "bid": 0.5
-            },
-            {
-              "keywordText": "tiragraffi salva divano",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tiragraffi proteggi divano",
+              "keywordText": "tappeto tiragraffi per gatti adesivo",
               "matchType": "EXACT",
               "bid": 0.4
             },
             {
               "keywordText": "pannello tiragraffi",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tappeto adesivo per gatti",
               "matchType": "EXACT",
               "bid": 0.4
             },
@@ -296,27 +281,12 @@
               "bid": 0.4
             },
             {
-              "keywordText": "tappeto antigraffio",
+              "keywordText": "tiragraffi salva divano",
               "matchType": "EXACT",
               "bid": 0.4
             },
             {
-              "keywordText": "graffiatoio da divano",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tappetino tiragraffi per divano",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tappetino unghie gatto",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tira graffi per divano",
+              "keywordText": "tiragraffi proteggi divano",
               "matchType": "EXACT",
               "bid": 0.4
             },
@@ -326,77 +296,42 @@
               "bid": 0.4
             },
             {
-              "keywordText": "tiragraffi da attaccare al divano",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tiragraffi adesivo per gatti",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tessuto tiragraffi",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "rivestimento per tiragraffi",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tappetino ritagliabile",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tappeto graffi gatto",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "tappetini tiragraffi per gatti",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "moquette adesiva per gatti",
-              "matchType": "EXACT",
-              "bid": 0.4
-            },
-            {
-              "keywordText": "pannello tiragraffi per gatti",
-              "matchType": "EXACT",
-              "bid": 0.35
-            },
-            {
-              "keywordText": "pannello tiragraffi da muro",
-              "matchType": "EXACT",
-              "bid": 0.35
-            },
-            {
               "keywordText": "tiragraffi angolare per divano",
               "matchType": "EXACT",
               "bid": 0.35
             },
             {
-              "keywordText": "angolo divano tiragraffi",
+              "keywordText": "tappetino gatto tiragraffi",
               "matchType": "EXACT",
               "bid": 0.35
             },
             {
-              "keywordText": "tiragraffi per angolo divano",
+              "keywordText": "tappetini tiragraffi per gatti",
               "matchType": "EXACT",
               "bid": 0.35
             },
             {
-              "keywordText": "tappeto tiragraffi per gatti adesivo",
+              "keywordText": "antigraffio gatto",
               "matchType": "EXACT",
               "bid": 0.35
             },
             {
-              "keywordText": "tappeto autoadesivo",
+              "keywordText": "tappeto adesivo per gatti",
+              "matchType": "EXACT",
+              "bid": 0.35
+            },
+            {
+              "keywordText": "proteggi divano gatti graffi",
+              "matchType": "EXACT",
+              "bid": 0.35
+            },
+            {
+              "keywordText": "tappetino ritagliabile",
+              "matchType": "EXACT",
+              "bid": 0.35
+            },
+            {
+              "keywordText": "tiragraffi da attaccare al divano",
               "matchType": "EXACT",
               "bid": 0.35
             },
@@ -404,6 +339,46 @@
               "keywordText": "tappeto tiragraffi per gatti adulti",
               "matchType": "EXACT",
               "bid": 0.35
+            },
+            {
+              "keywordText": "pannello tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "pannello tiragraffi da muro",
+              "matchType": "EXACT",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "rivestimento per tiragraffi",
+              "matchType": "EXACT",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "tessuto tiragraffi",
+              "matchType": "EXACT",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "angolo divano tiragraffi",
+              "matchType": "EXACT",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "tiragraffi per angolo divano",
+              "matchType": "EXACT",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "zerbino tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "tappeto autoadesivo",
+              "matchType": "EXACT",
+              "bid": 0.3
             }
           ],
           "negatives": [
@@ -412,30 +387,42 @@
               "matchType": "NEGATIVE_BROAD"
             },
             {
-              "keywordText": "sisal",
-              "matchType": "NEGATIVE_BROAD"
-            },
-            {
-              "keywordText": "gambe tavolo",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
               "keywordText": "torre",
               "matchType": "NEGATIVE_BROAD"
             },
             {
-              "keywordText": "zerbino",
+              "keywordText": "sisal",
               "matchType": "NEGATIVE_BROAD"
             },
             {
-              "keywordText": "guinzaglio",
+              "keywordText": "albero gatto",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia",
               "matchType": "NEGATIVE_BROAD"
+            },
+            {
+              "keywordText": "graffiatore legno",
+              "matchType": "NEGATIVE_PHRASE"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "type": "create_campaign",
+      "campaign": {
+        "name": "SP-Manual-PhraseBroad-TiragraffAdes",
+        "targetingType": "MANUAL",
+        "dailyBudget": 2.5,
+        "biddingStrategy": "LEGACY_FOR_SALES",
+        "state": "PAUSED"
+      },
+      "adGroups": [
         {
-          "name": "AG-phrase-longtail",
-          "defaultBid": 0.3,
+          "name": "AG-phrase-broad-longtail",
+          "defaultBid": 0.35,
           "products": [
             {
               "sku": "HG-2NLU-BOQA",
@@ -476,87 +463,122 @@
           ],
           "keywords": [
             {
-              "keywordText": "tappetino tiragraffi ritagliabile per gatti",
+              "keywordText": "tiragraffi adesivo per divano",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "tappetino tiragraffi adesivo",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "tiragraffi adesivi per divano",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "protezione divano graffi gatto",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "tappetino ritagliabile per gatti",
               "matchType": "PHRASE",
               "bid": 0.35
             },
             {
-              "keywordText": "tiragraffi adesivo ritagliabile",
+              "keywordText": "tappeto tiragraffi adesivo per gatti",
               "matchType": "PHRASE",
               "bid": 0.35
             },
             {
-              "keywordText": "tappetino antigraffio adesivo divano",
+              "keywordText": "tappetino antigraffio adesivo per gatti",
               "matchType": "PHRASE",
               "bid": 0.35
             },
             {
-              "keywordText": "protezione mobili graffi gatto adesiva",
+              "keywordText": "protezione mobili graffi gatto adesivo",
               "matchType": "PHRASE",
               "bid": 0.35
             },
             {
-              "keywordText": "tiragraffi autoadesivo per divano",
+              "keywordText": "pannello tiragraffi autoadesivo",
               "matchType": "PHRASE",
-              "bid": 0.35
+              "bid": 0.32
+            },
+            {
+              "keywordText": "tiragraffi per gatti multisuperficie",
+              "matchType": "PHRASE",
+              "bid": 0.32
             },
             {
               "keywordText": "tappetino feltro tiragraffi gatti",
               "matchType": "PHRASE",
-              "bid": 0.3
+              "bid": 0.32
             },
             {
-              "keywordText": "ricambio tiragraffi gatto",
+              "keywordText": "tiragraffi salva divano adesivo",
+              "matchType": "PHRASE",
+              "bid": 0.32
+            },
+            {
+              "keywordText": "protezione angolo divano gatti",
+              "matchType": "PHRASE",
+              "bid": 0.32
+            },
+            {
+              "keywordText": "tappetino unghie gatto adesivo",
+              "matchType": "PHRASE",
+              "bid": 0.32
+            },
+            {
+              "keywordText": "rivestimento tiragraffi autoadesivo",
               "matchType": "PHRASE",
               "bid": 0.3
             },
             {
-              "keywordText": "tiragraffi adesivo multisuperficie",
+              "keywordText": "tappetino graffi gatti parete",
               "matchType": "PHRASE",
               "bid": 0.3
             },
             {
-              "keywordText": "protezione angolo divano gatto",
-              "matchType": "PHRASE",
+              "keywordText": "tiragraffi gatto divano adesivo ritagliabile",
+              "matchType": "BROAD",
               "bid": 0.3
             },
             {
-              "keywordText": "tappetino salva divano graffi gatto",
-              "matchType": "PHRASE",
+              "keywordText": "protezione divano gatto adesiva",
+              "matchType": "BROAD",
               "bid": 0.3
             },
             {
-              "keywordText": "tiragraffi da parete adesivo gatto",
-              "matchType": "PHRASE",
-              "bid": 0.3
+              "keywordText": "tappetino tiragraffi ritagliabile",
+              "matchType": "BROAD",
+              "bid": 0.28
             },
             {
-              "keywordText": "tappetino graffi gatto divano poltrona",
-              "matchType": "PHRASE",
-              "bid": 0.3
+              "keywordText": "antigraffio divano adesivo gatto",
+              "matchType": "BROAD",
+              "bid": 0.28
             },
             {
-              "keywordText": "antigraffio adesivo per gatti",
+              "keywordText": "tappeto moquette tiragraffi gatti",
+              "matchType": "BROAD",
+              "bid": 0.28
+            },
+            {
+              "keywordText": "salva divano graffi gatto autoadesivo",
+              "matchType": "BROAD",
+              "bid": 0.28
+            },
+            {
+              "keywordText": "tappetino protezione mobili gatto",
               "matchType": "BROAD",
               "bid": 0.25
             },
             {
-              "keywordText": "tappetino tiragraffi autoadesivo",
-              "matchType": "BROAD",
-              "bid": 0.25
-            },
-            {
-              "keywordText": "protezione divano gatto adesiva ritagliabile",
-              "matchType": "BROAD",
-              "bid": 0.25
-            },
-            {
-              "keywordText": "tiragraffi senza viti gatto",
-              "matchType": "BROAD",
-              "bid": 0.25
-            },
-            {
-              "keywordText": "tappeto graffi gatto adesivo mobile",
+              "keywordText": "affilare unghie gatto divano protezione",
               "matchType": "BROAD",
               "bid": 0.25
             }
@@ -567,24 +589,24 @@
               "matchType": "NEGATIVE_BROAD"
             },
             {
-              "keywordText": "sisal",
-              "matchType": "NEGATIVE_BROAD"
-            },
-            {
-              "keywordText": "gambe tavolo",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
               "keywordText": "torre",
               "matchType": "NEGATIVE_BROAD"
             },
             {
-              "keywordText": "zerbino",
+              "keywordText": "sisal",
               "matchType": "NEGATIVE_BROAD"
             },
             {
-              "keywordText": "guinzaglio",
+              "keywordText": "albero gatto",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia",
               "matchType": "NEGATIVE_BROAD"
+            },
+            {
+              "keywordText": "graffiatore legno",
+              "matchType": "NEGATIVE_PHRASE"
             }
           ]
         }
@@ -592,7 +614,7 @@
     }
   ],
   "_meta": {
-    "generated_at": "2026-07-25T05:59:56.964095",
+    "generated_at": "2026-07-25T06:38:46.491581",
     "marketplace": "IT",
     "asin": "B0GBY77D5L",
     "children": [
@@ -605,25 +627,22 @@
       "B0G64LK12Z",
       "B0G64HGTHC"
     ],
-    "explanation": "## Spiegazione della struttura proposta\n\n**Prodotto**: tappetino tiragraffi autoadesivo per gatti, 60×60 cm, ritagliabile, multisuperficie. Gli ASIN differiscono per **colore/variante** (nessuna differenza di misura strutturale dichiarata), quindi tutti i child vanno nello **stesso ad group** per evitare frammentazione e auto-competizione.\n\n**Struttura**: 2 campagne totali.\n1. **AUTO** (budget €3/g): discovery con bid conservativo (€0,40), tutti i child, 4 targeting automatici attivi. Serve a raccogliere search term nuovi su un prodotto senza storico.\n2. **MANUAL EXACT + PHRASE** (budget €5/g): divisa in 2 ad group — `AG-core-exact` con le keyword ad alta impression share da Fonte 2 (tiragraffi adesivi per divano 66,67%, tappetino tiragraffi adesivo 12,16%, tiragraffi da divano 7,03%, tappeto tiragraffi 6,67%, tappeto tiragraffi adesivo 4,88%, ecc.) a bid calibrati sul bid suggerito ma cappati per rispettare il target ACoS 30% con CPC medio €0,40; `AG-phrase-longtail` con termini PHRASE da listing/recensioni (ritagliabile, multisuperficie, feltro, ricambio tiragraffi, protezione mobili gatto) a bid più bassi.\n\n**Keyword principali**: quasi interamente da **Fonte 2** (nessuno storico), filtrate per pertinenza (esclusi \"tiragraffi cartone\", \"tiragraffi gambe tavolo\", \"zerbino\", \"base tiragraffi\", \"moquette adesiva\" — fuori intento o product type diverso). Le **negative** di partenza coprono termini fuori intento evidenti da listing e recensioni: \"cartone\", \"gambe tavolo\", \"torre\", \"sisal\", \"zerbino\".\n\nI bid EXACT sono impostati a **€0,40** (CPC medio indicato) per le keyword a bassa imp.share, scalati fino a **€0,60-0,72** solo per quelle con imp.share alta dove la competizione è documentata, mantenendo comunque un margine sul target ACoS del 30%.\n\n---",
+    "explanation": "## Spiegazione della struttura proposta\n\n**Raggruppamento child ASIN:** Dall'analisi del listing emerge che la famiglia è composta da tappetini tiragraffi autoadesivi che differiscono principalmente per **colore** (bianco, grigio, marrone ecc.) e possibilmente per **dimensione** (60×60 come default). Non essendoci storico pubblicitario, tratto tutti i 9 ASIN come varianti della stessa famiglia senza intento di ricerca differenziato per misura: li inserisco tutti in un unico ad group per campagna, evitando la frammentazione dei dati e l'auto-concorrenza.\n\n**Struttura campagne:** 3 campagne totali con budget EUR 8/giorno:\n1. **SP-AUTO** (EUR 2,5/gg) — discovery con bid conservativo, tutti i child, targeting automatico HIGH_REL + COMPLEMENTS per intercettare query nuove.\n2. **SP-Manual-EXACT** (EUR 3,0/gg) — keyword ad alto intento da raccomandazioni Amazon (imp.share elevato o molto pertinenti): \"tiragraffi adesivi per divano\", \"tappetino tiragraffi adesivo\", \"tiragraffi adesivo\", \"tappeto tiragraffi adesivo\" ecc. Bid calibrati sui suggeriti Amazon scalati verso il CPC storico famiglia (EUR 0,4) per restare nel target ACoS 30%.\n3. **SP-Manual-PHRASE-BROAD** (EUR 2,5/gg) — long-tail da listing e recensioni (es. \"tappetino ritagliabile per gatti\", \"protezione divano graffi gatto\", \"antigraffio divano adesivo\") in PHRASE/BROAD con bid più bassi per espansione controllata.\n\n**Fonti keyword:** principalmente Fonte 2 (Amazon recommendations, filtrate per pertinenza — escluse \"tiragraffi cartone\", \"tiragraffi tavolo\" come poco pertinenti al prodotto adesivo da parete/divano), integrate con long-tail estratti dal testo del listing e dalle recensioni.\n\n**Negative di partenza:** \"cartone\", \"torre\", \"sisal\", \"graffiatore\", \"albero gatto\", \"cuccia\" — termini fuori intento evidenti da listing/recensioni e categoria adiacente non pertinente.\n\n---",
     "warnings": [
       "azione 0.adGroup0: matchType negativa non valido",
       "azione 0.adGroup0: matchType negativa non valido",
       "azione 0.adGroup0: matchType negativa non valido",
       "azione 0.adGroup0: matchType negativa non valido",
-      "azione 0.adGroup0: matchType negativa non valido",
-      "azione 0.adGroup0: expressionType 'SUBSTITUTES' non valido",
       "azione 0.adGroup0: expressionType 'COMPLEMENTS' non valido",
+      "azione 0.adGroup0: expressionType 'SUBSTITUTES' non valido",
       "azione 1.adGroup0: matchType negativa non valido",
       "azione 1.adGroup0: matchType negativa non valido",
       "azione 1.adGroup0: matchType negativa non valido",
       "azione 1.adGroup0: matchType negativa non valido",
-      "azione 1.adGroup0: matchType negativa non valido",
-      "azione 1.adGroup1: matchType negativa non valido",
-      "azione 1.adGroup1: matchType negativa non valido",
-      "azione 1.adGroup1: matchType negativa non valido",
-      "azione 1.adGroup1: matchType negativa non valido",
-      "azione 1.adGroup1: matchType negativa non valido"
+      "azione 2.adGroup0: matchType negativa non valido",
+      "azione 2.adGroup0: matchType negativa non valido",
+      "azione 2.adGroup0: matchType negativa non valido",
+      "azione 2.adGroup0: matchType negativa non valido"
     ],
     "recs_count": 149,
     "had_history": false,
