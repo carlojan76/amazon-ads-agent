@@ -1,12 +1,18 @@
 {
   "_meta": {
-    "fetched_at": "2026-07-20T10:08:26.091801",
+    "fetched_at": "2026-07-27T11:02:49.741808",
     "profile_id": "4093691005399804",
     "marketplace": "FR",
     "days": 14,
     "region": "eu",
-    "reports_incomplete": false,
-    "reports_timed_out": []
+    "reports_incomplete": true,
+    "reports_timed_out": [
+      "spCampaigns",
+      "spKeywords",
+      "spSearchTerm",
+      "spTargeting",
+      "spAdvertisedProduct"
+    ]
   },
   "campaigns": [
     {
@@ -96,6 +102,72 @@
       "startDate": "2026-06-14",
       "endDate": "",
       "bidding": {}
+    },
+    {
+      "campaignId": "181484190848112",
+      "name": "SP2-Manual-HamacGriffoir-EXACT",
+      "state": "ENABLED",
+      "budget": 3.5,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-07-25",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "29129170462683",
+      "name": "SP-Manual-HamacGriffoir-PHRASE",
+      "state": "PAUSED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-07-25",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "125800828523328",
+      "name": "SP2-Auto-HamacGriffoir",
+      "state": "ENABLED",
+      "budget": 2.5,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-07-25",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "25017415047524",
+      "name": "SP-Auto-HamacGriffoir",
+      "state": "PAUSED",
+      "budget": 2.5,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-07-25",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "191622386127438",
+      "name": "SP-Manual-HamacGriffoir-EXACT",
+      "state": "PAUSED",
+      "budget": 3.5,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-07-25",
+      "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "249362159368795",
+      "name": "SP2-Manual-HamacGriffoir-PHRASE",
+      "state": "ENABLED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-07-25",
+      "endDate": "",
+      "bidding": {}
     }
   ],
   "adGroups": [
@@ -128,6 +200,34 @@
       "defaultBid": 0.47
     },
     {
+      "adGroupId": "95976597248349",
+      "campaignId": "29129170462683",
+      "name": "AG-phrase-longtail",
+      "state": "ENABLED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "260693510698643",
+      "campaignId": "181484190848112",
+      "name": "AG-exact-core",
+      "state": "ENABLED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "74020114463711",
+      "campaignId": "249362159368795",
+      "name": "AG-phrase-longtail",
+      "state": "ENABLED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "197020617781135",
+      "campaignId": "191622386127438",
+      "name": "AG-exact-core",
+      "state": "ENABLED",
+      "defaultBid": 0.4
+    },
+    {
       "adGroupId": "507375668602219",
       "campaignId": "64445349747291",
       "name": "Squalo Francia",
@@ -154,6 +254,20 @@
       "name": "FR_Amaca_Auto_Jun",
       "state": "ENABLED",
       "defaultBid": 0.28
+    },
+    {
+      "adGroupId": "520501805660056",
+      "campaignId": "25017415047524",
+      "name": "AG-auto-all",
+      "state": "ENABLED",
+      "defaultBid": 0.4
+    },
+    {
+      "adGroupId": "289433471165315",
+      "campaignId": "125800828523328",
+      "name": "AG-auto-all",
+      "state": "ENABLED",
+      "defaultBid": 0.4
     }
   ],
   "keywords": [
@@ -1184,6 +1298,222 @@
       "matchType": "NEGATIVE_EXACT",
       "campaignId": "176086942618530",
       "state": "ENABLED"
+    },
+    {
+      "keywordText": "carton",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "191622386127438",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "chien",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "191622386127438",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "dog",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "191622386127438",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "exterieur",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "191622386127438",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "maine coon",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "191622386127438",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "fenetre",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "191622386127438",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "carton",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "25017415047524",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "chien",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "25017415047524",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "dog",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "25017415047524",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "exterieur",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "25017415047524",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "maine coon",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "25017415047524",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "fenetre",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "25017415047524",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "carton",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "29129170462683",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "chien",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "29129170462683",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "dog",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "29129170462683",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "exterieur",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "29129170462683",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "maine coon",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "29129170462683",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "fenetre",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "29129170462683",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "carton",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "181484190848112",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "chien",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "181484190848112",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "dog",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "181484190848112",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "exterieur",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "181484190848112",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "maine coon",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "181484190848112",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "fenetre",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "181484190848112",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "carton",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "249362159368795",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "chien",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "249362159368795",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "dog",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "249362159368795",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "exterieur",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "249362159368795",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "maine coon",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "249362159368795",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "fenetre",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "249362159368795",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "carton",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "125800828523328",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "chien",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "125800828523328",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "dog",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "125800828523328",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "exterieur",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "125800828523328",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "maine coon",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "125800828523328",
+      "state": "ENABLED"
+    },
+    {
+      "keywordText": "fenetre",
+      "matchType": "NEGATIVE_PHRASE",
+      "campaignId": "125800828523328",
+      "state": "ENABLED"
     }
   ],
   "targets": [
@@ -1332,6 +1662,102 @@
       "bid": 0.4
     },
     {
+      "targetId": "114289615676518",
+      "campaignId": "125800828523328",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "279539240190015",
+      "campaignId": "125800828523328",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "243380360558360",
+      "campaignId": "125800828523328",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "5878542979086",
+      "campaignId": "125800828523328",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "145650556841127",
+      "campaignId": "25017415047524",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "141706315205958",
+      "campaignId": "25017415047524",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "275647374701541",
+      "campaignId": "25017415047524",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "74330820603937",
+      "campaignId": "25017415047524",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
       "targetId": "97325753645467",
       "campaignId": "123475451997808",
       "expression": [
@@ -1346,249 +1772,15 @@
     }
   ],
   "reports": {
-    "campaigns": [
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.27,
-        "campaignId": 176086942618530,
-        "spend": 2.45,
-        "campaignStatus": "PAUSED",
-        "clicks": 9,
-        "impressions": 323,
-        "sales7d": 0,
-        "campaignName": "FR_Amaca_Auto_Jun",
-        "campaignBudgetAmount": 3.0,
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.0,
-        "campaignId": 128021223208209,
-        "spend": 0,
-        "campaignStatus": "PAUSED",
-        "clicks": 0,
-        "impressions": 1,
-        "sales7d": 0,
-        "campaignName": "FR Amaca Manuale",
-        "campaignBudgetAmount": 3.0,
-        "unitsSoldClicks7d": 0
-      }
-    ],
-    "keywords": [
-      {
-        "purchases7d": 0,
-        "keywordId": 14588349125846,
-        "cost": 0,
-        "adGroupName": "FR Amaca Manuale",
-        "matchType": "EXACT",
-        "campaignId": 128021223208209,
-        "clicks": 0,
-        "impressions": 1,
-        "keyword": "lit en bois pour chat",
-        "sales7d": 0,
-        "adGroupId": 151082890508206,
-        "unitsSoldClicks7d": 0
-      }
-    ],
-    "searchTerms": [
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 1,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "couchage et mobilier pour chats",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 2,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "grattoir chat lit",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 2,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "hamac chat lit",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 4,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "hamac pour chat",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.26,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 2,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "hamac sisal",
-        "spend": 0.26,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 1,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "lit grattoir chat sisal",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 1,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "lit sisal chat 70",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.23,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 1,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "niche sisal",
-        "spend": 0.23,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "costPerClick": 0.28,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "impressions": 6,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "searchTerm": "transat chat",
-        "spend": 0.28,
-        "clicks": 1,
-        "keyword": "close-match",
-        "unitsSoldClicks7d": 0
-      }
-    ],
-    "targeting": [
-      {
-        "purchases7d": 0,
-        "cost": 2.45,
-        "costPerClick": 0.27,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
-        "campaignId": 176086942618530,
-        "clicks": 9,
-        "impressions": 323,
-        "keyword": "close-match",
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "cost": 0,
-        "costPerClick": 0.0,
-        "adGroupName": "FR Amaca Manuale",
-        "matchType": "EXACT",
-        "campaignId": 128021223208209,
-        "clicks": 0,
-        "impressions": 1,
-        "keyword": "lit en bois pour chat",
-        "sales7d": 0,
-        "adGroupId": 151082890508206,
-        "unitsSoldClicks7d": 0
-      }
-    ],
-    "products": [
-      {
-        "purchases7d": 0,
-        "cost": 2.45,
-        "adGroupName": "FR_Amaca_Auto_Jun",
-        "campaignId": 176086942618530,
-        "advertisedAsin": "B0G5JC2YZ2",
-        "clicks": 9,
-        "advertisedSku": "FR-4DCI-RB8W",
-        "impressions": 323,
-        "sales7d": 0,
-        "adGroupId": 416144329258343,
-        "unitsSoldClicks7d": 0
-      },
-      {
-        "purchases7d": 0,
-        "cost": 0,
-        "adGroupName": "FR Amaca Manuale",
-        "campaignId": 128021223208209,
-        "advertisedAsin": "B0G5JC2YZ2",
-        "clicks": 0,
-        "advertisedSku": "FR-4DCI-RB8W",
-        "impressions": 1,
-        "sales7d": 0,
-        "adGroupId": 151082890508206,
-        "unitsSoldClicks7d": 0
-      }
-    ]
+    "campaigns": [],
+    "keywords": [],
+    "searchTerms": [],
+    "targeting": [],
+    "products": []
   },
-  "analysis": "# 📊 Stato Generale\n\nIl marketplace FR è attualmente **completamente inattivo** sul fronte campagne attive: zero spesa, zero impression, zero click, zero ordini negli ultimi 14 giorni. Le uniche due campagne esistenti (FR_Amaca_Auto_Jun e FR Amaca Manuale) sono entrambe in pausa, il che significa che il prodotto **non ha alcuna visibilità pubblicitaria** su Amazon Francia in questo momento. Non ci sono dati storici di conversione recuperabili da campagne spente. La priorità assoluta è ricostruire la presenza pubblicitaria da zero.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Riattivare o creare una campagna Auto attiva per il mercato FR**\n- **Azione**: Valutare se riattivare `FR_Amaca_Auto_Jun` (attualmente in pausa) oppure creare una nuova campagna Auto per l'ASIN dell'amaca. Budget iniziale consigliato: €5-8/giorno. Bid dinamico \"Down Only\" per limitare il rischio.\n- **Motivo**: Zero campagne attive = zero visibilità organica amplificata, zero raccolta dati su search terms FR, zero vendite attribuite ad ADS. Il marketplace FR è completamente cieco in questo momento.\n- **Impatto stimato**: Anche con budget minimo, in 7-14 giorni si raccolgono search terms reali del mercato francese, fondamentali per costruire campagne manual efficaci.\n\n**2. Creare una campagna Manual Exact/Phrase con le keyword core del prodotto**\n- **Azione**: Lanciare una campagna manuale con le keyword principali in francese per \"amaca\": `hamac`, `hamac de jardin`, `hamac avec support`, `hamac coton`, `hamac suspendu`. Bid di partenza: €0.35-0.50. Budget: €5/giorno.\n- **Motivo**: `FR Amaca Manuale` è in pausa e non ha mai generato spesa (€0.00). Non ci sono dati storici da cui attingere: serve ricominciare con keyword di base ad alta rilevanza per il prodotto.\n- **Impatto stimato**: Prime impressioni e click qualificati entro 48-72h dall'attivazione; dati sufficienti per ottimizzare entro 2 settimane.\n\n**3. Analizzare il motivo della pausa delle campagne esistenti prima di riattivarle**\n- **Azione**: Verificare manualmente su Seller Central FR se le campagne sono in pausa per scelta strategica, problemi con il listing (soppressione, Buy Box assente, prezzo non competitivo) o mancanza di budget. Controllare che l'ASIN sia buyable sul marketplace FR.\n- **Motivo**: `FR_Amaca_Auto_Jun` ha speso €2.45 senza generare alcuna vendita prima di essere messa in pausa. Riattivare ciecamente senza capire il problema potrebbe bruciare budget inutilmente.\n- **Impatto stimato**: Evita sprechi su un listing potenzialmente non ottimizzato; se il listing è OK, sblocca immediatamente il potenziale del marketplace FR.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n**Nessun search term da negativizzare** — non ci sono campagne attive né dati di search term disponibili.\n\n> ⚠️ **SEARCH TERMS VINCENTI → NUOVE KEYWORD**: Non ci sono search term con ordini da promuovere ad EXACT. Una volta riattivata la campagna Auto, monitorare settimanalmente il Search Term Report FR e promuovere ad EXACT ogni termine con ≥1 ordine e ACoS < 40%.\n\n---\n\n# 🟢 Keywords da Scalare\n\n**Nessuna keyword attiva da scalare** — il marketplace FR non ha campagne attive.\n\n**Keyword-idee da testare (basate su ricerca di prodotto, non da campagne spente):**\nUna volta create le nuove campagne, testare questi termini ad alta rilevanza per il mercato francese:\n\n| Keyword | Match Type | Bid Iniziale Suggerito |\n|---|---|---|\n| `hamac` | BROAD | €0.40 |\n| `hamac de jardin` | PHRASE | €0.45 |\n| `hamac avec support` | EXACT | €0.50 |\n| `hamac coton` | EXACT | €0.40 |\n| `hamac brésilien` | PHRASE | €0.35 |\n| `hamac extérieur` | PHRASE | €0.40 |\n| `hamac suspendu` | EXACT | €0.45 |\n\n---\n\n# 💡 Quick Wins\n\n1. **Controlla il listing FR prima di tutto**: Verifica titolo, bullet points e immagini in francese. Un listing non tradotto o soppresso vanifica qualsiasi budget pubblicitario. Usa il \"Listing Quality Dashboard\" su Seller Central FR.\n\n2. **Imposta un budget giornaliero conservativo (€5-8/giorno)**: Con zero dati storici, è inutile partire con budget alti. Meglio raccogliere dati per 2 settimane e poi scalare sulla base dei risultati reali.\n\n3. **Abilita il report Search Term automatico**: Programma un download settimanale del Search Term Report per FR. Dopo 7 giorni di campagna Auto attiva avrai i primi dati su cui costruire negative e promuovere keyword vincenti.\n\n4. **Verifica la stagionalità FR per le amache**: Il mercato francese per prodotti outdoor (amache) ha picchi tra aprile e agosto. Se siamo fuori stagione, valuta budget ridotti (€3/giorno) e investi in ottimizzazione del listing in attesa del picco. Se siamo in stagione, agisci immediatamente.\n\n5. **Separa Auto e Manual fin dall'inizio**: Crea due campagne distinte — una Auto (scoperta search terms FR) e una Manual (controllo sui termini già noti). Questo evita di mischiare dati e rende l'ottimizzazione molto più precisa.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n> ⚠️ Non ci sono campagne attive con ID utilizzabili per azioni automatiche. Le due campagne esistenti sono in pausa e non devono essere riattivate automaticamente (decisione da prendere manualmente dopo verifica del listing). Non esistono keyword attive, search terms, né ad group attivi con ID reali da cui generare azioni sicure.\n> \n> **Azione manuale raccomandata**: Riattivare o creare campagne per FR direttamente su Seller Central dopo verifica del listing.",
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace FR non presenta alcuna campagna attiva nel periodo analizzato (ultimi 14 giorni). La spesa è €0, le vendite €0, e non esistono dati di traffico o conversione su cui lavorare. Non ci sono nemmeno campagne in pausa/archiviate o keyword storiche da recuperare. Il marketplace è essenzialmente inattivo e necessita di essere avviato da zero.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Attivare le prime campagne su FR**\n- **Azione**: Creare almeno 1 campagna Sponsored Products per gli ASIN prioritari del catalogo, con struttura minima: 1 campagna Auto (budget €10-15/giorno) + 1 campagna Manual Broad per raccogliere dati di search term.\n- **Motivo**: Zero campagne attive = zero visibilità = zero vendite attribuite ad Ads su FR. Senza dati non è possibile ottimizzare nulla.\n- **Impatto stimato**: Anche un budget modesto (€10/giorno) inizia a generare impression e search term data entro 48-72h, fondamentali per le settimane successive.\n\n**2. Impostare una struttura di targeting iniziale basata sul mercato IT/DE (se attivi)**\n- **Azione**: Se esistono campagne attive su altri marketplace (IT, DE, ES), esportare le keyword vincenti (ACoS < 25%) e importarle su FR in versione francese — traduzione + adattamento locale (es. \"télécommande\", \"chargeur sans fil\", ecc.).\n- **Motivo**: Partire da zero senza dati storici è inefficiente. Sfruttare i vincitori di altri marketplace riduce il tempo di apprendimento.\n- **Impatto stimato**: Riduzione del periodo di test da 4-6 settimane a 2-3 settimane, con ACoS iniziale più controllato.\n\n**3. Definire target ACoS e budget mensile per FR prima di spendere**\n- **Azione**: Prima di lanciare, stabilire: ACoS target (es. ≤ 30% per fase lancio), budget giornaliero massimo per marketplace, e breakeven ACoS per ogni ASIN (margine lordo %). Documentarlo prima di creare le campagne.\n- **Motivo**: Senza un target definito, qualsiasi spesa è priva di benchmark e si rischia di ottimizzare nel vuoto.\n- **Impatto stimato**: Evita sprechi nelle prime settimane, permette decisioni di scala o stop basate su dati reali.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n**Nessun search term disponibile** — non ci sono campagne attive che abbiano generato traffico. Questa sezione sarà popolata dalla prossima analisi, una volta che le campagne saranno live da almeno 7-10 giorni.\n\n> ✅ **SEARCH TERMS VINCENTI → NUOVE KEYWORD**: Nessun dato disponibile. Da monitorare appena le campagne Auto inizieranno a girare — i search term con ≥1 ordine e CPC efficiente vanno promossi subito a EXACT match in campagna Manual.\n\n---\n\n# 🟢 Keywords da Scalare\n\nNessuna keyword attiva disponibile al momento.\n\n**Piano per la prossima settimana** (post-lancio):\n- Dopo 7 giorni di campagna Auto, estrarre i search term con ≥ 2 ordini e ACoS < 35% → aggiungerli come EXACT in campagna Manual con bid = CPC medio osservato.\n- Keyword-idee da campagne in pausa: **nessuna disponibile** su questo marketplace.\n\n---\n\n# 💡 Quick Wins\n\n1. **Traduzione keyword IT→FR**: Se hai keyword italiane performanti, usa DeepL + revisione madrelingua per adattarle al francese. Le query FR hanno spesso struttura diversa (più articoli, accordo di genere).\n\n2. **Bid iniziale conservativo su Auto**: Parti con bid €0.30-0.40 su campagna Auto FR per limitare il rischio nelle prime 2 settimane mentre raccogli dati. Alza solo dopo aver visto i primi search term convertire.\n\n3. **Separare Auto da Manual fin da subito**: Non mixare. Auto = raccolta dati. Manual = scale dei vincitori. Struttura pulita ora = ottimizzazione più rapida tra 3 settimane.\n\n4. **Monitorare il placement report dopo 7 giorni**: Su FR i placement \"Top of Search\" tendono ad avere CPC più alto che su IT — verifica subito i moltiplicatori e abbassali se il traffico è troppo costoso in fase lancio.\n\n5. **Impostare alert di budget giornaliero**: Configura notifiche su Seller Central per evitare che le campagne esauriscano il budget prima delle 18:00 (picco di traffico FR).\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n\n\n> **Nota**: Nessuna azione automatizzabile — non esistono ID reali di campagne, keyword o ad group su cui operare. Tutte le azioni necessarie (creazione campagne, struttura, budget) devono essere eseguite manualmente su Seller Central o tramite bulk file. Riesegui l'analisi dopo 7-14 giorni di campagne attive per avere il primo set di azioni ottimizzabili.",
   "actions": {
     "actions": []
   },
-  "generated_at": "2026-07-20T10:09:03.597470"
+  "generated_at": "2026-07-27T11:03:21.161780"
 }
