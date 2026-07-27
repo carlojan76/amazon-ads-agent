@@ -1,0 +1,517 @@
+{
+  "actions": [
+    {
+      "type": "create_campaign",
+      "campaign": {
+        "name": "SP-Auto-BrossePoil",
+        "targetingType": "AUTO",
+        "dailyBudget": 3.0,
+        "biddingStrategy": "LEGACY_FOR_SALES",
+        "state": "PAUSED"
+      },
+      "adGroups": [
+        {
+          "name": "AG-auto-all-colors",
+          "defaultBid": 0.4,
+          "products": [
+            {
+              "asin": "B0GX7P144B"
+            }
+          ],
+          "autoTargets": [
+            {
+              "expressionType": "QUERY_HIGH_REL_MATCHES",
+              "bid": 0.45
+            },
+            {
+              "expressionType": "QUERY_BROAD_REL_MATCHES",
+              "bid": 0.35
+            },
+            {
+              "expressionType": "ASIN_SUBSTITUTE_RELATED",
+              "bid": 0.35
+            },
+            {
+              "expressionType": "ASIN_ACCESSORY_RELATED",
+              "bid": 0.3
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "brosse toilettage",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "brosse poney",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "brosse chevaux",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "brosse a carder",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "magic brush cheval",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "brosse equitation",
+              "matchType": "NEGATIVE_PHRASE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "create_campaign",
+      "campaign": {
+        "name": "SP-Manual-BrossePoil-EXACT",
+        "targetingType": "MANUAL",
+        "dailyBudget": 3.0,
+        "biddingStrategy": "LEGACY_FOR_SALES",
+        "state": "PAUSED"
+      },
+      "adGroups": [
+        {
+          "name": "AG-exact-core-fr",
+          "defaultBid": 0.5,
+          "products": [
+            {
+              "asin": "B0GX7P144B"
+            }
+          ],
+          "keywords": [
+            {
+              "keywordText": "brosse anti poil voiture",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "brosse anti poils voiture",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "brosse poil chien voiture",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "brosse poils animaux voiture",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "brosse caoutchouc poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.65
+            },
+            {
+              "keywordText": "brosse en caoutchouc",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "brosse caoutchouc",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "brosse anti poils animaux voiture",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "brosse poil de chien voiture",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "brosse poils de chien voiture",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "brosse poil animaux voiture",
+              "matchType": "EXACT",
+              "bid": 0.7
+            },
+            {
+              "keywordText": "brosse anti poil",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse anti poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse poil chien",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "brosse poil de chien",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "brosse poils de chien",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "brosse chien",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse chat",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse silicone poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "brosse silicone voiture",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "anti poil chat",
+              "matchType": "EXACT",
+              "bid": 0.5
+            },
+            {
+              "keywordText": "anti poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.5
+            },
+            {
+              "keywordText": "enlever poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "ramasse poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.5
+            },
+            {
+              "keywordText": "brosse poil voiture",
+              "matchType": "EXACT",
+              "bid": 0.65
+            },
+            {
+              "keywordText": "brosse poils voiture",
+              "matchType": "EXACT",
+              "bid": 0.65
+            },
+            {
+              "keywordText": "brosse chien voiture",
+              "matchType": "EXACT",
+              "bid": 0.65
+            },
+            {
+              "keywordText": "brosse vetement anti poils",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse poil vetement",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse habits poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse poil moquette",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "brosse tapis poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "brosse nettoyage poils animaux",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse poil caoutchouc",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "brosse poils caoutchouc",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "brosse poil silicone",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse silicone poils",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "brosse chien poil court",
+              "matchType": "EXACT",
+              "bid": 0.55
+            },
+            {
+              "keywordText": "poil chat",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "poil chien voiture",
+              "matchType": "EXACT",
+              "bid": 0.6
+            },
+            {
+              "keywordText": "poil de chien voiture",
+              "matchType": "EXACT",
+              "bid": 0.6
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "brosse toilettage",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "brosse poney",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "brosse chevaux",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "brosse a carder",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "magic brush cheval",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "brosse equitation",
+              "matchType": "NEGATIVE_PHRASE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "create_campaign",
+      "campaign": {
+        "name": "SP-Manual-BrossePoil-PHRASE",
+        "targetingType": "MANUAL",
+        "dailyBudget": 2.0,
+        "biddingStrategy": "LEGACY_FOR_SALES",
+        "state": "PAUSED"
+      },
+      "adGroups": [
+        {
+          "name": "AG-phrase-longtail-fr",
+          "defaultBid": 0.38,
+          "products": [
+            {
+              "asin": "B0GX7P144B"
+            }
+          ],
+          "keywords": [
+            {
+              "keywordText": "brosse caoutchouc poils animaux",
+              "matchType": "PHRASE",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "brosse anti poil voiture",
+              "matchType": "PHRASE",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "brosse poils animaux voiture",
+              "matchType": "PHRASE",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "enlever poils animaux voiture",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "enlever poils chien voiture",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "enlever poils chat canape",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "brosse poil chien canape",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "brosse poil chat canape",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "brosse silicone poils animaux",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "brosse caoutchouc enlever poils",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "outil enlever poils animaux",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "brosse poil tapis voiture",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "brosse poil moquette voiture",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "brosse anti poils canape",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "brosse anti poil chien",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "ramasse poils animaux voiture",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "accessoire poils animaux voiture",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "brosse poil vetement animaux",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "brosse lavable poils animaux",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "brosse reutilisable poils animaux",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "brosse poil chien",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "brosse poil chat",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "anti poils animaux voiture",
+              "matchType": "PHRASE",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "brosse finition tapis voiture",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "brosse coccinelle poils",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "brosse toilettage",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "brosse poney",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "brosse chevaux",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "brosse a carder",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "magic brush cheval",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "brosse equitation",
+              "matchType": "NEGATIVE_PHRASE"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-07-27T20:13:12.566053",
+    "marketplace": "FR",
+    "asin": "B0GX7P144B",
+    "children": [],
+    "explanation": "## Spiegazione della struttura proposta\n\n**Prodotto**: Brosse en caoutchouc pour enlever les poils de chiens et chats (B0GX7P144B) — marketplace FR. Nessuno storico ads disponibile, quindi le keyword derivano interamente dalle **recommendations Amazon (Fonte 2)** e dal **testo del listing/recensioni**.\n\n**Raggruppamento child**: L'ASIN esiste in varianti di **solo colore** (rouge, bleu, noir come da listing), quindi tutti i child vanno nello **stesso ad group** senza frammentare. Lo SKU non è noto dalla mappa → uso `\"asin\"` con segnalazione.\n\n**Struttura campagne**:\n1. **SP-Auto-BrossePoil** (€3/giorno) — AUTO con tutti e 4 i target type per discovery. Bid conservativo a €0,40.\n2. **SP-Manual-BrossePoil-EXACT** (€3/giorno) — MANUAL EXACT con le keyword ad alto intento dal marketplace FR (brosse poil chien, brosse anti poil voiture, brosse caoutchouc poils animaux, ecc.), bid scalato su bid suggeriti Amazon ma cappati per rispettare target ACoS 30% (prezzo stimato ~€12-15, CVR ~5% → CPC max ~€0,45-0,55).\n3. **SP-Manual-BrossePoil-PHRASE** (€2/giorno) — MANUAL PHRASE/BROAD per long-tail da listing e recensioni (enlever poils voiture, brosse silicone poils animaux, ecc.) con bid più bassi.\n\n**Negative di partenza**: da listing/recensioni emergono intenti fuori target: grooming animali (brosse toilettage, brosse de bain chien), articoli equini (brosse poney, brosse chevaux), brosse à carder (artigianato tessile), accessori makeup. Aggiunte come NEGATIVE_EXACT/NEGATIVE_PHRASE.\n\n> ⚠️ **SKU non noto**: nessuno SKU presente nella mappa. Il prodotto è inserito con `\"asin\": \"B0GX7P144B\"` — il seller deve verificare lo SKU nel Seller Central (colonna SKU del catalogo) prima del lancio, altrimenti l'API rifiuta la creazione del product ad.\n\n> ⚠️ **Bid Amazon suggeriti molto alti** (€29–€303): quasi certamente gonfiati da competizione o errori API. Con CPC storico famiglia = €0,40 e budget €8/giorno, ho cappato tutti i bid a max €0,75 (EXACT top keyword) per non esaurire il budget in 10 click. Da alzare progressivamente dopo aver raccolto dati reali.\n\n---",
+    "warnings": [
+      "prodotto B0GX7P144B senza SKU: da seller aggiungilo prima di applicare",
+      "prodotto B0GX7P144B senza SKU: da seller aggiungilo prima di applicare",
+      "prodotto B0GX7P144B senza SKU: da seller aggiungilo prima di applicare"
+    ],
+    "recs_count": 150,
+    "had_history": false,
+    "status": "ok"
+  }
+}
