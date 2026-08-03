@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "fetched_at": "2026-07-27T11:02:49.589716",
+    "fetched_at": "2026-08-03T11:03:00.074895",
     "profile_id": "681612226639233",
     "marketplace": "IT",
     "days": 14,
@@ -808,6 +808,17 @@
       "bidding": {}
     },
     {
+      "campaignId": "84291377522686",
+      "name": "SP-Auto-LupoFelix-SpazzolaPeli",
+      "state": "ENABLED",
+      "budget": 2.5,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-07-27",
+      "endDate": "2026-08-07",
+      "bidding": {}
+    },
+    {
       "campaignId": "178131310506881",
       "name": "SP-Auto-AmacaGatto",
       "state": "PAUSED",
@@ -830,6 +841,17 @@
       "bidding": {}
     },
     {
+      "campaignId": "276702699702742",
+      "name": "SP-Manual-LupoFelix-SpazzolaPeli-EXACT",
+      "state": "ENABLED",
+      "budget": 3.5,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-07-27",
+      "endDate": "2026-08-14",
+      "bidding": {}
+    },
+    {
       "campaignId": "247769374035061",
       "name": "SP-Manual-AmacaGatto",
       "state": "PAUSED",
@@ -838,6 +860,17 @@
       "targetingType": "MANUAL",
       "startDate": "2026-07-25",
       "endDate": "",
+      "bidding": {}
+    },
+    {
+      "campaignId": "135987588544331",
+      "name": "SP-Manual-LupoFelix-SpazzolaPeli-PHRASE-BROAD",
+      "state": "ENABLED",
+      "budget": 2.0,
+      "budgetType": "DAILY",
+      "targetingType": "MANUAL",
+      "startDate": "2026-07-27",
+      "endDate": "2026-08-07",
       "bidding": {}
     },
     {
@@ -854,12 +887,12 @@
     {
       "campaignId": "253166973183429",
       "name": "SP-Auto-TiragraffAdes",
-      "state": "ENABLED",
+      "state": "PAUSED",
       "budget": 2.5,
       "budgetType": "DAILY",
       "targetingType": "AUTO",
       "startDate": "2026-07-25",
-      "endDate": "",
+      "endDate": "2026-08-08",
       "bidding": {}
     },
     {
@@ -881,7 +914,7 @@
       "budgetType": "DAILY",
       "targetingType": "AUTO",
       "startDate": "2026-07-25",
-      "endDate": "",
+      "endDate": "2026-08-09",
       "bidding": {}
     }
   ],
@@ -3126,9 +3159,9 @@
     "targeting": [],
     "products": []
   },
-  "analysis": "# 📊 Stato Generale\n\nIl marketplace IT non mostra alcuna campagna PPC attiva nel periodo analizzato (ultimi 14 giorni). Spesa, impression, click e ordini sono tutti a zero. Non ci sono dati storici da campagne in pausa o archiviate, né dati per-ASIN disponibili. Si tratta di un account sostanzialmente fermo sul fronte advertising: **il problema principale è l'assenza totale di visibilità a pagamento**, con conseguente dipendenza esclusiva dal ranking organico.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Lancia almeno una campagna Sponsored Products Auto-targeting**\n- **Azione**: Crea una campagna SP Auto su tutti gli ASIN principali del catalogo IT, budget giornaliero €15-20, bid di partenza €0.40-0.50.\n- **Motivo**: Zero campagne attive = zero dati, zero vendite attribuite ad Ads, zero harvest di search term. L'account è cieco.\n- **Impatto stimato**: Anche con ACoS iniziale alto (40-60%), si inizia a raccogliere search term reali da cui estrarre keyword vincenti nelle settimane successive.\n\n**2. Affianca una campagna SP Manual Exact sui tuoi ASIN core**\n- **Azione**: Identifica le 5-10 keyword di prodotto più rilevanti (brand competitor + categoria), crea una campagna Manual Exact con bid €0.45-0.60 e budget €10/giorno.\n- **Motivo**: Senza campagne manual, non si controlla la visibilità sui termini ad alta intenzione d'acquisto. La campagna Auto da sola non è sufficiente per scalare.\n- **Impatto stimato**: CTR e conversion rate superiori rispetto all'Auto su termini esatti; ACoS target <30% entro 3-4 settimane se le keyword sono pertinenti.\n\n**3. Imposta una struttura di budget minima e non interrompere le campagne**\n- **Azione**: Assicurati che le campagne appena create abbiano budget sufficiente da non esaurirsi prima delle 18:00 (orario di picco acquisti IT). Monitora il budget cap giornaliero ogni 3 giorni.\n- **Motivo**: Interrompere e riattivare campagne frequentemente resetta l'algoritmo di apprendimento Amazon, vanificando i dati accumulati.\n- **Impatto stimato**: Continuità di dati = curva di apprendimento più rapida, ottimizzazioni possibili già dalla seconda settimana.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n⚠️ **Nessun search term disponibile** da negativizzare: non ci sono campagne attive né dati di search term nel periodo. Una volta lanciate le campagne (vedi Azioni Urgenti), torna qui la prossima settimana con i dati reali.\n\n> **Regola operativa da applicare subito dopo il lancio**: scarica il Search Term Report dopo 7 giorni, identifica i termini con spesa >€0.50 e zero ordini → negativizza in NEGATIVE_EXACT. Termini con ordini e buon ACoS → promuovi a keyword EXACT con `add_keyword`.\n\n---\n\n# 🟢 Keywords da Scalare\n\nNessuna keyword attiva da scalare in questo momento — dati assenti.\n\n**Piano per le prossime 2 settimane dopo il lancio:**\n- Settimana 1: raccogli dati, non toccare nulla.\n- Settimana 2: scala i bid delle keyword EXACT con ACoS <25% di +15-20%; pausa le keyword con spesa >€3 e zero ordini.\n\n---\n\n# 💡 Quick Wins\n\n1. **Struttura campagne \"Isolate per ASIN\"**: crea ad group separati per ogni ASIN (non mettere tutti i prodotti nello stesso ad group). Così l'attribuzione è certa e i dati per-ASIN diventano immediatamente leggibili.\n\n2. **Usa i prezzi come leva prima di spendere in Ads**: verifica che i tuoi ASIN abbiano recensioni ≥ 3.5★ e Buy Box al 100%. Fare Ads su prodotti senza Buy Box brucia budget senza conversioni.\n\n3. **Imposta il tracciamento ACoS target prima del lancio**: definisci il tuo ACoS target (es. margine netto 30% → ACoS target ≤25%) così dall'inizio hai un benchmark chiaro per le ottimizzazioni.\n\n4. **Considera Sponsored Brands se hai un brand registrato**: anche con budget ridotto (€5/giorno), le SB aumentano la brand awareness e il CTR organico — effetto positivo sul ranking.\n\n5. **Pianifica un review settimanale fisso**: senza un ciclo di ottimizzazione regolare (es. ogni lunedì mattina), anche le campagne ben strutturate degenerano in 2-3 settimane. Blocca 30 minuti/settimana in calendario.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n\n\n> **Nota**: Non esistono ID reali (campagne, ad group, keyword) nei dati forniti. Generare azioni con ID inventati causerebbe errori nello script o modifiche su campagne sbagliate. Una volta lanciate le campagne e ottenuti gli ID reali, il prossimo report conterrà azioni JSON complete ed eseguibili.",
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace IT non presenta **nessuna campagna PPC attiva** nel periodo analizzato (ultimi 14 giorni). Spesa, vendite, click e impression sono tutti a zero. Non ci sono campagne in pausa o archiviate né dati storici recuperabili. Il profilo pubblicitario è essenzialmente **inattivo**: nessuna visibilità a pagamento, nessuna raccolta dati, nessuna crescita PPC in corso.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Lancia almeno una campagna Sponsored Products Auto**\n- **Azione**: Crea una campagna Auto su ciascun ASIN principale, budget giornaliero €10-15, bid di default €0.40-0.50. Targeting: close match + substitutes attivi, loose match + complements in pausa inizialmente.\n- **Motivo**: Zero campagne attive = zero raccolta di search term, zero vendite attribuite ad Ads. Senza dati non è possibile ottimizzare nulla.\n- **Impatto stimato**: Avvio del funnel dati entro 7 giorni; prime conversioni e search term reali disponibili per la settimana successiva.\n\n**2. Lancia campagne Sponsored Products Manual (Broad/Phrase) su keyword seed**\n- **Azione**: Identifica 5-10 keyword core per ogni ASIN (da ricerca organica, BSR competitors, Brand Analytics se disponibile). Crea campagne Manual con match BROAD o PHRASE, bid €0.35-0.55, budget €10/giorno.\n- **Motivo**: La campagna Auto raccoglie dati ma il Manual permette di presidiare subito le keyword strategiche ad alto intento d'acquisto.\n- **Impatto stimato**: Impressioni qualificate già dalla prima settimana; ACoS misurabile entro 14 giorni.\n\n**3. Imposta un sistema di monitoraggio e review cadenzato**\n- **Azione**: Pianifica review PPC ogni 7 giorni. Dopo il primo ciclo di campagne Auto, estrai i search term con ordini ≥1 e aggiungili come EXACT in campagna Manual; negativizza i termini irrilevanti.\n- **Motivo**: Senza un processo ricorrente, il budget si disperderà su search term non pertinenti senza ottimizzazione.\n- **Impatto stimato**: Riduzione ACoS del 15-25% nel secondo mese rispetto al lancio grezzo.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\nNessun search term disponibile al momento (zero campagne attive = zero dati di search term).\n\n➡️ **Da fare alla prossima review** (dopo 7-10 giorni di campagne Auto attive): estrarre tutti i search term con spesa > €0.50 e zero ordini e negativizzarli in NEGATIVE_EXACT o NEGATIVE_PHRASE.\n\n**Keyword Vincenti da Promuovere (add_keyword)**\nNessun search term con ordini disponibile ora. Dopo la prima settimana di Auto, promuovere in EXACT i termini con ≥1 ordine e ACoS accettabile.\n\n---\n\n# 🟢 Keywords da Scalare\n\nNessuna keyword attiva presente. Nessuna keyword-idea da campagne in pausa disponibile.\n\n➡️ **Azione preparatoria**: costruisci la lista keyword seed con questi strumenti prima del lancio:\n- **Helium 10 / Jungle Scout**: keyword per volume e rilevanza\n- **Brand Analytics Amazon**: search term con alto CVR organico\n- **Report Search Term organici** (se disponibili da Seller Central)\n\n---\n\n# 💡 Quick Wins\n\n1. **Controlla la scheda prodotto prima di spendere in Ads**: titolo, bullet point, immagini principali e A+ content devono essere ottimizzati. Un CTR basso su campagne nuove è spesso un problema di listing, non di bid.\n\n2. **Imposta un budget cap mensile in Seller Central** per evitare sorprese durante la fase di raccolta dati (es. €150-200/mese per ASIN nelle prime 4 settimane).\n\n3. **Usa il Portfolio Amazon Ads** per raggruppare le campagne per ASIN: facilita il monitoraggio del budget aggregato e del ROAS per prodotto.\n\n4. **Attiva Sponsored Brands solo dopo aver validato le SP**: non disperdere budget su SB finché non hai dati di conversione solidi sulle Sponsored Products.\n\n5. **Segna le date di lancio campagne**: l'algoritmo Amazon impiega 1-2 settimane per ottimizzare la distribuzione delle impression; non modificare bid nei primi 7 giorni salvo sprechi evidenti.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\nNon esistono campagne attive, keyword ID, campaign ID o ad group ID reali nei dati forniti. Generare azioni automatiche con ID inventati sarebbe scorretto e causerebbe errori nello script.",
   "actions": {
     "actions": []
   },
-  "generated_at": "2026-07-27T11:03:21.546434"
+  "generated_at": "2026-08-03T11:03:28.787258"
 }
