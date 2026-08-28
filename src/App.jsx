@@ -210,8 +210,8 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
           {metrics.meta?.reports_failed?.length
             ? ` Amazon ha rifiutato i report: ${metrics.meta.reports_failed.join(", ")}.`
             : ""}
-          {metrics.meta?.days > 31
-            ? " L'intervallo richiesto supera i 31 giorni consentiti dall'API: rilancia il fetch con --days 31 o meno."
+          {metrics.meta?.days > 31 && !(metrics.meta?.report_windows?.length > 1)
+            ? " L'intervallo supera i 31 giorni ed e' stato chiesto in una sola richiesta: aggiorna amazon_ads_api.py, che ora spezza il periodo in finestre."
             : " Rilancia il fetch e controlla l'output con check_data.py."}
         </div>
       ) : !metrics.hasIds ? (
