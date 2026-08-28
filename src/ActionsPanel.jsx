@@ -81,7 +81,7 @@ function Row({ action, onToggle, onEdit, onRemove }) {
           {d.delta && (
             <Chip color={d.deltaUp ? C.green : C.yellow} bg={d.deltaUp ? C.greenDim : C.yellowDim}>{d.delta}</Chip>
           )}
-          {action.source === "ai" && <Chip color={C.purple} bg={C.purpleDim} title="Proposta dall'AI Advisor in questa sessione">AI</Chip>}
+          {action.source === "ai" && <Chip color={C.purple} bg={C.purpleDim} title="Proposta dal Consulente in questa sessione">AI</Chip>}
           {action.source === "manual" && <Chip color={C.blue} bg={C.blueDim}>manuale</Chip>}
         </div>
 
@@ -523,8 +523,9 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
               Nessuna azione da rivedere
             </div>
             <div style={{ fontSize: T.small, color: C.textMuted, lineHeight: 1.6, maxWidth: 420, margin: "0 auto" }}>
-              Apri la scheda <strong style={{ color: C.accent }}>AI Advisor</strong> e lancia l'analisi: i consigli
-              con un ID valido compaiono qui, pronti da rivedere. Oppure creane una con “Azione manuale”.
+              Apri la scheda <strong style={{ color: C.accent }}>Consulente</strong> e premi
+              “Analizza le campagne”: i consigli con un ID valido compaiono qui, pronti da rivedere.
+              Oppure creane una tu con “+ Azione manuale”.
             </div>
           </div>
         ) : visible.length === 0 ? (

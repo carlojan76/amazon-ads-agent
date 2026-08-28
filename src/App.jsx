@@ -147,9 +147,40 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
           messages: [...history, { role: "user", content: msg }],
         }),
       });
-      const data = await resp.json();
-      if (data.error) throw new Error(data.error.message);
-      const text = data.content?.map((b) => b.text || "").join("\n") || "Nessuna risposta";
+
+      let data;
+      try {
+        data = await resp.json();
+      } catch {
+        throw new Error(`Risposta non leggibile dall'API (HTTP ${resp.status}). `
+          + `Se sei dietro una VPN o un proxy aziendale, potrebbe stare bloccando la chiamata.`);
+      }
+
+      // Prima l'errore veniva cercato solo in data.error, e qualsiasi altro
+      // caso finiva in un generico "Nessuna risposta" che non diceva nulla.
+      if (!resp.ok || data.type === "error" || data.error) {
+        const e = data.error || {};
+        const hint = resp.status === 401
+          ? " La chiave API non è valida o è stata revocata."
+          : resp.status === 400 && /credit|balance/i.test(e.message || "")
+            ? " Il piano non ha credito residuo: controlla la fatturazione su console.anthropic.com."
+            : resp.status === 429
+              ? " Hai superato il limite di richieste: riprova tra qualche minuto."
+              : "";
+        throw new Error(`API Anthropic — HTTP ${resp.status}${e.type ? ` (${e.type})` : ""}: `
+          + `${e.message || "errore non specificato"}.${hint}`);
+      }
+
+      const blocks = Array.isArray(data.content) ? data.content : [];
+      const text = blocks.map((b) => b.text || "").join("\n").trim();
+      if (!text) {
+        // Console: utile per capire cosa è arrivato davvero.
+        console.warn("Risposta senza testo dall'API Anthropic:", data);
+        const kinds = blocks.map((b) => b.type).filter(Boolean).join(", ") || "nessuno";
+        throw new Error(`Il modello ha risposto senza testo (blocchi ricevuti: ${kinds}; `
+          + `motivo di arresto: ${data.stop_reason || "ignoto"}). `
+          + `Se il motivo è "max_tokens", i dati inviati sono troppi: riprova con una domanda più mirata.`);
+      }
 
       const { actions, cleanText, warnings } = extractActionsFromText(text);
       const { kept, rejected } = validateAgainstData(actions, metrics);
@@ -674,6 +705,13 @@ export default function App() {
                   {metrics.weeklyAnalysis}
                 </div>
               </details>
+            )}
+            {!metrics.weeklyAnalysis && !metrics.proposedActions?.length && (
+              <Banner tone="blue">
+                Questo file è un export grezzo dell'API: contiene i dati, non le proposte.
+                Le azioni arrivano dal <strong>Consulente</strong> in questa scheda, oppure dalla
+                weekly analysis, che aggiunge la sua analisi al file pubblicato.
+              </Banner>
             )}
             <ActionsPanel
               key={fileName}
