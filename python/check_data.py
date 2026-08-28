@@ -44,12 +44,16 @@ def main():
         n = len(data.get("reports", {}).get(key, []))
         total_rows += n
         print(f"    {label:12} {n:5} righe")
+    wins = meta.get("report_windows") or []
+    if len(wins) > 1:
+        print(f"    (periodo coperto da {len(wins)} finestre unite: "
+              f"{wins[-1][0]} → {wins[0][1]})")
     if total_rows == 0:
         problems.append("nessuna riga in NESSUN report: spesa e vendite risultano tutte a zero")
         days = meta.get("days_requested") or meta.get("days")
-        if isinstance(days, int) and days > 31:
-            problems.append(f"intervallo di {days} giorni: l'API ne accetta al massimo 31, "
-                            f"le richieste vengono rifiutate")
+        if isinstance(days, int) and days > 31 and not wins:
+            problems.append(f"intervallo di {days} giorni chiesto in una sola richiesta: "
+                            f"l'API ne accetta al massimo 31. Aggiorna amazon_ads_api.py.")
 
     if meta.get("reports_incomplete"):
         problems.append("il fetcher ha segnalato dati incompleti")

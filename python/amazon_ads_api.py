@@ -41,6 +41,98 @@ TOKEN_URL = "https://api.amazon.com/auth/o2/token"
 MAX_REPORT_DAYS = 31
 
 
+# ============================================================
+# FINESTRE TEMPORALI
+# ============================================================
+# Una richiesta di report copre al massimo MAX_REPORT_DAYS giorni. Per periodi
+# piu' lunghi si scaricano piu' finestre adiacenti e si sommano le metriche.
+
+# Campi additivi: si sommano quando si uniscono due finestre.
+_ADDITIVE_FIELDS = {
+    "impressions", "clicks", "cost", "spend",
+    "purchases7d", "purchases14d", "purchases30d", "orders",
+    "sales7d", "sales14d", "sales30d", "sales",
+    "unitsSoldClicks7d", "unitsSoldClicks14d", "unitsSoldClicks30d",
+    "attributedSales7d", "attributedSales14d",
+}
+
+# Come si riconosce "la stessa entita'" in due finestre diverse.
+_MERGE_KEYS = {
+    "spCampaigns": ("campaignId",),
+    "spKeywords": ("keywordId", "campaignId", "adGroupId", "keyword", "matchType"),
+    "spSearchTerm": ("campaignId", "adGroupId", "keyword", "matchType", "searchTerm"),
+    "spTargeting": ("campaignId", "adGroupId", "keyword", "matchType"),
+    "spAdvertisedProduct": ("campaignId", "adGroupId", "advertisedAsin", "advertisedSku"),
+}
+
+
+def _date_windows(days, max_days=MAX_REPORT_DAYS, today=None):
+    """Finestre adiacenti che coprono `days` giorni fino a IERI.
+
+    Ritorna una lista di (start_date, end_date) in formato YYYY-MM-DD, dalla
+    piu' recente alla piu' vecchia. Con days <= max_days la lista ha un solo
+    elemento, identico a quello che si otteneva prima.
+    """
+    today = today or datetime.now()
+    end = today - timedelta(days=1)          # ieri: l'ultimo giorno consolidato
+    remaining = max(1, int(days))
+    windows = []
+    while remaining > 0:
+        span = min(remaining, max_days)
+        start = end - timedelta(days=span - 1)
+        windows.append((start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")))
+        end = start - timedelta(days=1)
+        remaining -= span
+    return windows
+
+
+def _merge_key(row, report_type):
+    fields = _MERGE_KEYS.get(report_type)
+    if not fields:
+        # Tipo sconosciuto: chiave su tutti i campi non numerici, cosi' nel
+        # dubbio si duplica invece di sommare cose diverse.
+        fields = tuple(sorted(k for k in row if k not in _ADDITIVE_FIELDS))
+    return tuple(str(row.get(f, "")) for f in fields)
+
+
+def _num(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _merge_report_rows(existing, new_rows, report_type):
+    """Unisce le righe di due finestre sommando le metriche additive.
+
+    I campi non additivi (nomi, stati, match type) restano quelli della prima
+    occorrenza. Le metriche derivate che sappiamo ricalcolare (CPC) vengono
+    ricalcolate sul totale, invece di restare quelle di una finestra sola.
+    """
+    merged = {}
+    order = []
+    for row in list(existing) + list(new_rows):
+        key = _merge_key(row, report_type)
+        if key not in merged:
+            merged[key] = dict(row)
+            order.append(key)
+            continue
+        target = merged[key]
+        for field, value in row.items():
+            if field in _ADDITIVE_FIELDS:
+                target[field] = _num(target.get(field)) + _num(value)
+            elif field not in target or target[field] in ("", None):
+                target[field] = value
+
+    out = [merged[k] for k in order]
+    for row in out:
+        clicks = _num(row.get("clicks"))
+        if "costPerClick" in row:
+            cost = _num(row.get("cost", row.get("spend", 0)))
+            row["costPerClick"] = round(cost / clicks, 4) if clicks else 0
+    return out
+
+
 class AmazonAdsAPI:
     def __init__(self, config):
         self.config = config
@@ -54,6 +146,7 @@ class AmazonAdsAPI:
         self.skipped_reports = []
         self.failed_reports = []
         self.clamped_days = None
+        self.report_windows = []
 
     def authenticate(self):
         print("🔐 Autenticazione in corso...")
@@ -205,22 +298,24 @@ class AmazonAdsAPI:
                               "targetingClauses", "targets", campaign_ids)
 
     # --- Reporting v3 ---
-    def request_report(self, report_type, days=14):
-        # L'API v3 non ha dati consolidati per "oggi": usare endDate = ieri.
-        # Richiedere la data odierna e' una causa frequente di report che
-        # restano bloccati in PENDING o tornano vuoti.
-        #
-        # L'intervallo massimo e' 31 giorni: oltre, la creazione del report
-        # viene rifiutata con un 400 e si ottengono zero righe. Meglio ridurre
-        # la finestra dicendolo, che restituire un export vuoto.
-        if days > MAX_REPORT_DAYS:
-            print(f"   ⚠️ {days} giorni richiesti, ma l'API ne accetta al massimo {MAX_REPORT_DAYS}: "
-                  f"uso {MAX_REPORT_DAYS} giorni.", flush=True)
-            self.clamped_days = days
-            days = MAX_REPORT_DAYS
+    def request_report(self, report_type, days=14, start_date=None, end_date=None):
+        """Richiede un report. O si passano date esplicite, o un numero di giorni.
 
-        end_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-        start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        Con `days` la finestra viene limitata a MAX_REPORT_DAYS, perche' l'API
+        rifiuta gli intervalli piu' lunghi. Per coprire periodi maggiori si usa
+        fetch_reports(), che spezza il periodo in finestre e le unisce.
+        """
+        if start_date is None or end_date is None:
+            # L'API v3 non ha dati consolidati per "oggi": usare endDate = ieri.
+            # Richiedere la data odierna e' una causa frequente di report che
+            # restano bloccati in PENDING o tornano vuoti.
+            if days > MAX_REPORT_DAYS:
+                print(f"   ⚠️ {days} giorni richiesti, ma una singola richiesta ne accetta al massimo "
+                      f"{MAX_REPORT_DAYS}: uso {MAX_REPORT_DAYS} giorni.", flush=True)
+                self.clamped_days = days
+                days = MAX_REPORT_DAYS
+            end_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
         columns_map = {
             "spCampaigns": [
@@ -381,19 +476,53 @@ class AmazonAdsAPI:
         if pending:
             print(f"   ⏰ Timeout: report ancora in PENDING dopo {max_wait}s: {', '.join(pending.keys())}", flush=True)
         # Traccia i report NON arrivati: distingue 'zero reale' da 'timeout'.
-        self.timed_out_reports = list(pending.keys())
+        # extend, non assegnazione: con piu' finestre i timeout si accumulano
+        for rt in pending:
+            if rt not in self.timed_out_reports:
+                self.timed_out_reports.append(rt)
         return results
 
     def fetch_reports(self, report_types, days=14, max_wait=600):
-        """Richiede TUTTI i report in blocco, poi li attende in parallelo.
+        """Scarica i report coprendo `days` giorni, anche oltre il limite dell'API.
 
-        report_types: lista di tipi (es. ['spCampaigns', 'spKeywords', ...]).
-        Ritorna:      dict {report_type: [righe]}.
+        Una singola richiesta accetta al massimo MAX_REPORT_DAYS giorni. Per
+        periodi piu' lunghi il periodo viene spezzato in finestre adiacenti,
+        scaricate una dopo l'altra e poi UNITE sommando le metriche.
+
+        L'unione e' necessaria, non cosmetica: i report SUMMARY restituiscono
+        una riga per entita' PER FINESTRA, quindi concatenarle darebbe la stessa
+        keyword ripetuta N volte, e a valle verrebbe contata N volte.
+
+        Nota sull'attribuzione: le conversioni sono attribuite alla data del
+        CLICK, quindi sommare finestre adiacenti e' corretto. Restano poco
+        attribuiti gli ultimi giorni della finestra piu' recente, dove la
+        finestra di attribuzione a 7 giorni non si e' ancora chiusa: e' lo
+        stesso limite che avrebbe una singola richiesta.
         """
-        report_map = {}
-        for rt in report_types:
-            report_map[rt] = self.request_report(rt, days)
-        return self.poll_reports(report_map, max_wait=max_wait)
+        windows = _date_windows(days)
+        self.report_windows = [list(w) for w in windows]
+
+        if len(windows) > 1:
+            print(f"📆 {days} giorni richiesti: il periodo supera il limite di {MAX_REPORT_DAYS} "
+                  f"giorni per richiesta, lo divido in {len(windows)} finestre.", flush=True)
+            for s, e in windows:
+                print(f"     {s} → {e}", flush=True)
+
+        merged = {rt: [] for rt in report_types}
+        for i, (start, end) in enumerate(windows, 1):
+            if len(windows) > 1:
+                print(f"\n--- Finestra {i}/{len(windows)}: {start} → {end} ---", flush=True)
+            report_map = {rt: self.request_report(rt, start_date=start, end_date=end)
+                          for rt in report_types}
+            results = self.poll_reports(report_map, max_wait=max_wait)
+            for rt, rows in results.items():
+                merged[rt] = _merge_report_rows(merged[rt], rows, rt)
+
+        if len(windows) > 1:
+            print("\n📊 Righe dopo l'unione delle finestre:", flush=True)
+            for rt, rows in merged.items():
+                print(f"     {rt}: {len(rows)}", flush=True)
+        return merged
 
     def poll_report(self, report_id, max_wait=600, interval=15):
         """Compatibilita': attende un singolo report riusando il polling batch."""
@@ -481,8 +610,8 @@ def fetch_all_data(marketplace=None, days=14):
             "reports_skipped_425": skipped,
             "reports_failed": failed,
             "incomplete_lists": sorted(set(incomplete_lists)),
-            "days_requested": getattr(api, "clamped_days", None) or days,
-            "days_capped_to": MAX_REPORT_DAYS if getattr(api, "clamped_days", None) else None,
+            "days_requested": days,
+            "report_windows": getattr(api, "report_windows", []),
         },
         "campaigns": [
             {
