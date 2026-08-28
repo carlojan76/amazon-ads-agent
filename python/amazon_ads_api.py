@@ -374,36 +374,56 @@ class AmazonAdsAPI:
         headers = self._base_headers()
         headers["Content-Type"] = "application/json"
         headers["Accept"] = "application/vnd.createAsync.v3+json"
-        try:
-            resp = requests.post(
-                f"{self.base_url}/reporting/reports",
-                headers=headers,
-                json=payload,
-                timeout=30,
-            )
+        for attempt in range(3):
+            try:
+                resp = requests.post(
+                    f"{self.base_url}/reporting/reports",
+                    headers=headers,
+                    json=payload,
+                    timeout=30,
+                )
+            except Exception as e:
+                print(f"   ⚠️ Errore richiesta report {report_type}: {e}")
+                self.failed_reports.append(f"{report_type} ({e})")
+                return None
+
+            if resp.status_code == 429:
+                # Con piu' finestre le creazioni sono ravvicinate: il rate limit
+                # va assorbito, non trattato come errore definitivo.
+                if attempt < 2:
+                    wait = 10 * (attempt + 1)
+                    print(f"   ⏳ {report_type}: rate limit (429), riprovo tra {wait}s...", flush=True)
+                    time.sleep(wait)
+                    continue
+                print(f"   ⚠️ {report_type}: rate limit persistente (429)")
+                self.failed_reports.append(f"{report_type} (429 rate limit)")
+                return None
+
             # 425 = richiesta identica gia' in coda (report generato di recente,
-            # non ancora scaduto). Non e' un errore: Amazon evita i duplicati.
+            # non ancora scaduto). Amazon evita i duplicati.
+            # ATTENZIONE: saltare qui significa metriche a ZERO per questo report.
+            # Va segnalato, altrimenti l'analisi legge "nessuna spesa" dove in
+            # realta' mancano i dati.
             if resp.status_code == 425:
-                # ATTENZIONE: saltare qui significa metriche a ZERO per questo
-                # report. Va segnalato, altrimenti l'analisi legge "nessuna
-                # spesa" dove in realta' mancano i dati.
                 print(f"   ⏭️  {report_type}: report identico gia' in elaborazione (425), lo salto.")
                 self.skipped_reports.append(report_type)
                 return None
+
             if resp.status_code >= 400:
                 # Qualsiasi errore qui significa ZERO righe per questo report.
-                # Va registrato: altrimenti l'export sembra completo e "spesa 0"
-                # viene letto come "nessuna attivita'".
                 print(f"   ⚠️ {report_type} HTTP {resp.status_code}: {resp.text[:300]}")
                 self.failed_reports.append(f"{report_type} (HTTP {resp.status_code})")
                 return None
-            report_id = resp.json().get("reportId")
+
+            try:
+                report_id = resp.json().get("reportId")
+            except Exception:
+                self.failed_reports.append(f"{report_type} (risposta non JSON)")
+                return None
             print(f"   Report ID: {report_id}")
             return report_id
-        except Exception as e:
-            print(f"   ⚠️ Errore richiesta report {report_type}: {e}")
-            self.failed_reports.append(f"{report_type} ({e})")
-            return None
+
+        return None
 
     def _check_report(self, report_id):
         """Controlla lo stato di un singolo report (una sola chiamata, no attesa).
@@ -451,7 +471,8 @@ class AmazonAdsAPI:
         if not pending:
             return results
 
-        print(f"⏳ Attesa in parallelo di {len(pending)} report (max {max_wait}s)...", flush=True)
+        print(f"⏳ Attendo {len(pending)} report (limite {max_wait}s). "
+              f"Amazon impiega tipicamente 2-10 minuti; su periodi lunghi anche di piu'.", flush=True)
         start = time.time()
         while pending and (time.time() - start) < max_wait:
             elapsed = int(time.time() - start)
@@ -459,7 +480,7 @@ class AmazonAdsAPI:
             for rt, rid in list(pending.items()):
                 status, url = self._check_report(rid)
                 if status == "COMPLETED":
-                    print(f"   ✅ {rt} completato ({elapsed}s)", flush=True)
+                    print(f"   ✅ {rt} pronto dopo {elapsed}s", flush=True)
                     results[rt] = self._download_report(url) if url else []
                     done_now.append(rt)
                 elif status == "FAILURE":
@@ -469,8 +490,8 @@ class AmazonAdsAPI:
             for rt in done_now:
                 pending.pop(rt, None)
             if pending:
-                still = ", ".join(pending.keys())
-                print(f"   ... in attesa ({elapsed}s): {still}", flush=True)
+                mins, secs = divmod(elapsed, 60)
+                print(f"   ⏳ {mins}m{secs:02d}s — mancano {len(pending)}: {', '.join(pending.keys())}", flush=True)
                 time.sleep(interval)
 
         if pending:
@@ -508,15 +529,25 @@ class AmazonAdsAPI:
             for s, e in windows:
                 print(f"     {s} → {e}", flush=True)
 
+        # 1) Richiedi TUTTI i report di TUTTE le finestre subito.
+        #    Elaborare una finestra alla volta significherebbe attendere due
+        #    volte il tempo di generazione (fino a max_wait per ciclo): qui il
+        #    tempo totale resta quello del report piu' lento.
+        report_map = {}
+        for wi, (start, end) in enumerate(windows):
+            for rt in report_types:
+                key = f"{rt}@{wi}" if len(windows) > 1 else rt
+                report_map[key] = self.request_report(rt, start_date=start, end_date=end)
+                time.sleep(0.5)  # respiro tra le creazioni, per non prendere 429
+
+        # 2) Attendili tutti insieme.
+        results = self.poll_reports(report_map, max_wait=max_wait)
+
+        # 3) Unisci le finestre sommando le metriche per entita'.
         merged = {rt: [] for rt in report_types}
-        for i, (start, end) in enumerate(windows, 1):
-            if len(windows) > 1:
-                print(f"\n--- Finestra {i}/{len(windows)}: {start} → {end} ---", flush=True)
-            report_map = {rt: self.request_report(rt, start_date=start, end_date=end)
-                          for rt in report_types}
-            results = self.poll_reports(report_map, max_wait=max_wait)
-            for rt, rows in results.items():
-                merged[rt] = _merge_report_rows(merged[rt], rows, rt)
+        for key, rows in results.items():
+            rt = key.split("@")[0]
+            merged[rt] = _merge_report_rows(merged[rt], rows, rt)
 
         if len(windows) > 1:
             print("\n📊 Righe dopo l'unione delle finestre:", flush=True)
