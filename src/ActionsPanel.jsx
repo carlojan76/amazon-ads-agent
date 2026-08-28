@@ -3,7 +3,7 @@ import { C, F, T, S, R, button, input, card } from "./theme";
 import {
   ACTION_TYPES, GROUP_ORDER, KW_MATCH, NEG_MATCH, GUARDRAILS,
   normalizeAction, validateAction, isValidAction, describeAction,
-  editableField, estimatedSaving, toPayload,
+  editableField, estimatedSaving, toPayload, actionSignature, dedupeActions,
 } from "./actions";
 import {
   startDeviceFlow, pollForToken, getUser, checkRepoAccess, dispatchWorkflow,
@@ -32,10 +32,8 @@ const isValidRepo = (s) => /^[\w.-]+\/[\w.-]+$/.test((s || "").trim());
 let uid = 0;
 const nextId = () => `a${Date.now()}_${uid++}`;
 
-/** Firma stabile di un'azione: serve a riconoscerla tra un caricamento e l'altro. */
-const signature = (a) =>
-  [a.type, a.keywordId || "", a.campaignId || "", a.adGroupId || "",
-    (a.keywordText || "").toLowerCase(), a.matchType || ""].join("|");
+// Firma condivisa con App.jsx e con il deduplico (vedi actions.js).
+const signature = actionSignature;
 
 const TONE = { red: C.red, green: C.green, yellow: C.yellow, blue: C.blue };
 
@@ -281,16 +279,20 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
     const saved = ls.get(storeKey, { overrides: {}, manual: [] });
     setActions((prev) => {
       const prevBySig = new Map(prev.filter((a) => a.source !== "manual").map((a) => [signature(a), a]));
-      const rebuilt = initialActions.map((raw) => {
+      const rebuilt = dedupeActions(initialActions.map(normalizeAction)).map((raw) => {
         const a = normalizeAction(raw);
         const sig = signature(a);
         const keep = prevBySig.get(sig);
         const ov = saved.overrides?.[sig];
+        // Un'azione con avvisi non viene spuntata da sola: se merita
+        // un'occhiata, la spunta la mette l'utente.
+        const check = validateAction(a);
         const merged = {
           ...a,
           id: keep?.id || nextId(),
           source: a.source || "weekly",
-          included: keep ? keep.included : ov?.included ?? isValidAction(a),
+          included: keep ? keep.included
+            : ov?.included ?? (check.errors.length === 0 && check.warnings.length === 0),
         };
         for (const f of ["new_bid", "new_budget", "bid"]) {
           if (keep && f in keep) merged[f] = keep[f];
@@ -751,9 +753,23 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
           </button>
         </div>
 
-        {!previewValid && previewedJson !== null && (
-          <div style={{ fontSize: T.micro, color: C.yellow, marginTop: S.sm }}>
-            Hai cambiato la selezione dopo l'anteprima: rigenerala prima di applicare.
+        {!previewValid && (
+          <div style={{ fontSize: T.micro, color: C.textDim, marginTop: S.sm, lineHeight: 1.6 }}>
+            {/* Prima il passo 3 era solo disabilitato, senza spiegare cosa mancasse. */}
+            {!selected.length
+              ? "Seleziona almeno un'azione qui sopra."
+              : !ghUser
+                ? "Connetti prima un token GitHub (passo 1)."
+                : !repoOk
+                  ? "Imposta il repository di destinazione in Configurazione."
+                  : previewedJson !== null
+                    ? "Hai cambiato la selezione dopo l'anteprima: rigenerala prima di applicare."
+                    : "Genera prima l'anteprima (passo 2): serve a confrontare le azioni con lo stato "
+                      + "attuale su Amazon. Solo dopo si sblocca la conferma."}
+            {" "}In alternativa, <strong>Scarica JSON</strong> e lancialo da riga di comando:{" "}
+            <code style={{ fontFamily: F.mono }}>
+              python apply_changes.py actions.json --marketplace {ghMarketplace || "IT"}
+            </code>
           </div>
         )}
         {tooBig && (

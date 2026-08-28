@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { C, F, T, S, R, button, input, card, GLOBAL_CSS } from "./theme";
 import ActionsPanel from "./ActionsPanel";
 import CampaignPlanner from "./CampaignPlanner";
-import { ACTIONS_PROMPT, extractActionsFromText, validateAgainstData } from "./actions";
+import { ACTIONS_PROMPT, extractActionsFromText, validateAgainstData, actionSignature, dedupeActions } from "./actions";
 import { parseCSV, processJSON, processCSV } from "./parse";
 
 const ENV_KEY = typeof import.meta !== "undefined" ? import.meta.env?.VITE_ANTHROPIC_API_KEY : "";
@@ -375,14 +375,17 @@ export default function App() {
   }, []);
 
   const addAiActions = useCallback((actions) => {
+    // Deduplico sulla FIRMA, non sull'oggetto intero: due analisi successive
+    // propongono spesso lo stesso intervento con una motivazione diversa, e
+    // confrontando l'oggetto per intero finivano entrambe nell'elenco.
     setAiActions((prev) => {
-      const seen = new Set(prev.map((a) => JSON.stringify(a)));
-      return [...prev, ...actions.filter((a) => !seen.has(JSON.stringify(a)))];
+      const seen = new Set(prev.map(actionSignature));
+      return [...prev, ...actions.filter((a) => !seen.has(actionSignature(a)))];
     });
   }, []);
 
   const allProposed = useMemo(
-    () => [...(metrics?.proposedActions || []), ...aiActions],
+    () => dedupeActions([...(metrics?.proposedActions || []), ...aiActions]),
     [metrics?.proposedActions, aiActions]
   );
 
