@@ -10,6 +10,25 @@ import {
   latestRunId, waitForNewRun, followRun,
 } from "./github";
 
+/**
+ * Su GitHub Pages l'URL contiene gia' owner e repo:
+ * https://carlojan76.github.io/amazon-ads-agent/ -> carlojan76/amazon-ads-agent
+ * Meglio dedurlo che chiederlo: era il campo piu' facile da lasciare vuoto.
+ */
+function guessRepoFromUrl() {
+  try {
+    const host = window.location.hostname;
+    const m = /^([\w-]+)\.github\.io$/.exec(host);
+    if (!m) return "";
+    const seg = window.location.pathname.split("/").filter(Boolean)[0];
+    return seg ? `${m[1]}/${seg}` : "";
+  } catch {
+    return "";
+  }
+}
+
+const isValidRepo = (s) => /^[\w.-]+\/[\w.-]+$/.test((s || "").trim());
+
 let uid = 0;
 const nextId = () => `a${Date.now()}_${uid++}`;
 
@@ -347,7 +366,8 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
 
   // ---- connessione GitHub ----
   const [ghClientId, setGhClientId] = useState(() => localStorage.getItem("gh_client_id") || import.meta.env?.VITE_GITHUB_CLIENT_ID || "");
-  const [ghRepo, setGhRepo] = useState(() => localStorage.getItem("gh_repo") || import.meta.env?.VITE_GITHUB_REPO || "");
+  const [ghRepo, setGhRepo] = useState(() =>
+    localStorage.getItem("gh_repo") || import.meta.env?.VITE_GITHUB_REPO || guessRepoFromUrl());
   const [ghWorkflow, setGhWorkflow] = useState(() => localStorage.getItem("gh_workflow") || "apply-actions.yml");
   const [ghProxy, setGhProxy] = useState(() => localStorage.getItem("gh_device_proxy") || "");
   const [ghToken, setGhToken] = useState(() => localStorage.getItem("gh_token") || "");
@@ -428,7 +448,12 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
 
   const launch = async (dryRun) => {
     const [owner, repo] = ghRepo.split("/").map((s) => s.trim());
-    if (!owner || !repo) { setError("Il repository va scritto come owner/repo."); setShowGhSettings(true); return; }
+    if (!isValidRepo(ghRepo)) {
+      setError('Manca il repository di destinazione: scrivilo come "owner/repo" '
+        + '(es. carlojan76/amazon-ads-agent) nel pannello Configurazione, che ho appena aperto.');
+      setShowGhSettings(true);
+      return;
+    }
     setBusy(dryRun ? "preview" : "apply");
     setError(null); setRun(null);
 
@@ -478,7 +503,8 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
     URL.revokeObjectURL(url);
   };
 
-  const canPreview = selected.length > 0 && ghUser && !busy && !tooBig;
+  const repoOk = isValidRepo(ghRepo);
+  const canPreview = selected.length > 0 && ghUser && repoOk && !busy && !tooBig;
   const canApply = canPreview && previewValid && confirmText === "APPLICA";
 
   // ---------------------------------------------------------------- render
@@ -585,7 +611,13 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
             <label>
               <span style={{ fontSize: T.micro, color: C.textDim }}>Repository</span>
               <input value={ghRepo} onChange={(e) => setGhRepo(e.target.value)} placeholder="tuo-utente/amazon-ads-agent"
-                style={{ ...input, width: "100%", fontFamily: F.mono }} />
+                style={{ ...input, width: "100%", fontFamily: F.mono,
+                  borderColor: ghRepo && !isValidRepo(ghRepo) ? C.red : C.borderStrong }} />
+              {ghRepo && !isValidRepo(ghRepo) && (
+                <span style={{ fontSize: T.micro, color: C.red }}>
+                  Formato atteso: owner/repo, senza https:// e senza .git
+                </span>
+              )}
             </label>
             <label>
               <span style={{ fontSize: T.micro, color: C.textDim }}>File del workflow</span>
@@ -698,7 +730,13 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
           </button>
           <span style={{ fontSize: T.micro, color: C.textDim, flex: "1 1 240px", lineHeight: 1.5 }}>
             Esegue il workflow in sola lettura: mostra i valori attuali sull'account e cosa cambierebbe,
-            senza toccare nulla.
+            senza toccare nulla. Destinazione:{" "}
+            {repoOk
+              ? <code style={{ fontFamily: F.mono, color: C.textMuted }}>{ghRepo}</code>
+              : <button onClick={() => setShowGhSettings(true)}
+                  style={{ ...button("quiet", { small: true }), padding: 0, color: C.yellow }}>
+                  repository non impostato — aprilo in Configurazione
+                </button>}
           </span>
         </div>
 
