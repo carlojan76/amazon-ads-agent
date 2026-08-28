@@ -37,6 +37,9 @@ ENDPOINTS = {
 
 TOKEN_URL = "https://api.amazon.com/auth/o2/token"
 
+# L'API di reporting v3 rifiuta gli intervalli superiori a 31 giorni.
+MAX_REPORT_DAYS = 31
+
 
 class AmazonAdsAPI:
     def __init__(self, config):
@@ -44,6 +47,13 @@ class AmazonAdsAPI:
         self.base_url = ENDPOINTS[config["region"]]
         self.access_token = None
         self.profile_id = config.get("profile_id", "")
+        # Tracciamento della COMPLETEZZA dei dati: distingue "zero reale" da
+        # "non siamo riusciti a scaricarlo". Letto da fetch_all_data -> _meta.
+        self.incomplete_lists = []
+        self.timed_out_reports = []
+        self.skipped_reports = []
+        self.failed_reports = []
+        self.clamped_days = None
 
     def authenticate(self):
         print("🔐 Autenticazione in corso...")
@@ -125,93 +135,90 @@ class AmazonAdsAPI:
             raise Exception("Nessun profilo advertising trovato")
 
     # --- SP v3 endpoints ---
-    def get_campaigns(self):
-        print("📁 Recupero campagne SP...")
-        vnd = "application/vnd.spCampaign.v3+json"
-        campaigns = []
-        next_token = None
-        while True:
-            payload = {"maxResults": 100}
-            if next_token:
-                payload["nextToken"] = next_token
-            try:
-                resp = self._post("/sp/campaigns/list", payload, content_type=vnd, accept=vnd)
-                batch = resp.get("campaigns", [])
-                campaigns.extend(batch)
+    def _list_all(self, path, vnd, result_key, label, campaign_ids=None, extra_filter=None):
+        """Lista COMPLETA di una risorsa v3: pagina con nextToken e spezza il
+        filtro campagne in blocchi da 100 ID.
+
+        Prima questa parte non paginava: con piu' di 100 keyword (o ad group,
+        negative, target) i dati venivano troncati silenziosamente e l'analisi
+        girava su un sottoinsieme dell'account, senza alcun avviso.
+        """
+        ids = [str(c) for c in (campaign_ids or []) if c]
+        chunks = [ids[i:i + 100] for i in range(0, len(ids), 100)] or [None]
+
+        items = []
+        truncated = False
+        for chunk in chunks:
+            next_token = None
+            pages = 0
+            while True:
+                payload = {"maxResults": 100}
+                if chunk:
+                    payload["campaignIdFilter"] = {"include": chunk}
+                if extra_filter:
+                    payload.update(extra_filter)
+                if next_token:
+                    payload["nextToken"] = next_token
+                try:
+                    resp = self._post(path, payload, content_type=vnd, accept=vnd)
+                except Exception as e:
+                    print(f"   ⚠️ Errore {label}: {e}")
+                    truncated = True
+                    break
+                items.extend(resp.get(result_key, []))
                 next_token = resp.get("nextToken")
-                print(f"   ... {len(campaigns)} campagne trovate")
+                pages += 1
                 if not next_token:
                     break
-            except Exception as e:
-                print(f"   ⚠️ Errore: {e}")
-                break
-        return campaigns
+                if pages >= 100:  # paracadute anti-loop
+                    print(f"   ⚠️ {label}: interrotto dopo 100 pagine")
+                    truncated = True
+                    break
+        print(f"   ... {len(items)} {label} trovati{' (INCOMPLETI)' if truncated else ''}")
+        if truncated:
+            self.incomplete_lists.append(label)
+        return items
+
+    def get_campaigns(self):
+        print("📁 Recupero campagne SP...")
+        return self._list_all("/sp/campaigns/list", "application/vnd.spCampaign.v3+json",
+                              "campaigns", "campagne")
 
     def get_ad_groups(self, campaign_ids=None):
         print("📂 Recupero ad groups...")
-        vnd = "application/vnd.spAdGroup.v3+json"
-        payload = {"maxResults": 100}
-        if campaign_ids:
-            payload["campaignIdFilter"] = {"include": campaign_ids[:100]}
-        try:
-            resp = self._post("/sp/adGroups/list", payload, content_type=vnd, accept=vnd)
-            groups = resp.get("adGroups", [])
-            print(f"   ... {len(groups)} ad groups trovati")
-            return groups
-        except Exception as e:
-            print(f"   ⚠️ Errore: {e}")
-            return []
+        return self._list_all("/sp/adGroups/list", "application/vnd.spAdGroup.v3+json",
+                              "adGroups", "ad groups", campaign_ids)
 
     def get_keywords(self, campaign_ids=None):
         print("🔑 Recupero keywords...")
-        vnd = "application/vnd.spKeyword.v3+json"
-        payload = {"maxResults": 100}
-        if campaign_ids:
-            payload["campaignIdFilter"] = {"include": campaign_ids[:100]}
-        try:
-            resp = self._post("/sp/keywords/list", payload, content_type=vnd, accept=vnd)
-            keywords = resp.get("keywords", [])
-            print(f"   ... {len(keywords)} keywords trovate")
-            return keywords
-        except Exception as e:
-            print(f"   ⚠️ Errore: {e}")
-            return []
+        return self._list_all("/sp/keywords/list", "application/vnd.spKeyword.v3+json",
+                              "keywords", "keywords", campaign_ids)
 
     def get_negative_keywords(self, campaign_ids=None):
         print("🚫 Recupero negative keywords...")
-        vnd = "application/vnd.spNegativeKeyword.v3+json"
-        payload = {"maxResults": 100}
-        if campaign_ids:
-            payload["campaignIdFilter"] = {"include": campaign_ids[:100]}
-        try:
-            resp = self._post("/sp/negativeKeywords/list", payload, content_type=vnd, accept=vnd)
-            neg_kws = resp.get("negativeKeywords", [])
-            print(f"   ... {len(neg_kws)} negative keywords trovate")
-            return neg_kws
-        except Exception as e:
-            print(f"   ⚠️ Errore: {e}")
-            return []
+        return self._list_all("/sp/negativeKeywords/list", "application/vnd.spNegativeKeyword.v3+json",
+                              "negativeKeywords", "negative keywords", campaign_ids)
 
     def get_targets(self, campaign_ids=None):
         print("🎯 Recupero targets...")
-        vnd = "application/vnd.spTargetingClause.v3+json"
-        payload = {"maxResults": 100}
-        if campaign_ids:
-            payload["campaignIdFilter"] = {"include": campaign_ids[:100]}
-        try:
-            resp = self._post("/sp/targets/list", payload, content_type=vnd, accept=vnd)
-            targets = resp.get("targetingClauses", [])
-            print(f"   ... {len(targets)} targets trovati")
-            return targets
-        except Exception as e:
-            print(f"   ⚠️ Errore: {e}")
-            return []
+        return self._list_all("/sp/targets/list", "application/vnd.spTargetingClause.v3+json",
+                              "targetingClauses", "targets", campaign_ids)
 
     # --- Reporting v3 ---
     def request_report(self, report_type, days=14):
         # L'API v3 non ha dati consolidati per "oggi": usare endDate = ieri.
         # Richiedere la data odierna e' una causa frequente di report che
         # restano bloccati in PENDING o tornano vuoti.
+        #
+        # L'intervallo massimo e' 31 giorni: oltre, la creazione del report
+        # viene rifiutata con un 400 e si ottengono zero righe. Meglio ridurre
+        # la finestra dicendolo, che restituire un export vuoto.
+        if days > MAX_REPORT_DAYS:
+            print(f"   ⚠️ {days} giorni richiesti, ma l'API ne accetta al massimo {MAX_REPORT_DAYS}: "
+                  f"uso {MAX_REPORT_DAYS} giorni.", flush=True)
+            self.clamped_days = days
+            days = MAX_REPORT_DAYS
+
         end_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
         start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
@@ -282,16 +289,25 @@ class AmazonAdsAPI:
             # 425 = richiesta identica gia' in coda (report generato di recente,
             # non ancora scaduto). Non e' un errore: Amazon evita i duplicati.
             if resp.status_code == 425:
+                # ATTENZIONE: saltare qui significa metriche a ZERO per questo
+                # report. Va segnalato, altrimenti l'analisi legge "nessuna
+                # spesa" dove in realta' mancano i dati.
                 print(f"   ⏭️  {report_type}: report identico gia' in elaborazione (425), lo salto.")
+                self.skipped_reports.append(report_type)
                 return None
             if resp.status_code >= 400:
+                # Qualsiasi errore qui significa ZERO righe per questo report.
+                # Va registrato: altrimenti l'export sembra completo e "spesa 0"
+                # viene letto come "nessuna attivita'".
                 print(f"   ⚠️ {report_type} HTTP {resp.status_code}: {resp.text[:300]}")
+                self.failed_reports.append(f"{report_type} (HTTP {resp.status_code})")
                 return None
             report_id = resp.json().get("reportId")
             print(f"   Report ID: {report_id}")
             return report_id
         except Exception as e:
             print(f"   ⚠️ Errore richiesta report {report_type}: {e}")
+            self.failed_reports.append(f"{report_type} ({e})")
             return None
 
     def _check_report(self, report_id):
@@ -418,10 +434,12 @@ def fetch_all_data(marketplace=None, days=14):
     campaigns = api.get_campaigns()
     campaign_ids = [str(c.get("campaignId", "")) for c in campaigns if c.get("campaignId")]
 
-    ad_groups = api.get_ad_groups(campaign_ids[:50])
-    keywords = api.get_keywords(campaign_ids[:50])
-    neg_keywords = api.get_negative_keywords(campaign_ids[:50])
-    targets = api.get_targets(campaign_ids[:50])
+    # Nessun taglio a 50 campagne: _list_all spezza da solo il filtro in
+    # blocchi da 100 ID e pagina i risultati.
+    ad_groups = api.get_ad_groups(campaign_ids)
+    keywords = api.get_keywords(campaign_ids)
+    neg_keywords = api.get_negative_keywords(campaign_ids)
+    targets = api.get_targets(campaign_ids)
 
     print("\n" + "=" * 50)
     print(f"📊 REPORT PERFORMANCE (ultimi {days} giorni)")
@@ -432,9 +450,19 @@ def fetch_all_data(marketplace=None, days=14):
     report_types = ["spCampaigns", "spKeywords", "spSearchTerm", "spTargeting", "spAdvertisedProduct"]
     reports = api.fetch_reports(report_types, days, max_wait=int(os.getenv("REPORT_MAX_WAIT", "1800")))
     timed_out = getattr(api, "timed_out_reports", [])
-    if timed_out:
-        print("    ATTENZIONE: report incompleti per timeout: " + ", ".join(timed_out) +
-              " -> metriche a zero NON per reale assenza di attivita.", flush=True)
+    skipped = getattr(api, "skipped_reports", [])
+    failed = getattr(api, "failed_reports", [])
+    incomplete_lists = getattr(api, "incomplete_lists", [])
+    if timed_out or skipped or failed or incomplete_lists:
+        print("    ATTENZIONE — dati INCOMPLETI, le metriche a zero non significano assenza di attivita':", flush=True)
+        if timed_out:
+            print("      - report in timeout: " + ", ".join(timed_out), flush=True)
+        if skipped:
+            print("      - report saltati (425, richiesta identica gia' in coda): " + ", ".join(skipped), flush=True)
+        if failed:
+            print("      - report RIFIUTATI da Amazon: " + ", ".join(failed), flush=True)
+        if incomplete_lists:
+            print("      - liste troncate da errori API: " + ", ".join(sorted(set(incomplete_lists))), flush=True)
     campaign_report = reports.get("spCampaigns", [])
     keyword_report = reports.get("spKeywords", [])
     search_term_report = reports.get("spSearchTerm", [])
@@ -448,8 +476,13 @@ def fetch_all_data(marketplace=None, days=14):
             "marketplace": marketplace or "auto",
             "days": days,
             "region": CONFIG["region"],
-            "reports_incomplete": bool(timed_out),
+            "reports_incomplete": bool(timed_out or skipped or failed or incomplete_lists),
             "reports_timed_out": timed_out,
+            "reports_skipped_425": skipped,
+            "reports_failed": failed,
+            "incomplete_lists": sorted(set(incomplete_lists)),
+            "days_requested": getattr(api, "clamped_days", None) or days,
+            "days_capped_to": MAX_REPORT_DAYS if getattr(api, "clamped_days", None) else None,
         },
         "campaigns": [
             {

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "fetched_at": "2026-07-13T10:40:05.134183",
+    "fetched_at": "2026-08-24T08:05:29.744633",
     "profile_id": "2593537292052861",
     "marketplace": "DE",
     "days": 14,
@@ -18,6 +18,17 @@
       "targetingType": "AUTO",
       "startDate": "2026-02-22",
       "endDate": "2026-03-31",
+      "bidding": {}
+    },
+    {
+      "campaignId": "156701363108720",
+      "name": "Campagna - 19/02/2026 22:12:46.519",
+      "state": "ARCHIVED",
+      "budget": 5.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-02-19",
+      "endDate": "2026-03-07",
       "bidding": {}
     },
     {
@@ -115,6 +126,13 @@
       "name": "Gruppo di annunci - 22.2.2026 19:14:45.794",
       "state": "ARCHIVED",
       "defaultBid": 0.68
+    },
+    {
+      "adGroupId": "498565102662876",
+      "campaignId": "156701363108720",
+      "name": "Gruppo di annunci - 19/02/2026 22:12:36.940",
+      "state": "ARCHIVED",
+      "defaultBid": 0.4
     },
     {
       "adGroupId": "437360994356789",
@@ -690,6 +708,54 @@
   ],
   "targets": [
     {
+      "targetId": "70622422284809",
+      "campaignId": "156701363108720",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "54679522329527",
+      "campaignId": "156701363108720",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "188484295189762",
+      "campaignId": "156701363108720",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
+      "targetId": "13299356939171",
+      "campaignId": "156701363108720",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ARCHIVED",
+      "bid": 0
+    },
+    {
       "targetId": "89231194182793",
       "campaignId": "151886528673838",
       "expression": [
@@ -889,9 +955,9 @@
     "targeting": [],
     "products": []
   },
-  "analysis": "# 📊 Stato Generale\n\nIl marketplace DE non presenta alcuna campagna PPC attiva nel periodo analizzato (ultimi 14 giorni). La spesa è €0, le impression e i click sono a zero: il canale paid è completamente fermo. Non ci sono campagne in pausa o archiviate da cui attingere dati storici. Il conto è pulito ma anche completamente cieco: nessuna visibilità a pagamento su Amazon.de in questo momento.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Lanciare almeno una campagna Sponsored Products Auto sul marketplace DE**\n- **Azione**: Creare una campagna SP Auto con targeting automatico per i principali ASIN del catalogo DE, budget giornaliero €15-20, bid di partenza €0.40-0.50.\n- **Motivo**: Zero campagne attive = zero visibilità paid. Il mercato tedesco è competitivo e senza PPC attivo si perde posizionamento organico e Buy Box.\n- **Impatto stimato**: Raccolta dati di search term in 7-14 giorni, basi per ottimizzazioni successive.\n\n**2. Creare una campagna Sponsored Products Manual con keyword BROAD sui termini di categoria**\n- **Azione**: Identificare 10-15 keyword di categoria rilevanti per i tuoi ASIN (da ricerca manuale o tool esterno), lanciarle in BROAD a €0.35-0.45 bid, budget €10-15/giorno.\n- **Motivo**: Senza dati storici su DE, la campagna auto raccoglierà search term mentre il manual broad amplia la copertura velocemente.\n- **Impatto stimato**: Prime impressioni e click entro 24-48h dal lancio.\n\n**3. Impostare un sistema di monitoraggio settimanale per DE**\n- **Azione**: Pianificare review settimanale dei search term report dopo il lancio delle campagne (minimo dopo 7 giorni), pronti a negativizzare i termini irrilevanti e promuovere i convertenti.\n- **Motivo**: Senza storico dati, il rischio è bruciare budget su search term irrilevanti in tedesco (soprattutto con match BROAD e AUTO).\n- **Impatto stimato**: Riduzione waste del 20-30% già dalla seconda settimana di attività.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\nNessun search term disponibile da negativizzare — non ci sono campagne attive né dati di search term nel periodo.\n\n> ⚠️ **Appena lanci le prime campagne**, monitora subito questi pattern tipici da negativizzare su DE:\n> - Termini con \"kostenlos\" / \"gratis\" / \"gebraucht\" (gratuito/usato)\n> - Brand competitor diretti\n> - Termini generici non di categoria (es. \"amazon\", nomi di negozi)\n> - Ricerche in lingue non-DE (EN, FR, etc.) se non rilevanti\n\n**SEARCH TERMS VINCENTI → NUOVE KEYWORD**: Nessun dato disponibile. Da attivare dopo le prime 2 settimane di campagne auto.\n\n---\n\n# 🟢 Keywords da Scalare\n\nNessuna keyword attiva presente. Nessuna keyword-idea da campagne in pausa disponibile.\n\n> Una volta avviate le campagne, le keyword da scalare saranno quelle con ACoS < 25% e almeno 3 ordini nei 14 giorni — da identificare al prossimo ciclo di analisi.\n\n---\n\n# 💡 Quick Wins\n\n1. **Struttura campagna consigliata per il lancio**: 1 campagna Auto (scoperta search term) + 1 campagna Manual Exact (keyword già note da altri marketplace IT/ES/UK adattate in tedesco) + 1 campagna Manual Broad (espansione). Budget totale suggerito: €30-40/giorno per avere dati significativi entro 14 giorni.\n\n2. **Adatta le keyword in tedesco**: Se hai campagne attive su IT o altri marketplace, non copiare le keyword in italiano — traducile e adattale culturalmente. I tedeschi usano spesso compound words (es. \"Kaffeemaschine\" non \"macchina caffè\"). Usa Amazon Suggest su .de o tool come Helium10/DataDive in lingua DE.\n\n3. **Verifica listing DE prima di spendere in PPC**: Assicurati che titolo, bullet point e immagini siano ottimizzati in tedesco. PPC su listing non ottimizzato = click che non convertono = ACoS altissimo.\n\n4. **Imposta budget cap giornaliero conservativo**: Con zero storico, parti con €15-20/giorno per campagna. Aumenta solo dopo aver validato l'ACoS nella prima settimana.\n\n5. **Configura alert su ACoS**: Imposta una soglia di allerta (es. ACoS > 60%) dopo 5 giorni di campagna per intervenire rapidamente prima che il budget si esaurisca su search term non pertinenti.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n\n\n> **Nota**: Non vengono generate azioni automatiche perché non esistono campagne attive, keyword ID, campaign ID o ad group ID reali su cui operare. Tutte le azioni indicate nel report richiedono la **creazione manuale** di nuove campagne dall'interfaccia Amazon Ads o tramite bulk file — operazione che va deliberatamente decisa dall'operatore umano prima di qualsiasi automazione script.",
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace DE non presenta alcuna campagna attiva nel periodo analizzato (ultimi 14 giorni): spesa, impressioni, click e ordini sono tutti a zero. Non ci sono nemmeno campagne in pausa/archiviate né dati storici per ASIN. Il profilo PPC su questo marketplace è essenzialmente **inattivo** — non si tratta di un problema di ottimizzazione, ma di **assenza totale di advertising attivo**.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Attivare la prima campagna su DE**\n- **Azione**: Creare almeno una campagna Sponsored Products su DE — partire con una campagna Auto su ASIN best-seller IT/EU, budget €10-15/giorno, bid suggerito €0.40-0.60 (CPC medio DE categoria consumer).\n- **Motivo**: Zero campagne attive = zero visibilità organica supportata da PPC, zero dati raccolti. Il marketplace DE è il più grande d'Europa e non sta generando nessun ritorno da advertising.\n- **Impatto stimato**: Anche con budget minimo, nelle prime 2 settimane si raccoglie dati su search term, CTR e conversione DE — prerequisito per qualsiasi ottimizzazione futura.\n\n**2. Verificare se esiste un account Seller/Vendor DE separato**\n- **Azione**: Controllare in Seller Central se il marketplace DE è effettivamente abilitato, se ci sono restrizioni ASIN (es. conformità CE, EAN, titoli in tedesco) e se le campagne eventualmente esistenti sono collegate al profilo corretto analizzato dallo script.\n- **Motivo**: L'assenza totale di dati (0 campagne attive, 0 archiviate) può indicare un problema di configurazione dell'account o dello script di estrazione, non necessariamente che il marketplace sia vuoto.\n- **Impatto stimato**: Evita di costruire campagne su un account sbagliato; sblocca potenzialmente dati già esistenti.\n\n**3. Definire una struttura campagne minima DE prima di investire**\n- **Azione**: Prima di lanciare, preparare: (a) listing ottimizzati in tedesco (titolo, bullet, descrizione), (b) prezzo competitivo vs concorrenza DE, (c) struttura con almeno 1 campagna Auto + 1 Manual Exact sui top 5 keyword tedeschi del prodotto.\n- **Motivo**: Lanciare PPC su listing non localizzati o con prezzo fuori mercato DE brucia budget senza conversioni.\n- **Impatto stimato**: Aumenta il conversion rate atteso dal primo giorno, riducendo ACoS di lancio stimato dal 60-80% a un range 30-45%.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n**Nessun dato disponibile** — zero campagne attive, zero search term generati.\n\n> ⚠️ Appena le prime campagne Auto saranno attive, tornare su questo report dopo 7-14 giorni per identificare i primi search term irrilevanti da negativizzare (tipicamente branded concorrenti, termini generici non pertinenti, varianti colore/taglia non vendute).\n\n---\n\n# 🟢 Keywords da Scalare\n\n**Nessuna keyword attiva da scalare.**\n\n### Keyword-Idee da recuperare (campagne in pausa)\nNessuna disponibile nei dati attuali.\n\n> 💡 Quando si lancia la prima campagna Auto, i search term con 1+ ordini e ACoS < 35% vanno promossi immediatamente a keyword Manual Exact con bid = CPC medio del search term.\n\n---\n\n# 💡 Quick Wins\n\n1. **Usa i dati del marketplace IT/ES come proxy per DE**: se hai campagne attive su altri marketplace, esporta le top 10 keyword per ordini e usale come seed per la prima campagna Manual DE — risparmia 2-3 settimane di raccolta dati Auto.\n\n2. **Imposta un budget cap conservativo all'inizio**: €10/giorno per campagna è sufficiente per raccogliere dati senza rischio; scala solo dopo aver verificato un ACoS < 40% nelle prime 2 settimane.\n\n3. **Abilita il report Search Term ogni 3 giorni nelle prime 2 settimane**: la fase di apprendimento Auto su DE può generare match molto ampi — negativizzare velocemente riduce lo spreco iniziale del 20-30%.\n\n4. **Verifica la Buy Box su DE**: senza Buy Box le campagne SP non girano. Controllare che tutti gli ASIN da sponsorizzare abbiano Buy Box attiva su amazon.de prima del lancio.\n\n5. **Considera Sponsored Brands se hai un Brand Registry**: su DE il formato SB (banner + headline) ha CPC mediamente più basso di SP su segmenti competitivi — buona opzione per il lancio a fianco delle Auto.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n\n\n> **Motivazione**: Non esistono ID reali di campagne, keyword, ad group o search term nei dati forniti. Generare azioni con ID inventati causerebbe errori nello script o modifiche su campagne sbagliate. Tutte le azioni necessarie (creazione campagne, struttura, listing) sono **manuali** e non automatizzabili tramite `apply_changes.py` senza dati preesistenti.",
   "actions": {
     "actions": []
   },
-  "generated_at": "2026-07-13T10:40:36.200691"
+  "generated_at": "2026-08-24T08:06:02.344361"
 }

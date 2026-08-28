@@ -42,9 +42,23 @@ cp .env.example .env
 cd python
 pip install requests
 
-# Set Amazon Ads credentials (env vars or edit CONFIG in amazon_ads_api.py)
+# Credenziali via variabili d'ambiente (o modifica CONFIG in amazon_ads_api.py)
+export AMAZON_ADS_CLIENT_ID='amzn1.application-oa2-client.xxxxx'
+export AMAZON_ADS_CLIENT_SECRET='amzn1.oa2-cs.v1.xxxxx'
+export AMAZON_ADS_REFRESH_TOKEN='Atzr|xxxxx'
+
 python amazon_ads_api.py --marketplace IT --days 14
 ```
+
+Produce `amazon_ads_IT_<data>_<ora>.json` nella cartella corrente.
+
+⚠️ **`--days` non può superare 31**: l'API di reporting v3 rifiuta gli intervalli più lunghi, e il risultato sarebbe un file con la struttura delle campagne ma zero righe di performance. Se chiedi di più, lo script riduce la finestra a 31 giorni segnalandolo. Prima di usarlo, verifica che sia completo:
+
+```bash
+python check_data.py amazon_ads_IT_20260828_1530.json
+```
+
+Controlla i punti in cui il fetcher ha già sbagliato: liste troncate (un conteggio multiplo esatto di 100 è sospetto), report in timeout o saltati, e soprattutto la sovrapposizione tra le keyword del report e quelle della lista strutturale — è da lì che arriva il bid, e senza sovrapposizione i bid restano a zero. Esce con codice 1 se il file non è affidabile.
 
 ### 4. Analyze
 
@@ -71,24 +85,56 @@ L'app React può girare anche online, senza installare nulla in locale:
 
 ⚠️ **Attenzione — le pagine GitHub Pages sono pubbliche di default**, anche se il repo è privato (a meno di GitHub Enterprise Cloud con Pages ristretta). Chiunque conosca l'URL vedrebbe i dati di spesa/keyword/campagne pubblicati lì. Se questo è un problema, valuta di mettere il sito dietro un proxy con autenticazione (es. Cloudflare Access) o di non abilitare la pubblicazione automatica e usare solo il drag & drop locale.
 
-### Tab "✅ Azioni" — confermare ed applicare le modifiche
+### Tab "Azioni" — rivedere e applicare le modifiche
 
-Nella UI (locale o online), la tab **Azioni** mostra le modifiche che Claude propone (negative keyword, bid, budget, pause/riattivazioni):
+La tab **Azioni** raccoglie tutto ciò che è applicabile: le proposte della weekly analysis **e** quelle generate al volo dal Consulente sui dati che hai appena caricato.
 
-- **Spunta/deseleziona** le singole azioni, **modifica** bid/budget al volo, **rimuovi** quelle che non ti convincono
-- **+ Aggiungi azione manuale** per crearne di tue (stesso formato di `apply_changes.py`)
-- **⬇️ Scarica actions.json** — sempre disponibile, va incollato nel workflow `Apply Amazon Ads Changes` (tab Actions su GitHub), come già succedeva prima
-- **🚀 Applica direttamente da qui** — connetti il tuo account GitHub (OAuth Device Flow, nessun token da copiare) e lancia il workflow di apply con un click. Vedi sotto come creare l'OAuth App.
+Il flusso è a tre passi obbligati, pensato per non applicare mai niente alla cieca:
 
-#### Creare l'OAuth App per l'apply con un click
+1. **Rivedi** — le azioni sono raggruppate per intento (*Tagliare gli sprechi*, *Far crescere*, *Ottimizzare i bid*, *Budget e campagne*). Ogni riga mostra la variazione in percentuale, il motivo con il dato che la giustifica e l'impatto stimato in euro. Puoi spuntare/deselezionare (anche per gruppo), modificare bid e budget in linea, cercare, filtrare, rimuovere o aggiungere azioni tue. Le scelte sopravvivono a un refresh della pagina.
+2. **Anteprima** — lancia il workflow in sola lettura. Legge lo stato **attuale** su Amazon, scarta le azioni già allineate (bid già a quel valore, keyword già in pausa) e scrive un riepilogo leggibile nel summary del run.
+3. **Applica** — si sblocca solo dopo un'anteprima riuscita, e solo per *quella* selezione: se cambi idea e modifichi qualcosa, l'anteprima decade e va rifatta. Serve comunque digitare `APPLICA`.
 
-1. GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**
-2. Homepage URL: l'URL della tua Pages (es. `https://tuo-utente.github.io/amazon-ads-agent/`)
-3. Authorization callback URL: puoi mettere lo stesso URL (non viene usato nel Device Flow, ma è obbligatorio)
-4. Spunta **"Enable Device Flow"**
-5. Copia il **Client ID** e incollalo nel pannello "⚙️ Config" della tab Azioni, insieme al repo (`owner/repo`)
+Lo stato del run viene seguito in tempo reale nella UI, con il link diretto al log.
 
-Il token generato resta solo nel browser (localStorage), non viene mai inviato ad Anthropic o a terzi, e puoi revocarlo in qualsiasi momento da GitHub → Settings → Applications. Consigliato: lascia sempre "dry-run" attivo la prima volta, controlla l'anteprima su Actions, poi applica per davvero.
+**Se non hai gli ID** (tipico dei CSV di Seller Central) i consigli restano testuali: l'applicazione automatica richiede il JSON prodotto da `amazon_ads_api.py`.
+
+#### Limiti di sicurezza e rollback
+
+Prima di scrivere su Amazon, `apply_changes.py` applica dei limiti — validi anche per le azioni scritte a mano, così un errore di battitura (bid `45.00` invece di `0.45`) non diventa una spesa:
+
+| Cosa | Limite |
+|---|---|
+| Variazione bid | ±50%, comunque tra €0.02 e €5.00 |
+| Variazione budget | ±50%, comunque tra €1 e €100/giorno |
+| Azioni per run | max 80 |
+| Nuove campagne per run | max 4 |
+
+Si scavalcano con `--allow-large-changes`, da usare consapevolmente.
+
+Ogni applicazione produce un file `rollback_<MP>_<data>.json` tra gli artefatti del run: rilanciandolo si riportano bid, budget e stati com'erano. Negative e keyword aggiunte non hanno un'azione inversa via API e vengono elencate a parte come promemoria.
+
+- **⬇️ Scarica JSON** resta sempre disponibile, per incollarlo a mano nel workflow o lanciarlo da riga di comando.
+- **Connetti con GitHub** usa un fine-grained token limitato a questo repo. Vedi sotto.
+
+#### Connettere GitHub
+
+L'app gira solo nel browser, senza backend. Gli endpoint di login di GitHub (`github.com/login/…`) **non inviano header CORS**, quindi il Device Flow da qui non funziona: il browser blocca la richiesta e `fetch` fallisce con "Failed to fetch". `api.github.com` invece il CORS ce l'ha, quindi con un token in mano tutto il resto funziona.
+
+La via che funziona è un **fine-grained token**:
+
+1. GitHub → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**
+2. **Repository access**: *Only select repositories* → scegli solo questo repo
+3. **Permissions → Repository permissions → Actions**: *Read and write*
+4. Genera, copia il token e incollalo nel pannello Azioni → **Connetti**
+
+Il token resta nel browser (localStorage) e serve solo a lanciare il workflow. Limitandolo a un repo e al solo permesso Actions, non può leggere né toccare altro. Revocalo quando vuoi da GitHub → Settings → Personal access tokens. Metti una scadenza breve se usi la UI da un computer condiviso.
+
+Appena connesso, l'app verifica di riuscire davvero a vedere il workflow: se il token non ha i permessi giusti te lo dice subito, invece di farti scoprire il 403 al momento di applicare.
+
+**Device Flow (opzionale)**: resta disponibile se metti davanti un proxy che aggiunga gli header CORS (es. un Cloudflare Worker che inoltra a `github.com`). L'URL del proxy si configura nel pannello, sotto "Accesso senza token". Senza proxy non può funzionare.
+
+**Senza connettere niente**: **⬇️ Scarica JSON** e incollalo nel workflow `Apply Amazon Ads Changes` dal tab Actions di GitHub, come prima.
 
 ## Features
 
@@ -110,6 +156,14 @@ Il token generato resta solo nel browser (localStorage), non viene mai inviato a
 
 IT, FR, DE, ES, UK, NL, SE, PL, BE, IE
 
+## Test
+
+```bash
+npm test
+```
+
+Test senza dipendenze (solo `node`), su `tests/smoke.mjs`. Coprono i punti in cui il codice ha già sbagliato: numeri in formato europeo, CSV con punto e virgola, join dei bid reali dalla lista strutturale, estrazione delle azioni dall'output del modello, scarto degli ID inventati e limiti di variazione.
+
 ## Tech Stack
 
 - **Frontend**: React 18 + Vite
@@ -124,10 +178,13 @@ IT, FR, DE, ES, UK, NL, SE, PL, BE, IE
 ```
 amazon-ads-agent/
 ├── src/                          # React app
-│   ├── App.jsx
-│   ├── ActionsPanel.jsx          # Tab "Azioni": revisione/conferma/apply
-│   ├── github.js                 # GitHub OAuth Device Flow + workflow dispatch
-│   ├── theme.js
+│   ├── App.jsx                   # Dashboard, Consulente AI, navigazione
+│   ├── parse.js                  # Parsing JSON/CSV (testabile senza browser)
+│   ├── actions.js                # Modello azioni: validazione, limiti, descrizioni
+│   ├── ActionsPanel.jsx          # Tab "Azioni": rivedi → anteprima → applica
+│   ├── CampaignPlanner.jsx       # Nuova campagna da ASIN
+│   ├── github.js                 # OAuth Device Flow, dispatch e stato dei run
+│   ├── theme.js                  # Token di colore, tipografia, spaziature
 │   └── main.jsx
 ├── public/data/                  # JSON pubblicati dalla weekly analysis (auto-committati)
 ├── python/

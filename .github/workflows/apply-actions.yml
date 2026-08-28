@@ -80,7 +80,7 @@ jobs:
           echo "--- Validazione JSON ---"
           python -c "import json; json.load(open('actions_input.json')); print('OK')"
 
-      - name: 🔍 Anteprima (dry-run sempre eseguita per sicurezza)
+      - name: 🔍 Anteprima (sempre eseguita, anche prima di applicare)
         env:
           AMAZON_ADS_CLIENT_ID: ${{ secrets.AMAZON_ADS_CLIENT_ID }}
           AMAZON_ADS_CLIENT_SECRET: ${{ secrets.AMAZON_ADS_CLIENT_SECRET }}
@@ -89,7 +89,40 @@ jobs:
           cd python
           python apply_changes.py actions_input.json \
             --marketplace ${{ github.event.inputs.marketplace }} \
-            --dry-run
+            --dry-run --json-out preview.json
+
+      - name: 📋 Riepilogo leggibile dell'anteprima
+        if: always()
+        run: |
+          cd python
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          p = pathlib.Path("preview.json")
+          if not p.exists():
+              print("## Anteprima non disponibile\n\nLo script si e' fermato prima di produrla: controlla il log del passo precedente.")
+              raise SystemExit
+          d = json.loads(p.read_text())
+          print(f"## Anteprima — {d['marketplace']}\n")
+          if d.get("guardrails"):
+              print("### Bloccato dai limiti di sicurezza\n")
+              for g in d["guardrails"]:
+                  print(f"- {g}")
+              print()
+          if d.get("fixes"):
+              print("### Correzioni automatiche\n")
+              for f in d["fixes"]:
+                  print(f"- {f}")
+              print()
+          if d.get("skipped"):
+              print("### Gia' allineate, non verranno inviate\n")
+              for s in d["skipped"]:
+                  print(f"- {s}")
+              print()
+          if d.get("preview"):
+              print(f"### {len(d['preview'])} modifiche da applicare\n")
+              for line in d["preview"]:
+                  print(f"- `{line}`")
+          PY
 
       - name: 🚀 Applica modifiche
         if: ${{ github.event.inputs.dry_run != 'true' }}
@@ -101,12 +134,40 @@ jobs:
           cd python
           python apply_changes.py actions_input.json \
             --marketplace ${{ github.event.inputs.marketplace }} \
-            --yes
+            --yes --json-out applied.json
 
-      - name: 📦 Upload log come artefatto
+      - name: ↩️ Come annullare
+        if: ${{ always() && github.event.inputs.dry_run != 'true' }}
+        run: |
+          cd python
+          for f in rollback_*.json; do
+            [ -e "$f" ] || continue
+            {
+              echo "## Come annullare queste modifiche"
+              echo ""
+              echo "Scarica \`$f\` dagli artefatti di questo run e rilancia il workflow"
+              echo "incollandone il contenuto in \`actions_json\`: riporta bid, budget e stati com'erano."
+              python - "$f" <<'PY'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          if d.get("_manual_undo"):
+              print("")
+              print("Da fare a mano (l'API non espone un'azione inversa):")
+              for m in d["_manual_undo"]:
+                  print(f"- {m}")
+          PY
+            } >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: 📦 Upload log, anteprima e rollback
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: apply-log-${{ github.event.inputs.marketplace }}-${{ github.run_number }}
-          path: python/apply_log_*.json
+          path: |
+            python/apply_log_*.json
+            python/rollback_*.json
+            python/preview.json
+            python/applied.json
           retention-days: 90
+          if-no-files-found: ignore

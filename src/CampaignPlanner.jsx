@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { C } from "./theme";
 import {
-  startDeviceFlow, pollForToken, getUser,
+  getUser,
   dispatchWorkflow, findLatestRun, getRun, getRepoFileContents,
+  getLatestCommitForPath,
 } from "./github";
 
 const MARKETPLACES = ["IT", "FR", "DE", "ES", "UK", "NL", "SE", "PL", "BE", "IE"];
@@ -178,12 +179,10 @@ function AdGroupEditor({ g, onChange, onRemove, isAuto }) {
 // ---- componente principale -------------------------------------------------
 export default function CampaignPlanner({ onClose }) {
   // GitHub config (condivisa con ActionsPanel via localStorage)
-  const [clientId, setClientId] = useState(() => ls("gh_client_id"));
   const [owner, setOwner] = useState(() => ls("gh_owner"));
   const [repo, setRepo] = useState(() => ls("gh_repo"));
   const [token, setToken] = useState(() => ls("gh_token"));
   const [ghUser, setGhUser] = useState(null);
-  const [device, setDevice] = useState(null);
   const [connecting, setConnecting] = useState(false);
 
   // form
@@ -201,9 +200,10 @@ export default function CampaignPlanner({ onClose }) {
   const [plan, setPlan] = useState(null); // { actions, _meta }
   const [actions, setActions] = useState([]);
   const [applyMsg, setApplyMsg] = useState("");
+  const [debug, setDebug] = useState([]);
   const pollRef = useRef(null);
+  const addDebug = (msg) => setDebug(d => [...d, `[${new Date().toLocaleTimeString()}] ${msg}`].slice(-20));
 
-  useEffect(() => { localStorage.setItem("gh_client_id", clientId); }, [clientId]);
   useEffect(() => { localStorage.setItem("gh_owner", owner); }, [owner]);
   useEffect(() => { localStorage.setItem("gh_repo", repo); }, [repo]);
   useEffect(() => { if (token) localStorage.setItem("gh_token", token); }, [token]);
@@ -213,16 +213,14 @@ export default function CampaignPlanner({ onClose }) {
   }, [token]); // eslint-disable-line
 
   const connect = async () => {
-    if (!clientId) { setStatus("Inserisci prima il GitHub OAuth Client ID."); return; }
+    if (!token.trim()) { setStatus("Incolla il Personal Access Token (PAT) di GitHub."); return; }
+    if (!owner.trim() || !repo.trim()) { setStatus("Inserisci owner e repo."); return; }
     setConnecting(true); setStatus("");
     try {
-      const d = await startDeviceFlow(clientId, "repo");
-      setDevice(d);
-      const t = await pollForToken(clientId, d.device_code, d.interval, d.expires_in);
-      setToken(t);
-      setGhUser(await getUser(t));
-      setDevice(null);
-    } catch (e) { setStatus(String(e.message || e)); }
+      const user = await getUser(token.trim());
+      setGhUser(user);
+      localStorage.setItem("gh_token", token.trim());
+    } catch (e) { setStatus("Token non valido o scaduto. Rigenera il PAT su GitHub."); setToken(""); localStorage.removeItem("gh_token"); }
     finally { setConnecting(false); }
   };
 
@@ -232,13 +230,16 @@ export default function CampaignPlanner({ onClose }) {
     if (!token || !owner || !repo) { setStatus("Configura e connetti GitHub prima."); return; }
     if (!f.asin.trim()) { setStatus("Inserisci un ASIN."); return; }
     setPhase("waiting"); setStatus("Leggo lo stato attuale del file..."); setPlan(null); setActions([]);
+    setDebug([`start: ${new Date().toLocaleTimeString()}`]);
 
-    // sha precedente (per capire quando il file cambia)
-    let beforeSha = null;
+    // Prendo l'ultimo commit che ha toccato il file: la Commits API e' fresca,
+    // la Contents API ha cache lunga e non e' affidabile per rilevare cambi.
+    let beforeCommitSha = null;
     try {
-      const prev = await getRepoFileContents({ token, owner, repo, path: planPath });
-      beforeSha = prev?.sha || null;
+      const prev = await getLatestCommitForPath({ token, owner, repo, path: planPath });
+      beforeCommitSha = prev?.sha || null;
     } catch { /* file non esiste ancora */ }
+    addDebug(`beforeCommitSha=${beforeCommitSha ? beforeCommitSha.substring(0, 7) : "(none)"}`);
 
     setStatus("Avvio del workflow di generazione...");
     try {
@@ -252,47 +253,88 @@ export default function CampaignPlanner({ onClose }) {
         },
       });
     } catch (e) { setPhase("error"); setStatus(String(e.message || e)); return; }
+    addDebug("workflow dispatched");
 
     // trova il run (per link + rilevare fallimenti)
     let runId = null;
+    let runSucceeded = false;
     setTimeout(async () => {
       const run = await findLatestRun({ token, owner, repo, workflow: PLAN_WORKFLOW });
-      if (run) { runId = run.id; setRunUrl(run.html_url); }
+      if (run) { runId = run.id; setRunUrl(run.html_url); addDebug(`runId=${run.id}`); }
     }, 4000);
 
     const start = Date.now();
     const TIMEOUT = 8 * 60 * 1000;
     setStatus("Generazione in corso (fetch dati + recommendations + Claude)... puo' richiedere 1-3 minuti.");
     clearInterval(pollRef.current);
+    let tickCount = 0;
+
+    const loadPlan = async (fromLabel) => {
+      // Legge il file con retry (Contents API ha cache di 60-90s).
+      addDebug(`loadPlan(${fromLabel}): reading file`);
+      let res = null;
+      for (let attempt = 0; attempt < 8; attempt++) {
+        try { res = await getRepoFileContents({ token, owner, repo, path: planPath }); }
+        catch (e) { addDebug(`read err: ${e.message}`); }
+        if (res && res.json) break;
+        await new Promise(r => setTimeout(r, 3000));
+      }
+      if (!res || !res.json) { addDebug("read: nessun JSON dopo retry"); return false; }
+
+      const pl = res.json;
+      addDebug(`read OK: ${pl.actions?.length || 0} actions, status=${pl._meta?.status}`);
+      clearInterval(pollRef.current);
+      if (!pl.actions || pl.actions.length === 0) {
+        setPhase("error");
+        setStatus("Il planner non ha prodotto azioni valide. Spiegazione: " + (pl._meta?.explanation || "").slice(0, 400));
+        return true;
+      }
+      setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
+      return true;
+    };
+
     pollRef.current = setInterval(async () => {
+      tickCount++;
       if (Date.now() - start > TIMEOUT) {
         clearInterval(pollRef.current); setPhase("error");
         setStatus("Timeout: il workflow non ha prodotto il blueprint in tempo. Controlla i log del run.");
         return;
       }
-      // fallimento del run?
+
+      // Stato del run
+      let runStatus = null;
       if (runId) {
-        const r = await getRun({ token, owner, repo, runId });
-        if (r && r.status === "completed" && r.conclusion && r.conclusion !== "success") {
-          clearInterval(pollRef.current); setPhase("error");
-          setStatus(`Il workflow e' terminato con esito "${r.conclusion}". Controlla i log.`);
-          return;
+        try {
+          const r = await getRun({ token, owner, repo, runId });
+          if (r) runStatus = r;
+        } catch (e) { addDebug(`getRun err: ${e.message}`); }
+        if (runStatus?.status === "completed") {
+          if (runStatus.conclusion && runStatus.conclusion !== "success") {
+            clearInterval(pollRef.current); setPhase("error");
+            setStatus(`Il workflow e' terminato con esito "${runStatus.conclusion}". Controlla i log.`);
+            return;
+          }
+          runSucceeded = true;
         }
       }
-      // file aggiornato?
-      let res = null;
-      try { res = await getRepoFileContents({ token, owner, repo, path: planPath }); }
-      catch { /* retry */ }
-      if (res && res.sha && res.sha !== beforeSha && res.json) {
-        clearInterval(pollRef.current);
-        const pl = res.json;
-        if (!pl.actions || pl.actions.length === 0) {
-          setPhase("error");
-          setStatus("Il planner non ha prodotto azioni valide. Spiegazione: " + (pl._meta?.explanation || "").slice(0, 400));
-          return;
-        }
-        setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
+      addDebug(`tick ${tickCount}: run=${runStatus?.status || "?"} conc=${runStatus?.conclusion || "?"}`);
+
+      // Se il run e' finito con successo, carica direttamente il file
+      // (a prescindere dalla Commits API, che potrebbe essere in ritardo).
+      if (runSucceeded) {
+        const ok = await loadPlan("run-success");
+        if (ok) return;
       }
+
+      // Altrimenti verifica se c'e' un commit nuovo
+      let commit = null;
+      try { commit = await getLatestCommitForPath({ token, owner, repo, path: planPath }); }
+      catch (e) { addDebug(`getCommit err: ${e.message}`); }
+      if (!commit) { addDebug("commit=null"); return; }
+      addDebug(`latestCommit=${commit.sha.substring(0, 7)}`);
+      if (commit.sha === beforeCommitSha) return; // niente ancora
+
+      await loadPlan("new-commit");
     }, 8000);
   };
 
@@ -342,20 +384,28 @@ export default function CampaignPlanner({ onClose }) {
           <div style={{ fontSize: 12, fontWeight: 600, color: C.text, marginBottom: 8 }}>
             {connected ? `🟢 GitHub: ${ghUser.login}` : "🔗 Connetti GitHub"}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
-            <input placeholder="OAuth Client ID" style={inputStyle} value={clientId} onChange={e => setClientId(e.target.value)} />
-            <input placeholder="owner (utente/org)" style={inputStyle} value={owner} onChange={e => setOwner(e.target.value)} />
-            <input placeholder="repo" style={inputStyle} value={repo} onChange={e => setRepo(e.target.value)} />
+          {!connected && (
+            <div style={{ fontSize: 10, color: C.textDim, marginBottom: 8, lineHeight: 1.5 }}>
+              Serve un Personal Access Token (PAT). Crealo su GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens. Permessi: Contents (read/write) + Actions (read/write) sul repo.
+            </div>
+          )}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+            <input placeholder="owner (il tuo username GitHub)" style={inputStyle} value={owner} onChange={e => setOwner(e.target.value)} />
+            <input placeholder="repo (es. amazon-ads-agent)" style={inputStyle} value={repo} onChange={e => setRepo(e.target.value)} />
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <input placeholder="Incolla qui il Personal Access Token (github_pat_...)" type="password" style={inputStyle} value={token} onChange={e => setToken(e.target.value)} />
+            <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>Il token resta solo nel tuo browser (localStorage), non viene inviato da nessuna parte.</div>
           </div>
           {!connected && (
             <button onClick={connect} disabled={connecting} style={btn(C.accent)}>
-              {connecting ? "In attesa di autorizzazione..." : "Connetti con GitHub"}
+              {connecting ? "Verifica in corso..." : "Connetti"}
             </button>
           )}
-          {device && (
-            <div style={{ marginTop: 8, fontSize: 12, color: C.textMuted }}>
-              Vai su <a href={device.verification_uri} target="_blank" rel="noreferrer" style={{ color: C.accent }}>{device.verification_uri}</a> e inserisci il codice: <b style={{ color: C.text }}>{device.user_code}</b>
-            </div>
+          {connected && (
+            <button onClick={() => { setToken(""); setGhUser(null); localStorage.removeItem("gh_token"); }} style={{ ...btn("transparent", C.textMuted), border: `1px solid ${C.border}`, fontSize: 11 }}>
+              Disconnetti
+            </button>
           )}
         </div>
 
@@ -399,6 +449,18 @@ export default function CampaignPlanner({ onClose }) {
             <button onClick={generate} disabled={!connected} style={{ ...btn(connected ? C.accent : C.border, connected ? "#fff" : C.textDim), padding: "11px 22px", fontSize: 13 }}>
               ⚡ Genera piano
             </button>
+            <button onClick={async () => {
+              if (!connected || !f.asin.trim()) { setStatus("Serve connessione e ASIN."); return; }
+              setStatus("Cerco piano esistente nel repo...");
+              addDebug("load-existing");
+              const res = await getRepoFileContents({ token, owner, repo, path: planPath }).catch(() => null);
+              if (!res || !res.json) { setStatus(`Nessun piano trovato per ${f.marketplace}/${f.asin}. Genera un piano nuovo.`); return; }
+              const pl = res.json;
+              if (!pl.actions?.length) { setStatus("Piano esistente vuoto. " + (pl._meta?.explanation || "").slice(0, 200)); return; }
+              setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
+            }} style={{ ...btn("transparent", C.accent), border: `1px solid ${C.accent}`, padding: "11px 20px", fontSize: 12, marginLeft: 8 }}>
+              📂 Carica ultimo piano
+            </button>
             {status && <div style={{ marginTop: 10, fontSize: 12, color: C.red }}>{status}</div>}
           </div>
         )}
@@ -408,6 +470,29 @@ export default function CampaignPlanner({ onClose }) {
             <div style={{ width: 34, height: 34, border: `3px solid ${C.border}`, borderTopColor: C.accent, borderRadius: "50%", animation: "spin .7s linear infinite", margin: "0 auto 14px" }} />
             <div style={{ color: C.accent, fontWeight: 600, fontSize: 13 }}>{status}</div>
             {runUrl && <div style={{ marginTop: 8, fontSize: 11 }}><a href={runUrl} target="_blank" rel="noreferrer" style={{ color: C.accent }}>apri il run su GitHub →</a></div>}
+            <div style={{ marginTop: 14, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+              <button onClick={async () => {
+                clearInterval(pollRef.current);
+                setStatus("Lettura diretta del file dal repo...");
+                addDebug("MANUAL: forced load");
+                const res = await getRepoFileContents({ token, owner, repo, path: planPath }).catch(() => null);
+                if (!res || !res.json) { setPhase("error"); setStatus("File non trovato nel repo. Il workflow potrebbe non essere ancora finito."); return; }
+                const pl = res.json;
+                if (!pl.actions?.length) { setPhase("error"); setStatus("Nessuna azione nel piano. " + (pl._meta?.explanation || "").slice(0, 300)); return; }
+                setPlan(pl); setActions(pl.actions); setPhase("review"); setStatus("");
+              }} style={{ ...btn("transparent", C.accent), border: `1px solid ${C.accent}`, fontSize: 11 }}>
+                📥 Carica direttamente (bypassa attesa)
+              </button>
+              <button onClick={() => { clearInterval(pollRef.current); setPhase("form"); setStatus(""); }} style={{ ...btn("transparent", C.textMuted), border: `1px solid ${C.border}`, fontSize: 11 }}>
+                ✕ Annulla
+              </button>
+            </div>
+            {debug.length > 0 && (
+              <details style={{ marginTop: 14, textAlign: "left" }}>
+                <summary style={{ fontSize: 10, color: C.textDim, cursor: "pointer" }}>Debug ({debug.length})</summary>
+                <pre style={{ fontSize: 10, color: C.textDim, background: C.bg, padding: 8, borderRadius: 6, marginTop: 6, maxHeight: 200, overflow: "auto" }}>{debug.join("\n")}</pre>
+              </details>
+            )}
             <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
           </div>
         )}

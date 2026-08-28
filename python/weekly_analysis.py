@@ -194,6 +194,28 @@ def build_summary(data):
         # Stato ignoto -> per prudenza trattata come attiva (non nasconde costi)
         return state_by_id.get(str(campaign_id), "ENABLED") == "ENABLED"
 
+    # ---- Metadati strutturali: bid e stato REALI delle keyword ----
+    # Il report performance (spKeywords) NON contiene la colonna bid: senza
+    # questo join ogni keyword risultava con bid 0, e il modello proponeva
+    # "±30% del bid attuale" partendo da zero. Idem per lo stato: senza di esso
+    # si finiva col proporre la pausa di keyword gia' in pausa.
+    kw_meta = {}
+    for k in data.get("keywords", []):
+        kid = str(k.get("keywordId", ""))
+        if kid:
+            kw_meta[kid] = {
+                "bid": float(k.get("bid") or 0),
+                "state": str(k.get("state", "")).upper(),
+                "adGroupId": str(k.get("adGroupId", "")),
+                "campaignId": str(k.get("campaignId", "")),
+            }
+    name_by_id = {str(c.get("campaignId", "")): c.get("name", "")
+                  for c in data.get("campaigns", []) if c.get("campaignId")}
+    # Ad group ATTIVI: destinazioni legittime per add_keyword / add_negative
+    active_ag = {str(g.get("adGroupId", "")) for g in data.get("adGroups", [])
+                 if str(g.get("state", "")).upper() == "ENABLED"
+                 and is_active(g.get("campaignId"))}
+
     # ---- Split campagne: attive vs in pausa/archiviate ----
     active_campaigns = [r for r in campaigns_report if is_active(r.get("campaignId"))]
     paused_report = [r for r in campaigns_report if not is_active(r.get("campaignId"))]
@@ -262,13 +284,20 @@ def build_summary(data):
         if spend == 0:
             continue
         k_acos = (spend / sales * 100) if sales > 0 else 999
+        kid = str(r.get("keywordId", ""))
+        meta = kw_meta.get(kid, {})
+        cid = str(r.get("campaignId", ""))
         kw_summary.append({
-            "keywordId": str(r.get("keywordId", "")),
-            "campaignId": str(r.get("campaignId", "")),
-            "adGroupId": str(r.get("adGroupId", "")),
+            "keywordId": kid,
+            "campaignId": cid,
+            "campaign": name_by_id.get(cid, ""),
+            "adGroupId": str(r.get("adGroupId", "")) or meta.get("adGroupId", ""),
             "keyword": kw, "matchType": mt,
             "spend": spend, "sales": sales,
             "clicks": clicks, "orders": orders, "acos": k_acos,
+            "bid": meta.get("bid", 0.0),
+            "state": meta.get("state", ""),
+            "cpc": (spend / clicks) if clicks > 0 else 0.0,
         })
     kw_summary.sort(key=lambda x: x["spend"], reverse=True)
 
@@ -319,6 +348,11 @@ def build_summary(data):
         "n_active": len(active_campaigns),
         "n_paused": len(paused_report),
         "asin_view": build_asin_view(data),
+        # Usati dal validatore delle azioni (anti-invenzione di ID)
+        "active_ad_group_ids": sorted(active_ag),
+        "campaign_budgets": {str(c.get("campaignId", "")): float(c.get("budget") or 0)
+                             for c in data.get("campaigns", []) if c.get("campaignId")},
+        "data_incomplete": bool(data.get("_meta", {}).get("reports_incomplete")),
     }
 
 
@@ -329,7 +363,9 @@ def build_claude_prompt(summary, marketplace, days):
         for c in summary["campaigns"]
     ])
     kws = "\n".join([
-        f'- [kwId:{k["keywordId"]} campId:{k["campaignId"]}] "{k["keyword"]}" [{k["matchType"]}] €{k["spend"]:.2f} spend, €{k["sales"]:.2f} sales, ACoS {k["acos"]:.1f}%, {k["clicks"]:.0f} clicks, {k["orders"]:.0f} orders'
+        f'- [kwId:{k["keywordId"]} campId:{k["campaignId"]} agId:{k["adGroupId"]}] "{k["keyword"]}" [{k["matchType"]}]'
+        f' bid attuale €{k["bid"]:.2f}, CPC medio €{k["cpc"]:.2f}, stato {k["state"] or "?"}'
+        f' | €{k["spend"]:.2f} spend, €{k["sales"]:.2f} sales, ACoS {k["acos"]:.1f}%, {k["clicks"]:.0f} clicks, {k["orders"]:.0f} orders'
         for k in summary["keywords"]
     ])
     waste = "\n".join([
@@ -454,8 +490,8 @@ Alla FINE del report, aggiungi UN SOLO blocco `<actions>...</actions>` con un JS
 - Ogni azione va giustificata da un dato concreto visto sopra.
 - Massimo 15 azioni totali, prioritizzando ROI e sicurezza.
 - Tipi di azione ammessi:
-  * `update_bid`: keywordId, keyword, old_bid, new_bid  — variazione max ±30% del bid attuale se noto, o partire da CPC medio della keyword
-  * `pause_keyword`: keywordId, keyword — solo se spesa > €3 e ZERO ordini in 14gg
+  * `update_bid`: keywordId, keyword, old_bid, new_bid — `old_bid` DEVE essere il "bid attuale" mostrato sopra per quella keyword (non inventarlo). Variazione max ±30% di quel valore, mai sotto €0.02.
+  * `pause_keyword`: keywordId, keyword — solo se spesa > €3 e ZERO ordini in 14gg, e SOLO se lo stato mostrato sopra e' ENABLED (non proporre la pausa di keyword gia' in pausa)
   * `add_negative`: campaignId, adGroupId (opzionale), keywordText, matchType (NEGATIVE_EXACT o NEGATIVE_PHRASE) — per search terms sprechi
   * `update_budget`: campaignId, campaign, old_budget (se noto), new_budget — variazione max ±50%
   * `add_keyword`: campaignId, adGroupId, keywordText, matchType (EXACT|PHRASE|BROAD), bid -> per search terms che HANNO GENERATO ORDINI ma non sono ancora keyword. Usa gli ID reali dell'ad group da cui proviene il search term. bid = CPC medio del search term (o 0.30-0.50 se ignoto). Preferisci match EXACT per i termini gia' vincenti.
@@ -688,8 +724,36 @@ def extract_actions(analysis_text, summary):
     valid_camp_ids |= {c["campaignId"] for c in summary.get("paused_campaigns", []) if c.get("campaignId")}
     valid_camp_ids |= {s["campaignId"] for s in summary.get("waste_st", []) if s.get("campaignId")}
 
+    # Ad group su cui e' lecito scrivere (attivi + quelli visti nei dati)
+    valid_ag_ids = set(summary.get("active_ad_group_ids", []))
+    valid_ag_ids |= {k["adGroupId"] for k in summary.get("keywords", []) if k.get("adGroupId")}
+    valid_ag_ids |= {s["adGroupId"] for s in summary.get("waste_st", []) if s.get("adGroupId")}
+    for a in summary.get("asin_view", {}).get("asins", []):
+        for t in a.get("active_adgroups", []):
+            valid_ag_ids.add(str(t.get("adGroupId", "")))
+
+    # Bid/stato reali per keyword, per ancorare le variazioni
+    kw_by_id = {}
+    for bucket in ("keywords", "waste_kw", "best_kw"):
+        for k in summary.get(bucket, []):
+            if k.get("keywordId"):
+                kw_by_id.setdefault(k["keywordId"], k)
+    budgets = summary.get("campaign_budgets", {})
+
+    # `add_keyword` era ESCLUSO da questa lista pur essendo richiesto a gran
+    # voce dal prompt ("la leva di crescita principale"): ogni promozione di un
+    # search term vincente veniva silenziosamente buttata via.
     ALLOWED_TYPES = {"update_bid", "pause_keyword", "enable_keyword",
-                     "add_negative", "update_budget"}
+                     "add_negative", "update_budget", "add_keyword"}
+
+    # Limiti di sicurezza: il modello non puo' proporre variazioni estreme.
+    MAX_BID_CHANGE = 0.30      # ±30%
+    MAX_BUDGET_CHANGE = 0.50   # ±50%
+    MIN_BID, MAX_BID = 0.02, 5.00
+    MIN_BUDGET = 1.00
+
+    def clamp(value, lo, hi):
+        return max(lo, min(hi, value))
 
     validated = []
     for i, a in enumerate(proposed):
@@ -707,7 +771,7 @@ def extract_actions(analysis_text, summary):
                 warnings.append(f"azione {i} ({t}): keywordId {kwid} non presente nei dati, scartata (anti-hallucination)")
                 continue
 
-        if t in ("add_negative", "update_budget"):
+        if t in ("add_negative", "update_budget", "add_keyword"):
             cid = str(a.get("campaignId", ""))
             if not cid:
                 warnings.append(f"azione {i} ({t}): campaignId mancante, scartata")
@@ -724,14 +788,77 @@ def extract_actions(analysis_text, summary):
             if mt not in ("NEGATIVE_EXACT", "NEGATIVE_PHRASE"):
                 warnings.append(f"azione {i}: matchType '{mt}' non valido, scartata")
                 continue
+            agid = str(a.get("adGroupId", "") or "")
+            if agid and agid not in valid_ag_ids:
+                warnings.append(f"azione {i}: adGroupId {agid} inesistente, negativa degradata a livello campagna")
+                a.pop("adGroupId", None)
 
-        if t == "update_bid" and not isinstance(a.get("new_bid"), (int, float)):
-            warnings.append(f"azione {i}: new_bid mancante o non numerico, scartata")
-            continue
+        if t == "add_keyword":
+            agid = str(a.get("adGroupId", ""))
+            if not agid:
+                warnings.append(f"azione {i} (add_keyword): adGroupId mancante, scartata")
+                continue
+            if agid not in valid_ag_ids:
+                warnings.append(f"azione {i} (add_keyword): adGroupId {agid} non presente/attivo, scartata")
+                continue
+            if not a.get("keywordText"):
+                warnings.append(f"azione {i} (add_keyword): keywordText mancante, scartata")
+                continue
+            if a.get("matchType", "EXACT") not in ("EXACT", "PHRASE", "BROAD"):
+                warnings.append(f"azione {i} (add_keyword): matchType non valido, scartata")
+                continue
+            if not isinstance(a.get("bid"), (int, float)):
+                warnings.append(f"azione {i} (add_keyword): bid mancante, scartata")
+                continue
+            bid = clamp(float(a["bid"]), MIN_BID, MAX_BID)
+            if bid != a["bid"]:
+                warnings.append(f"azione {i} (add_keyword): bid {a['bid']} portato nei limiti -> {bid}")
+            a["bid"] = round(bid, 2)
 
-        if t == "update_budget" and not isinstance(a.get("new_budget"), (int, float)):
-            warnings.append(f"azione {i}: new_budget mancante o non numerico, scartata")
-            continue
+        if t == "update_bid":
+            if not isinstance(a.get("new_bid"), (int, float)):
+                warnings.append(f"azione {i}: new_bid mancante o non numerico, scartata")
+                continue
+            known = kw_by_id.get(str(a.get("keywordId", "")), {})
+            cur = float(known.get("bid") or 0)
+            if cur > 0:
+                a["old_bid"] = round(cur, 2)  # sovrascrive un eventuale valore inventato
+                lo, hi = cur * (1 - MAX_BID_CHANGE), cur * (1 + MAX_BID_CHANGE)
+                new = clamp(float(a["new_bid"]), lo, hi)
+                new = clamp(new, MIN_BID, MAX_BID)
+                if abs(new - float(a["new_bid"])) > 0.001:
+                    warnings.append(
+                        f"azione {i}: new_bid {a['new_bid']} oltre il ±{int(MAX_BID_CHANGE * 100)}% "
+                        f"del bid reale {cur:.2f}, limitato a {new:.2f}")
+                a["new_bid"] = round(new, 2)
+                if abs(a["new_bid"] - cur) < 0.01:
+                    warnings.append(f"azione {i}: new_bid uguale al bid attuale, scartata")
+                    continue
+            else:
+                a["new_bid"] = round(clamp(float(a["new_bid"]), MIN_BID, MAX_BID), 2)
+
+        if t == "pause_keyword":
+            known = kw_by_id.get(str(a.get("keywordId", "")), {})
+            if known.get("state") and known["state"] != "ENABLED":
+                warnings.append(f"azione {i}: keyword gia' in stato {known['state']}, scartata")
+                continue
+
+        if t == "update_budget":
+            if not isinstance(a.get("new_budget"), (int, float)):
+                warnings.append(f"azione {i}: new_budget mancante o non numerico, scartata")
+                continue
+            cur = float(budgets.get(str(a.get("campaignId", "")), 0) or 0)
+            if cur > 0:
+                a["old_budget"] = round(cur, 2)
+                new = clamp(float(a["new_budget"]), cur * (1 - MAX_BUDGET_CHANGE), cur * (1 + MAX_BUDGET_CHANGE))
+                new = max(MIN_BUDGET, new)
+                if abs(new - float(a["new_budget"])) > 0.001:
+                    warnings.append(
+                        f"azione {i}: new_budget {a['new_budget']} oltre il ±{int(MAX_BUDGET_CHANGE * 100)}% "
+                        f"di {cur:.2f}, limitato a {new:.2f}")
+                a["new_budget"] = round(new, 2)
+            else:
+                a["new_budget"] = round(max(MIN_BUDGET, float(a["new_budget"])), 2)
 
         validated.append(a)
 

@@ -1,0 +1,42 @@
+warning: in the working copy of '.env.example', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/workflows/apply-actions.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/workflows/deploy-pages.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/workflows/weekly-analysis.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'GITHUB_ACTIONS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package-lock.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'public/data/DE.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'public/data/FR.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'public/data/IT.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'public/data/index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'python/amazon_ads_api.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'python/apply_changes.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'python/campaign_planner.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'python/weekly_analysis.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/ActionsPanel.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/App.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/CampaignPlanner.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/github.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/theme.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'vite.config.js', LF will be replaced by CRLF the next time Git touches it
+ .github/workflows/apply-actions.yml |   71 [32m+[m[31m-[m
+ README.md                           |   93 [32m+[m[31m-[m
+ package.json                        |    5 [32m+[m[31m-[m
+ public/data/DE.json                 |   72 [32m+[m[31m-[m
+ public/data/FR.json                 | 3348 [32m+++++++++++++++++++++[m[31m---[m
+ public/data/IT.json                 | 4844 [32m+++++++++++++++++++++[m[31m--------------[m
+ public/data/index.json              |    2 [32m+[m[31m-[m
+ python/amazon_ads_api.py            |  181 [32m+[m[31m-[m
+ python/apply_changes.py             |  735 [32m+++++[m[31m-[m
+ python/campaign_planner.py          |   51 [32m+[m[31m-[m
+ python/weekly_analysis.py           |  157 [32m+[m[31m-[m
+ src/ActionsPanel.jsx                |  902 [32m+++++[m[31m--[m
+ src/App.jsx                         |  957 [32m+++[m[31m----[m
+ src/CampaignPlanner.jsx             |  175 [32m+[m[31m-[m
+ src/github.js                       |  182 [32m+[m[31m-[m
+ src/theme.js                        |   90 [32m+[m[31m-[m
+ 16 files changed, 8613 insertions(+), 3252 deletions(-)
