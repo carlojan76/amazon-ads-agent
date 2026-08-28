@@ -9,6 +9,13 @@ const ENV_KEY = typeof import.meta !== "undefined" ? import.meta.env?.VITE_ANTHR
 const BASE_URL = typeof import.meta !== "undefined" ? import.meta.env.BASE_URL : "/";
 const MODEL = "claude-sonnet-5";
 
+// I modelli recenti ragionano prima di rispondere, e i token del ragionamento
+// contano DENTRO max_tokens. Con un tetto basso (4000) il budget si esauriva
+// nel ragionamento e la risposta arrivava senza testo, con stop_reason
+// "max_tokens". Il tetto va quindi tenuto largo abbastanza da coprire
+// ragionamento + report + blocco azioni.
+const MAX_TOKENS = 16000;
+
 // ---------------------------------------------------------------- UI comuni
 
 const eur = (v) => `€${(v || 0).toFixed(2)}`;
@@ -143,7 +150,7 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
           "anthropic-dangerous-direct-browser-access": "true",
         },
         body: JSON.stringify({
-          model: MODEL, max_tokens: 4000, system: sys,
+          model: MODEL, max_tokens: MAX_TOKENS, system: sys,
           messages: [...history, { role: "user", content: msg }],
         }),
       });
@@ -177,9 +184,12 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
         // Console: utile per capire cosa è arrivato davvero.
         console.warn("Risposta senza testo dall'API Anthropic:", data);
         const kinds = blocks.map((b) => b.type).filter(Boolean).join(", ") || "nessuno";
+        const why = data.stop_reason === "max_tokens"
+          ? ` Il budget di ${MAX_TOKENS} token si è esaurito nel ragionamento, prima della risposta: `
+            + `fai una domanda più circoscritta, oppure alza MAX_TOKENS in App.jsx.`
+          : "";
         throw new Error(`Il modello ha risposto senza testo (blocchi ricevuti: ${kinds}; `
-          + `motivo di arresto: ${data.stop_reason || "ignoto"}). `
-          + `Se il motivo è "max_tokens", i dati inviati sono troppi: riprova con una domanda più mirata.`);
+          + `motivo di arresto: ${data.stop_reason || "ignoto"}).${why}`);
       }
 
       const { actions, cleanText, warnings } = extractActionsFromText(text);
