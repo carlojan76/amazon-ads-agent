@@ -29,6 +29,9 @@ from amazon_ads_api import fetch_all_data, CONFIG
 # ============================================================
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+# Deve coprire ragionamento + report + blocco <actions>: i token del
+# ragionamento contano dentro max_tokens. Vedi call_claude().
+MAX_OUTPUT_TOKENS = int(os.getenv("MAX_OUTPUT_TOKENS", "16000"))
 
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
@@ -526,7 +529,11 @@ def call_claude(prompt):
             },
             json={
                 "model": ANTHROPIC_MODEL,
-                "max_tokens": 4000,
+                # I token del ragionamento contano dentro max_tokens: un tetto
+                # basso li fa esaurire prima della risposta, e si ottiene un
+                # contenuto senza testo (stop_reason "max_tokens"). Serve spazio
+                # per ragionamento + report + blocco <actions>.
+                "max_tokens": MAX_OUTPUT_TOKENS,
                 "messages": [{"role": "user", "content": prompt}],
             },
             timeout=120,
@@ -539,7 +546,20 @@ def call_claude(prompt):
     if resp.status_code != 200:
         return f"⚠️ Errore Claude API ({resp.status_code}): {resp.text[:300]}"
     data = resp.json()
-    return "\n".join(b.get("text", "") for b in data.get("content", []))
+    blocks = data.get("content", []) or []
+    text = "\n".join(b.get("text", "") for b in blocks).strip()
+    if not text:
+        # Senza questo controllo l'analisi usciva vuota e le azioni a zero,
+        # senza che nulla nel log spiegasse il perche'.
+        kinds = ", ".join(sorted({b.get("type", "?") for b in blocks})) or "nessuno"
+        stop = data.get("stop_reason", "ignoto")
+        print(f"   ⚠️ Risposta senza testo (blocchi: {kinds}, stop_reason: {stop})", flush=True)
+        if stop == "max_tokens":
+            return (f"⚠️ Il modello ha esaurito i {MAX_OUTPUT_TOKENS} token di output nel "
+                    f"ragionamento, senza arrivare alla risposta. Alza MAX_OUTPUT_TOKENS "
+                    f"in weekly_analysis.py.")
+        return f"⚠️ Risposta vuota da Claude (blocchi: {kinds}, stop_reason: {stop})"
+    return text
 
 
 def markdown_to_html(md_text):
