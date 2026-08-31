@@ -66,11 +66,12 @@ def build_asin_view(data):
             return float(m[0]) if m else 0.0
 
     # stato campagne e ad group
-    cstate = {}
+    cstate, ctarget = {}, {}
     for c in data.get("campaigns", []):
         cid = str(c.get("campaignId", ""))
         if cid:
             cstate[cid] = str(c.get("state", "")).upper()
+            ctarget[cid] = str(c.get("targetingType", "MANUAL")).upper()
     agstate = {}
     for g in data.get("adGroups", []):
         agid = str(g.get("adGroupId", ""))
@@ -97,7 +98,12 @@ def build_asin_view(data):
         if cact(cid) and agact(agid):
             lst = asin_active_ags.setdefault(asin, [])
             if not any(x["adGroupId"] == agid for x in lst):
-                lst.append({"campaignId": cid, "adGroupId": agid})
+                # Le campagne AUTO non accettano keyword positive: restano
+                # destinazioni valide per le negative, mai per un add_keyword.
+                lst.append({"campaignId": cid, "adGroupId": agid,
+                            "auto": ctarget.get(cid, "MANUAL") == "AUTO"})
+            # le destinazioni MANUAL vanno proposte per prime
+            lst.sort(key=lambda x: x.get("auto", False))
 
     certain = {agid: next(iter(v)) for agid, v in ag_asins.items() if len(v) == 1}
     ambiguous = sum(1 for v in ag_asins.values() if len(v) > 1)
@@ -214,10 +220,17 @@ def build_summary(data):
             }
     name_by_id = {str(c.get("campaignId", "")): c.get("name", "")
                   for c in data.get("campaigns", []) if c.get("campaignId")}
-    # Ad group ATTIVI: destinazioni legittime per add_keyword / add_negative
+    # Ad group ATTIVI: destinazioni legittime per le negative.
     active_ag = {str(g.get("adGroupId", "")) for g in data.get("adGroups", [])
                  if str(g.get("state", "")).upper() == "ENABLED"
                  and is_active(g.get("campaignId"))}
+    # Sottoinsieme AUTO: qui le keyword positive vengono rifiutate dall'API
+    # ("Only negative keywords ... are allowed in auto targeting campaigns"),
+    # quindi sono destinazioni valide solo per add_negative.
+    auto_camp_ids = {str(c.get("campaignId", "")) for c in data.get("campaigns", [])
+                     if str(c.get("targetingType", "")).upper() == "AUTO"}
+    auto_ag = {str(g.get("adGroupId", "")) for g in data.get("adGroups", [])
+               if str(g.get("campaignId", "")) in auto_camp_ids}
 
     # ---- Split campagne: attive vs in pausa/archiviate ----
     active_campaigns = [r for r in campaigns_report if is_active(r.get("campaignId"))]
@@ -353,6 +366,8 @@ def build_summary(data):
         "asin_view": build_asin_view(data),
         # Usati dal validatore delle azioni (anti-invenzione di ID)
         "active_ad_group_ids": sorted(active_ag),
+        "auto_ad_group_ids": sorted(auto_ag),
+        "auto_campaign_ids": sorted(auto_camp_ids),
         "campaign_budgets": {str(c.get("campaignId", "")): float(c.get("budget") or 0)
                              for c in data.get("campaigns", []) if c.get("campaignId")},
         "data_incomplete": bool(data.get("_meta", {}).get("reports_incomplete")),
@@ -397,8 +412,17 @@ def build_claude_prompt(summary, marketplace, days):
     asin_blocks = []
     for a in asin_view.get("asins", []):
         tgt = a["active_adgroups"]
-        if tgt:
-            tgt_str = f'AD GROUP ATTIVO dove ri-aggiungere -> campId:{tgt[0]["campaignId"]} adGroupId:{tgt[0]["adGroupId"]}'
+        manual_tgt = [t for t in tgt if not t.get("auto")]
+        if manual_tgt:
+            tgt_str = (f'AD GROUP MANUAL dove ri-aggiungere -> campId:{manual_tgt[0]["campaignId"]} '
+                       f'adGroupId:{manual_tgt[0]["adGroupId"]}')
+            auto_tgt = [t for t in tgt if t.get("auto")]
+            if auto_tgt:
+                tgt_str += (f' (l\'ad group {auto_tgt[0]["adGroupId"]} e\' di una campagna AUTO: '
+                            f'usabile SOLO per add_negative)')
+        elif tgt:
+            tgt_str = (f'SOLO ad group AUTO disponibili ({tgt[0]["adGroupId"]}): NON generare add_keyword, '
+                       f'le keyword positive vengono rifiutate dalle campagne AUTO')
         else:
             tgt_str = "NESSUN ad group attivo per questo ASIN -> serve riattivazione manuale campagna (NON generare add_keyword)"
         kw_lines = "\n".join(
@@ -495,9 +519,10 @@ Alla FINE del report, aggiungi UN SOLO blocco `<actions>...</actions>` con un JS
 - Tipi di azione ammessi:
   * `update_bid`: keywordId, keyword, old_bid, new_bid — `old_bid` DEVE essere il "bid attuale" mostrato sopra per quella keyword (non inventarlo). Variazione max ±30% di quel valore, mai sotto €0.02.
   * `pause_keyword`: keywordId, keyword — solo se spesa > €3 e ZERO ordini in 14gg, e SOLO se lo stato mostrato sopra e' ENABLED (non proporre la pausa di keyword gia' in pausa)
-  * `add_negative`: campaignId, adGroupId (opzionale), keywordText, matchType (NEGATIVE_EXACT o NEGATIVE_PHRASE) — per search terms sprechi
+  * `add_negative`: campaignId, adGroupId (opzionale), keywordText, matchType (NEGATIVE_EXACT o NEGATIVE_PHRASE) — per search terms sprechi. MAI una negativa che coincide con una keyword ATTIVA dello stesso ad group (la spegnerebbe): se il termine e' uno spreco su quella keyword, usa `pause_keyword` o abbassa il bid. La negativa esatta nell'ad group PHRASE/BROAD per incanalare il traffico verso l'ad group EXACT resta legittima.
+  * mai proporre `pause_keyword` e `add_keyword` sullo stesso termine e stesso ad group nello stesso piano: decidi se il termine va spento o promosso
   * `update_budget`: campaignId, campaign, old_budget (se noto), new_budget — variazione max ±50%
-  * `add_keyword`: campaignId, adGroupId, keywordText, matchType (EXACT|PHRASE|BROAD), bid -> per search terms che HANNO GENERATO ORDINI ma non sono ancora keyword. Usa gli ID reali dell'ad group da cui proviene il search term. bid = CPC medio del search term (o 0.30-0.50 se ignoto). Preferisci match EXACT per i termini gia' vincenti.
+  * `add_keyword`: campaignId, adGroupId, keywordText, matchType (EXACT|PHRASE|BROAD), bid -> per search terms che HANNO GENERATO ORDINI ma non sono ancora keyword. MAI verso una campagna AUTO: accetta solo negative, l'API rifiuta le keyword positive. Punta all'ad group MANUAL indicato per quell'ASIN. Usa gli ID reali dell'ad group da cui proviene il search term. bid = CPC medio del search term (o 0.30-0.50 se ignoto). Preferisci match EXACT per i termini gia' vincenti.
 - NON generare `pause_campaign` / `enable_campaign` in automatico (troppo rischioso, lascia decidere l'umano).
 - RIATTIVAZIONE VINCITORI PER ASIN: per un vincitore (keyword da campagna spenta o search term non ancora keyword) usa `add_keyword` SOLO se l'ASIN ha un AD GROUP ATTIVO indicato sopra; punta a quel campId+adGroupId, match EXACT, bid = CPC del termine (o 0.30-0.50). Se l'ASIN non ha ad group attivo, NON generare add_keyword: segnalalo a parole come "riattivare manualmente una campagna per ASIN X".
 - Se non ci sono azioni ragionevoli, restituisci `{{"actions": []}}`.
@@ -746,6 +771,8 @@ def extract_actions(analysis_text, summary):
 
     # Ad group su cui e' lecito scrivere (attivi + quelli visti nei dati)
     valid_ag_ids = set(summary.get("active_ad_group_ids", []))
+    auto_ag_ids = set(summary.get("auto_ad_group_ids", []))
+    auto_camp_ids = set(summary.get("auto_campaign_ids", []))
     valid_ag_ids |= {k["adGroupId"] for k in summary.get("keywords", []) if k.get("adGroupId")}
     valid_ag_ids |= {s["adGroupId"] for s in summary.get("waste_st", []) if s.get("adGroupId")}
     for a in summary.get("asin_view", {}).get("asins", []):
@@ -820,6 +847,10 @@ def extract_actions(analysis_text, summary):
                 continue
             if agid not in valid_ag_ids:
                 warnings.append(f"azione {i} (add_keyword): adGroupId {agid} non presente/attivo, scartata")
+                continue
+            if agid in auto_ag_ids or str(a.get("campaignId", "")) in auto_camp_ids:
+                warnings.append(f"azione {i} (add_keyword): adGroupId {agid} appartiene a una campagna AUTO, "
+                                f"che accetta solo negative — scartata")
                 continue
             if not a.get("keywordText"):
                 warnings.append(f"azione {i} (add_keyword): keywordText mancante, scartata")
