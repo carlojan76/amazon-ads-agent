@@ -423,8 +423,8 @@ def _claude_json(system: str, user: str, max_tokens: int = 4096) -> Dict[str, An
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY non impostata: non posso generare la copy.")
-    model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5")
-    max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", max_tokens))
+    model = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-5"
+  max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", max_tokens))
 
     def _call(mt: int):
         resp = requests.post(
