@@ -53,6 +53,7 @@ import update_listing as ul  # riusa resolve_sku, get_listing, get_max_lengths, 
 import update_family as ufam  # riusa discover_children (relazione VARIATION)
 import listing_signals  # termini di ricerca reali dal report Amazon Ads
 import product_image  # MAIN del prodotto, per non far inventare la forma al modello
+import check_quality as cq  # stesso controllo offline, lanciato qui subito dopo la generazione
 
 
 # ----------------------------------------------------------------- HTTP helper
@@ -207,6 +208,73 @@ def fetch_catalog(asin: str, marketplace_id: str) -> Optional[Dict[str, Any]]:
         "image_candidates": image_candidates,
         "sales_ranks": ranks,
     }
+
+
+# ------------------------------------------------------------- 3b. concorrenti
+
+
+def fetch_competitors(keyword: str, marketplace_id: str, exclude_asin: str = "",
+                      page_size: int = 5) -> List[Dict[str, str]]:
+    """searchCatalogItems: stesso endpoint di fetch_catalog(), ma per KEYWORD
+    invece che per ASIN (/catalog/2022-04-01/items senza il path-param, con
+    'keywords' al posto di 'identifiers'). Stesse credenziali SP-API gia'
+    configurate, stesso helper _safe_get.
+
+    Il chiamante deve passare SOLO keyword da search_terms_meta['top_terms']
+    (scope 'asin'): sono le uniche su cui sappiamo che qualcuno ha davvero
+    comprato QUESTO prodotto. Cercare concorrenti su parole non verificate
+    (inventate o dell'intero account) produrrebbe un confronto fuorviante."""
+    out = _safe_get(
+        "/catalog/2022-04-01/items",
+        {"marketplaceIds": marketplace_id, "keywords": keyword,
+         "includedData": "summaries", "pageSize": page_size},
+        "concorrenti",
+    )
+    if not out:
+        return []
+
+    target = (exclude_asin or "").strip().upper()
+    hits: List[Dict[str, str]] = []
+    for item in out.get("items", []):
+        asin = (item.get("asin") or "").strip()
+        if not asin or asin.upper() == target:
+            continue  # e' il prodotto stesso, non un concorrente
+        s0 = (item.get("summaries") or [{}])[0]
+        item_name = s0.get("itemName")
+        if not item_name:
+            continue
+        hits.append({"asin": asin, "brand": s0.get("brand", ""), "item_name": item_name})
+    return hits
+
+
+def fetch_competitors_for_terms(terms: List[str], marketplace_id: str, asin: str,
+                                per_term: int = 5, max_terms: int = 10
+                                ) -> Dict[str, List[Dict[str, str]]]:
+    """Una searchCatalogItems per termine (max_terms, i primi per acquisti/click:
+    e' l'ordine con cui top_terms e' gia' ordinato). Salta i termini senza risultati."""
+    out: Dict[str, List[Dict[str, str]]] = {}
+    for term in terms[:max_terms]:
+        hits = fetch_competitors(term, marketplace_id, exclude_asin=asin, page_size=per_term)
+        if hits:
+            out[term] = hits
+    return out
+
+
+def format_competitors_md(by_term: Dict[str, List[Dict[str, str]]]) -> str:
+    if not by_term:
+        return ""
+    md = ["\n## Concorrenti sui termini che convertono (Amazon Catalog, ricerca per keyword)\n",
+         "Come chiamano il prodotto gli altri venditori che compaiono cercando QUESTI termini "
+         "reali (quelli su cui questo ASIN ha gia' generato acquisti). Serve solo a capire il "
+         "linguaggio in uso nella categoria, non da copiare: non promettere caratteristiche che "
+         "la foto e la scheda di QUESTO prodotto non confermano.\n"]
+    for term, hits in by_term.items():
+        md.append(f"**\"{term}\":**")
+        for h in hits:
+            brand = f" — {h['brand']}" if h.get("brand") else ""
+            md.append(f"- {h['item_name']}{brand}")
+        md.append("")
+    return "\n".join(md) + "\n"
 
 
 # ----------------------------------------------------------------- 4. A+ content
@@ -393,6 +461,9 @@ def build_markdown(pack: Dict[str, Any]) -> str:
     if pack.get("search_terms_md"):
         md.append(pack["search_terms_md"])
 
+    if pack.get("competitors_md"):
+        md.append(pack["competitors_md"])
+
     return "\n".join(md) + "\n"
 
 
@@ -430,6 +501,11 @@ STILE:
   prodotto risponde davvero a quell'intenzione di ricerca. Se un termine non converte
   perche' la copy attuale descrive male il prodotto, la correzione e' descrivere bene
   il prodotto, non ripetere il termine piu' volte.
+- Se il brief contiene la sezione "Concorrenti sui termini che convertono", usala solo per
+  capire il linguaggio della categoria (come i venditori concorrenti chiamano un prodotto
+  simile). Non copiare le loro affermazioni e non attribuire al TUO prodotto caratteristiche
+  che vedi nei loro titoli: quello che scrivi deve restare confermato dalla foto e dalla
+  scheda di questo ASIN.
 - Voce del brand: pratica, calda, mai iperbolica. Chiudi la descrizione con la firma Lupo & Felix.
 """
 
@@ -680,6 +756,8 @@ def main() -> int:
     ap.add_argument("--no-search-terms", action="store_true",
                     help="Non includere i termini di ricerca nel brief")
     ap.add_argument("--search-terms-top", type=int, default=20)
+    ap.add_argument("--no-competitors", action="store_true",
+                    help="Non cercare i concorrenti sui termini che convertono (searchCatalogItems)")
     args = ap.parse_args()
 
     market = args.marketplace.upper()
@@ -731,6 +809,17 @@ def main() -> int:
     else:
         print(f"  [search term] non inclusi ({st_meta.get('reason')})")
 
+    # Concorrenti SOLO sui termini che convertono di questo ASIN (scope 'asin'):
+    # se i termini sono dell'intero account (nessun dato ads ancora per l'ASIN)
+    # non sono confermati come intento di ricerca per questo prodotto, quindi
+    # cercare "concorrenti" su quelle parole confronterebbe cose a caso.
+    competitors, competitors_md = {}, ""
+    if not args.no_competitors and st_meta.get("available") and st_meta.get("scope") == "asin":
+        competitors = fetch_competitors_for_terms(st_meta["top_terms"], marketplace_id, args.asin)
+        competitors_md = format_competitors_md(competitors)
+        n_hits = sum(len(v) for v in competitors.values())
+        print(f"  [concorrenti] {n_hits} risultati su {len(competitors)}/{len(st_meta['top_terms'])} termini")
+
     pack = {
         "asin": args.asin,
         "sku": sku,
@@ -742,6 +831,8 @@ def main() -> int:
         "reviews": reviews,
         "search_terms_md": st_md,
         "search_terms_meta": st_meta,
+        "competitors": competitors,
+        "competitors_md": competitors_md,
     }
 
     main_img = None
@@ -810,9 +901,17 @@ def main() -> int:
         with open(out, "w", encoding="utf-8") as fh:
             json.dump(copy, fh, ensure_ascii=False, indent=2)
         print(f"Copy generata in {out}")
-        print(f"Controllo qualita' (limiti, termini che convertono, firma brand):\n"
-             f"  python .\\check_quality.py --content .\\{out}")
-        print(f"Verifica con:\n  python .\\update_listing.py --content .\\{out} --diff")
+
+        # Stesso controllo di check_quality.py, lanciato qui in automatico: non e' un
+        # gate (non fa fallire la build, che deve comunque committare per la UI), solo
+        # un avviso ben visibile nel log se la copy non rispetta il brief che ha letto.
+        print("\nControllo qualita':")
+        n_error, n_warning = cq.check_one(out, f"{base}.json")
+        if n_error:
+            print(f"\n{n_error} ERROR nel controllo qualita': rileggi la copy prima di applicarla "
+                 f"con update_listing.py (o rilancia:\n  python .\\check_quality.py --content .\\{out})")
+
+        print(f"\nVerifica con:\n  python .\\update_listing.py --content .\\{out} --diff")
 
     return 0
 
