@@ -26,13 +26,28 @@ validare il corpo della richiesta. Quindi:
     leggi il messaggio, spesso e' li' che si vede la causa precisa.
   - 200 fino a DONE -> accesso confermato, il dataset e' leggibile.
 
-La query di default qui sotto e' la mia migliore ricostruzione del dataset
-Search Query Performance ("analytics_searchQueryPerformance_2024_04_09"),
-non una copia verificata dalla documentazione corrente — i dataset Data
-Kiosk sono versionati e Amazon puo' averli aggiornati. Se il probe risponde
-con un errore di validazione GraphQL (non 401/403), e' quasi certamente
-questo il motivo: controlla il nome/versione del dataset sulla doc SP-API
-Data Kiosk e rilancia con --query-file, che sostituisce la query di default
+STRUTTURA DELLA QUERY (confermata su documentazione ufficiale SP-API): un
+dataset "versioned domain" (es. analytics_searchQueryPerformance_2024_04_09)
+va selezionato SENZA argomenti e con UN SOLO campo annidato al suo interno
+(es. searchQueryPerformanceByAsin), ed e' quel campo annidato a portare gli
+argomenti veri (startDate/endDate/marketplaceIds) e la selezione dei campi
+di risposta. Mettere gli argomenti direttamente sul domain, o selezionare
+piu' campi diretti sotto il domain, produce l'errore GraphQL "Versioned
+domain cannot select multiple query fields." — e' l'errore che questo
+script ha effettivamente ricevuto in un run reale prima di questa versione,
+confermando che l'account e l'app SONO autorizzati (altrimenti sarebbe
+arrivato un 401/403, non un 400 di validazione).
+
+Cio' che NON e' confermato da documentazione, solo dedotto per analogia col
+dataset gemello analytics_salesAndTraffic_2024_04_24 (che usa il campo
+annidato salesAndTraffic**ByAsin**): il nome esatto del campo annidato qui
+sotto, "searchQueryPerformanceByAsin", e la lista di campi di risposta
+richiesti (searchQuery, searchQueryScore, searchQueryVolume, ...). Se il
+nome del dataset/campo fosse cambiato o diverso, il probe ora dara' un
+errore GraphQL specifico tipo "Cannot query field X" invece del generico
+errore strutturale di prima — molto piu' facile da correggere. Controlla
+la doc SP-API Data Kiosk (o il Data Kiosk Schema Explorer in Seller
+Central) e rilancia con --query-file, che sostituisce la query di default
 senza toccare il codice.
 
 Uso:
@@ -57,23 +72,34 @@ import requests
 import config
 import spapi
 
+# Nome del "versioned domain": va selezionato senza argomenti (vedi docstring).
 DATASET = "analytics_searchQueryPerformance_2024_04_09"
 
+# Campo annidato che porta gli argomenti veri: NOME NON CONFERMATO da
+# documentazione, dedotto per analogia con salesAndTrafficByAsin del dataset
+# gemello analytics_salesAndTraffic_2024_04_24. Se sbagliato, il probe ora
+# dara' un errore GraphQL specifico ("Cannot query field ...") invece del
+# generico errore strutturale di prima.
+QUERY_FIELD = "searchQueryPerformanceByAsin"
+
 DEFAULT_QUERY_TEMPLATE = """query SearchQueryPerformanceAccessProbe {{
-  {dataset}(
-    startDate: "{start}"
-    endDate: "{end}"
-    marketplaceIds: ["{marketplace_id}"]
-  ) {{
-    startDate
-    endDate
+  {dataset} {{
+    {query_field}(
+      startDate: "{start}"
+      endDate: "{end}"
+      marketplaceIds: ["{marketplace_id}"]
+    ) {{
+      startDate
+      endDate
+    }}
   }}
 }}"""
 
 
 def _default_query(marketplace_id: str, start: str, end: str) -> str:
     return DEFAULT_QUERY_TEMPLATE.format(
-        dataset=DATASET, start=start, end=end, marketplace_id=marketplace_id)
+        dataset=DATASET, query_field=QUERY_FIELD, start=start, end=end,
+        marketplace_id=marketplace_id)
 
 
 def create_query(graphql: str) -> str:
@@ -164,7 +190,8 @@ def main() -> int:
         print(f"Query da {args.query_file}.")
     else:
         graphql = _default_query(marketplace_id, start, end)
-        print(f"Query di default (dataset presunto: {DATASET}, periodo {start} -> {end}).")
+        print(f"Query di default (dataset presunto: {DATASET}, campo presunto: "
+              f"{QUERY_FIELD}, periodo {start} -> {end}).")
         print("Se non e' quella giusta per il tuo account, usa --query-file.\n")
 
     print(f"Marketplace: {market} ({marketplace_id})\n")
