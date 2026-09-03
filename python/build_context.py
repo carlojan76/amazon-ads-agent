@@ -52,6 +52,7 @@ import spapi
 import update_listing as ul  # riusa resolve_sku, get_listing, get_max_lengths, LANGUAGE_TAGS
 import update_family as ufam  # riusa discover_children (relazione VARIATION)
 import listing_signals  # termini di ricerca reali dal report Amazon Ads
+import product_image  # MAIN del prodotto, per non far inventare la forma al modello
 
 
 # ----------------------------------------------------------------- HTTP helper
@@ -178,11 +179,19 @@ def fetch_catalog(asin: str, marketplace_id: str) -> Optional[Dict[str, Any]]:
     s0 = summaries[0] if summaries else {}
 
     images: List[str] = []
+    image_candidates: List[Dict[str, Any]] = []
     for block in out.get("images", []):
         for img in block.get("images", []):
             link = img.get("link")
             if link:
                 images.append(f"{img.get('variant', '?')}: {link}")
+                # Forma strutturata: serve a product_image per scegliere la MAIN
+                # alla risoluzione giusta. La lista di stringhe sopra resta
+                # com'era perche' la usa build_markdown.
+                image_candidates.append({
+                    "variant": img.get("variant", ""), "link": link,
+                    "width": img.get("width"), "height": img.get("height"),
+                })
 
     ranks: List[str] = []
     for block in out.get("salesRanks", []):
@@ -195,6 +204,7 @@ def fetch_catalog(asin: str, marketplace_id: str) -> Optional[Dict[str, Any]]:
         "color": s0.get("color", ""),
         "size": s0.get("size", ""),
         "images": images,
+        "image_candidates": image_candidates,
         "sales_ranks": ranks,
     }
 
@@ -403,6 +413,10 @@ REGOLE FERREE SUL FORMATO DELL'OUTPUT:
 STILE:
 - Titolo denso di keyword ma leggibile; benefici concreti, non aggettivi vuoti.
 - 5 bullet: ognuno apre con un beneficio in MAIUSCOLO, poi la spiegazione.
+- Se ti viene fornita la foto del prodotto, GUARDALA prima di scrivere. Descrivi la
+  forma, il materiale e il modo d'uso che vedi, non quelli che afferma la copy attuale:
+  una copy sbagliata sull'oggetto va corretta, non riscritta meglio. Non inventare
+  caratteristiche che nella foto non si vedono e che nessuna fonte del brief conferma.
 - Usa gli insight delle recensioni: rafforza cio' che i clienti apprezzano, anticipa
   le obiezioni dei topic negativi. Non citare mai "recensioni" esplicitamente.
 - Se il brief contiene la sezione "Termini che convertono", i termini che hanno
@@ -411,11 +425,17 @@ STILE:
   Se pero' quella sezione e' marcata come dati "dell'intero account" e non di questo
   ASIN, trattala solo come indizio sul linguaggio del brand: non promettere
   caratteristiche che il prodotto non ha pur di includere un termine.
+- I termini elencati come "traffico che NON converte" NON possono comparire nel titolo.
+  Puoi usarli al massimo in un bullet, e solo se la foto e il brief confermano che il
+  prodotto risponde davvero a quell'intenzione di ricerca. Se un termine non converte
+  perche' la copy attuale descrive male il prodotto, la correzione e' descrivere bene
+  il prodotto, non ripetere il termine piu' volte.
 - Voce del brand: pratica, calda, mai iperbolica. Chiudi la descrizione con la firma Lupo & Felix.
 """
 
 
-def _claude_json(system: str, user: str, max_tokens: int = 4096) -> Dict[str, Any]:
+def _claude_json(system: str, user: str, max_tokens: int = 4096,
+                 images: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """POST unico verso la Messages API; ritorna il JSON parsato dalla risposta.
     Impone JSON puro (niente backtick/preamboli) via system prompt del chiamante.
     Se la risposta arriva troncata (stop_reason=max_tokens o JSON incompleto),
@@ -423,8 +443,11 @@ def _claude_json(system: str, user: str, max_tokens: int = 4096) -> Dict[str, An
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY non impostata: non posso generare la copy.")
-    model = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-5"
+    model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5")
     max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", max_tokens))
+
+    # Immagini prima del testo: la Messages API rende meglio con questo ordine.
+    content: Any = user if not images else [*images, {"type": "text", "text": user}]
 
     def _call(mt: int):
         resp = requests.post(
@@ -432,7 +455,7 @@ def _claude_json(system: str, user: str, max_tokens: int = 4096) -> Dict[str, An
             headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
                      "content-type": "application/json"},
             json={"model": model, "max_tokens": mt, "system": system,
-                  "messages": [{"role": "user", "content": user}]},
+                  "messages": [{"role": "user", "content": content}]},
             timeout=180,
         )
         resp.raise_for_status()
@@ -465,14 +488,21 @@ def _claude_json(system: str, user: str, max_tokens: int = 4096) -> Dict[str, An
             f"richiesta o alza ANTHROPIC_MAX_TOKENS.")
 
 
-def generate_copy(brief_md: str, asin: str, marketplace: str) -> Dict[str, Any]:
+def generate_copy(brief_md: str, asin: str, marketplace: str,
+                  image: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Copy per un singolo prodotto, nel formato che update_listing.py applica."""
+    img_note = (
+        "\n\nIn testa al messaggio trovi la FOTO PRINCIPALE del prodotto. "
+        "E' la fonte piu' affidabile su com'e' fatto l'oggetto: se la copy attuale "
+        "la contraddice, la foto ha ragione e la copy va corretta.\n\n"
+        if image else "\n\n"
+    )
     user_msg = (
-        f"Marketplace: {marketplace}. ASIN: {asin}.\n\n"
+        f"Marketplace: {marketplace}. ASIN: {asin}.{img_note}"
         f"Ecco il brief con copy attuale, scheda prodotto e insight recensioni:\n\n{brief_md}\n\n"
         "Riscrivi item_name, bullet_point (5) e product_description. Restituisci solo il JSON."
     )
-    copy = _claude_json(COPY_CONTRACT, user_msg)
+    copy = _claude_json(COPY_CONTRACT, user_msg, images=[image] if image else None)
     copy["asin"] = asin
     copy["marketplace"] = marketplace
     copy.setdefault("sku", None)
@@ -499,20 +529,28 @@ REGOLE FERREE SUL FORMATO DELL'OUTPUT:
 STILE:
 - Bullet: ognuno apre con un beneficio in MAIUSCOLO, poi la spiegazione. Non citare colori/taglie specifici
   (sono condivisi tra le varianti).
+- Se ti viene fornita la foto del prodotto, GUARDALA prima di scrivere. Descrivi la
+  forma, il materiale e il modo d'uso che vedi, non quelli che afferma la copy attuale:
+  una copy sbagliata sull'oggetto va corretta, non riscritta meglio. Non inventare
+  caratteristiche che nella foto non si vedono e che nessuna fonte del brief conferma.
 - Usa gli insight delle recensioni: rafforza cio' che i clienti apprezzano, anticipa le obiezioni negative.
   Non citare mai "recensioni" esplicitamente.
 - Voce del brand: pratica, calda, mai iperbolica. Chiudi la descrizione con la firma Lupo & Felix.
 """
 
 
-def generate_family_copy(brief_md: str, marketplace: str) -> Dict[str, Any]:
+def generate_family_copy(brief_md: str, marketplace: str,
+                         image: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Copy condivisa + template titolo per una famiglia (formato di update_family.py)."""
+    img_note = ("In testa trovi la FOTO PRINCIPALE del parent: descrive la forma reale "
+                "del prodotto e prevale sulla copy attuale se la contraddice.\n\n"
+                if image else "")
     user_msg = (
-        f"Marketplace: {marketplace}.\n\n"
+        f"Marketplace: {marketplace}.\n\n{img_note}"
         f"Brief della famiglia (copy attuale del parent + insight recensioni):\n\n{brief_md}\n\n"
         "Scrivi shared.bullet_point (5), shared.product_description e title_template. Solo JSON."
     )
-    out = _claude_json(FAMILY_CONTRACT, user_msg)
+    out = _claude_json(FAMILY_CONTRACT, user_msg, images=[image] if image else None)
     shared = out.get("shared", {})
     bad = set(shared) - {"bullet_point", "product_description"}
     if bad:
@@ -626,6 +664,8 @@ def main() -> int:
     ap.add_argument("--data-dir", default="../public/data",
                     help="Cartella dei JSON pubblicati da weekly_analysis.py "
                          "(report search term). '' o --no-search-terms per saltare.")
+    ap.add_argument("--no-image", action="store_true",
+                    help="Non passare la foto del prodotto al modello (solo con --generate)")
     ap.add_argument("--no-search-terms", action="store_true",
                     help="Non includere i termini di ricerca nel brief")
     ap.add_argument("--search-terms-top", type=int, default=20)
@@ -693,6 +733,12 @@ def main() -> int:
         "search_terms_meta": st_meta,
     }
 
+    main_img = None
+    if args.generate and not args.no_image:
+        main_img = product_image.main_image_block(catalog)
+        if main_img is None:
+            print("  [immagine] non disponibile: la copy sara' generata senza foto")
+
     os.makedirs(args.outdir, exist_ok=True)
     base = os.path.join(args.outdir, f"{args.asin}_{market}")
     with open(base + ".json", "w", encoding="utf-8") as fh:
@@ -717,7 +763,7 @@ def main() -> int:
         fam_out = os.path.join("listings", "family", f"{args.asin}_{market}.json")
         if args.generate:
             print("Chiedo a Claude la copy condivisa della famiglia...")
-            fc = generate_family_copy(brief, market)
+            fc = generate_family_copy(brief, market, image=main_img)
             family = build_family_json(market, fc["shared"], fc.get("title_template"),
                                        parent_sku=sku)
         else:
@@ -747,7 +793,7 @@ def main() -> int:
                 print("--source-marketplace di un mercato che ha la copy.", file=sys.stderr)
                 return 1
         print("\nChiedo la copy a Claude...")
-        copy = generate_copy(brief, args.asin, market)
+        copy = generate_copy(brief, args.asin, market, image=main_img)
         os.makedirs("listings/content", exist_ok=True)
         out = os.path.join("listings", "content", f"{args.asin}_{market}.json")
         with open(out, "w", encoding="utf-8") as fh:
