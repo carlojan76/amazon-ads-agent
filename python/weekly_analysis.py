@@ -28,7 +28,7 @@ from amazon_ads_api import fetch_all_data, CONFIG
 # CONFIG
 # ============================================================
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-6"
 # Deve coprire ragionamento + report + blocco <actions>: i token del
 # ragionamento contano dentro max_tokens. Vedi call_claude().
 MAX_OUTPUT_TOKENS = int(os.getenv("MAX_OUTPUT_TOKENS", "16000"))

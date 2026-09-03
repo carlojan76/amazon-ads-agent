@@ -443,7 +443,12 @@ def _claude_json(system: str, user: str, max_tokens: int = 4096,
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY non impostata: non posso generare la copy.")
-    model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5")
+    # os.getenv(..., default) usa il default SOLO se la var non esiste. In GitHub
+    # Actions, "ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}" imposta comunque
+    # la var, a stringa vuota se il secret non e' configurato nel repo: il default
+    # non scatta e il model finisce vuoto (da cui l'errore "String should have at
+    # least 1 character"). Con "or" il default scatta anche su stringa vuota.
+    model = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-5"
     max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", max_tokens))
 
     # Immagini prima del testo: la Messages API rende meglio con questo ordine.
