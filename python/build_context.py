@@ -458,7 +458,13 @@ def _claude_json(system: str, user: str, max_tokens: int = 4096,
                   "messages": [{"role": "user", "content": content}]},
             timeout=180,
         )
-        resp.raise_for_status()
+        if resp.status_code >= 400:
+            # raise_for_status() scarta il corpo, che e' l'unico posto dove l'API
+            # dice cosa non va (modello inesistente, immagine illeggibile, ...).
+            raise RuntimeError(
+                f"Anthropic API {resp.status_code} (model={model!r}, "
+                f"{len(content) if isinstance(content, list) else 1} blocchi): "
+                f"{resp.text[:600]}")
         data = resp.json()
         text = "".join(b.get("text", "") for b in data.get("content", [])
                        if b.get("type") == "text")

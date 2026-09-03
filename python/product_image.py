@@ -23,7 +23,6 @@ import requests
 MAX_WIDTH = 1200
 # Limite duro della Messages API: 5 MB per immagine. Si sta sotto con margine.
 MAX_BYTES = 3_500_000
-ALLOWED_MEDIA = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 
 
 def pick_main_image(candidates: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
@@ -47,16 +46,24 @@ def pick_main_image(candidates: List[Dict[str, Any]]) -> Optional[Dict[str, Any]
     return usable(main) or usable(candidates)
 
 
-def _media_type(url: str, content_type: str) -> Optional[str]:
-    ct = (content_type or "").split(";")[0].strip().lower()
-    if ct in ALLOWED_MEDIA:
-        return ct
-    lowered = url.lower()
-    for ext, mime in ((".jpg", "image/jpeg"), (".jpeg", "image/jpeg"),
-                      (".png", "image/png"), (".gif", "image/gif"),
-                      (".webp", "image/webp")):
-        if ext in lowered:
+# Firme dei formati accettati dalla Messages API. Si guarda il contenuto reale e
+# non l'estensione dell'URL: un CDN puo' rispondere 200 con una pagina di errore,
+# e dichiararla "image/jpeg" fa fallire la chiamata con un 400 poco leggibile.
+_MAGIC = (
+    (b"\xff\xd8\xff", "image/jpeg"),
+    (b"\x89PNG\r\n\x1a\n", "image/png"),
+    (b"GIF87a", "image/gif"),
+    (b"GIF89a", "image/gif"),
+)
+
+
+def sniff_media_type(data: bytes) -> Optional[str]:
+    """Riconosce il formato dai primi byte. None se non e' un'immagine valida."""
+    for magic, mime in _MAGIC:
+        if data.startswith(magic):
             return mime
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "image/webp"
     return None
 
 
@@ -68,24 +75,31 @@ def fetch_image_block(url: str, timeout: int = 30) -> Optional[Dict[str, Any]]:
     genera lo stesso come prima.
     """
     try:
-        resp = requests.get(url, timeout=timeout)
+        # Alcuni CDN rispondono in modo diverso senza User-Agent riconoscibile.
+        resp = requests.get(url, timeout=timeout,
+                            headers={"User-Agent": "lupo-felix-listing/1.0"})
         resp.raise_for_status()
     except requests.RequestException as exc:
         print(f"   [immagine] download fallito: {exc}")
         return None
 
-    media = _media_type(url, resp.headers.get("Content-Type", ""))
+    data = resp.content
+    media = sniff_media_type(data)
     if not media:
-        print(f"   [immagine] formato non supportato: {resp.headers.get('Content-Type')}")
+        head = data[:16]
+        print(f"   [immagine] i byte scaricati non sono un'immagine "
+              f"(Content-Type={resp.headers.get('Content-Type')!r}, "
+              f"{len(data)} byte, inizio={head!r}) - salto la foto")
         return None
-    if len(resp.content) > MAX_BYTES:
-        print(f"   [immagine] troppo grande ({len(resp.content) / 1e6:.1f} MB), saltata")
+    if len(data) > MAX_BYTES:
+        print(f"   [immagine] troppo grande ({len(data) / 1e6:.1f} MB), saltata")
         return None
 
+    print(f"   [immagine] {media}, {len(data) / 1024:.0f} KB")
     return {
         "type": "image",
         "source": {"type": "base64", "media_type": media,
-                   "data": base64.standard_b64encode(resp.content).decode("ascii")},
+                   "data": base64.standard_b64encode(data).decode("ascii")},
     }
 
 
