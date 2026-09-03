@@ -47,6 +47,134 @@
       "PT08: https://m.media-amazon.com/images/I/41zKWzwIz9L._SL75_.jpg",
       "PT08: https://m.media-amazon.com/images/I/711HAoAupEL.jpg"
     ],
+    "image_candidates": [
+      {
+        "variant": "MAIN",
+        "link": "https://m.media-amazon.com/images/I/41IsTJiijSL.jpg",
+        "width": 500,
+        "height": 500
+      },
+      {
+        "variant": "MAIN",
+        "link": "https://m.media-amazon.com/images/I/41IsTJiijSL._SL75_.jpg",
+        "width": 75,
+        "height": 75
+      },
+      {
+        "variant": "MAIN",
+        "link": "https://m.media-amazon.com/images/I/71D2Lmr8z+L.jpg",
+        "width": 2048,
+        "height": 2048
+      },
+      {
+        "variant": "PT01",
+        "link": "https://m.media-amazon.com/images/I/31owfUaYBiL.jpg",
+        "width": 500,
+        "height": 500
+      },
+      {
+        "variant": "PT01",
+        "link": "https://m.media-amazon.com/images/I/31owfUaYBiL._SL75_.jpg",
+        "width": 75,
+        "height": 75
+      },
+      {
+        "variant": "PT01",
+        "link": "https://m.media-amazon.com/images/I/71LHv16N5pL.jpg",
+        "width": 2048,
+        "height": 2048
+      },
+      {
+        "variant": "PT02",
+        "link": "https://m.media-amazon.com/images/I/517lL8ONapL.jpg",
+        "width": 582,
+        "height": 561
+      },
+      {
+        "variant": "PT02",
+        "link": "https://m.media-amazon.com/images/I/517lL8ONapL._SL75_.jpg",
+        "width": 75,
+        "height": 72
+      },
+      {
+        "variant": "PT03",
+        "link": "https://m.media-amazon.com/images/I/41ZwHCyfEwL.jpg",
+        "width": 555,
+        "height": 561
+      },
+      {
+        "variant": "PT03",
+        "link": "https://m.media-amazon.com/images/I/41ZwHCyfEwL._SL75_.jpg",
+        "width": 74,
+        "height": 75
+      },
+      {
+        "variant": "PT04",
+        "link": "https://m.media-amazon.com/images/I/61VcezzM3iL.jpg",
+        "width": 842,
+        "height": 525
+      },
+      {
+        "variant": "PT04",
+        "link": "https://m.media-amazon.com/images/I/61VcezzM3iL._SL75_.jpg",
+        "width": 75,
+        "height": 47
+      },
+      {
+        "variant": "PT05",
+        "link": "https://m.media-amazon.com/images/I/61XVK0iJr7L.jpg",
+        "width": 853,
+        "height": 781
+      },
+      {
+        "variant": "PT05",
+        "link": "https://m.media-amazon.com/images/I/61XVK0iJr7L._SL75_.jpg",
+        "width": 75,
+        "height": 69
+      },
+      {
+        "variant": "PT06",
+        "link": "https://m.media-amazon.com/images/I/41L+kBoqedL.jpg",
+        "width": 567,
+        "height": 562
+      },
+      {
+        "variant": "PT06",
+        "link": "https://m.media-amazon.com/images/I/41L+kBoqedL._SL75_.jpg",
+        "width": 75,
+        "height": 74
+      },
+      {
+        "variant": "PT07",
+        "link": "https://m.media-amazon.com/images/I/51IVVJaLjIL.jpg",
+        "width": 577,
+        "height": 577
+      },
+      {
+        "variant": "PT07",
+        "link": "https://m.media-amazon.com/images/I/51IVVJaLjIL._SL75_.jpg",
+        "width": 75,
+        "height": 75
+      },
+      {
+        "variant": "PT08",
+        "link": "https://m.media-amazon.com/images/I/41zKWzwIz9L.jpg",
+        "width": 500,
+        "height": 333
+      },
+      {
+        "variant": "PT08",
+        "link": "https://m.media-amazon.com/images/I/41zKWzwIz9L._SL75_.jpg",
+        "width": 75,
+        "height": 50
+      },
+      {
+        "variant": "PT08",
+        "link": "https://m.media-amazon.com/images/I/711HAoAupEL.jpg",
+        "width": 1536,
+        "height": 1024
+      }
+    ],
     "sales_ranks": [
       "#6698 in Prodotti per animali domestici"
     ]
