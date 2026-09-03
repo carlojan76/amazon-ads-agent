@@ -810,6 +810,8 @@ def main() -> int:
         with open(out, "w", encoding="utf-8") as fh:
             json.dump(copy, fh, ensure_ascii=False, indent=2)
         print(f"Copy generata in {out}")
+        print(f"Controllo qualita' (limiti, termini che convertono, firma brand):\n"
+             f"  python .\\check_quality.py --content .\\{out}")
         print(f"Verifica con:\n  python .\\update_listing.py --content .\\{out} --diff")
 
     return 0

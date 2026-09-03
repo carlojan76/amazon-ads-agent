@@ -107,6 +107,16 @@ def converting_terms(terms: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return [t for t in terms if t["purchases7d"] > 0]
 
 
+def avoid_terms(terms: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Termini con click e spesa ma zero acquisti: traffico che paghiamo e non converte.
+
+    Stesso ordine (spesa decrescente) con cui compaiono nel brief markdown, cosi'
+    "avoid_terms" nel context pack rispecchia esattamente cio' che il modello ha letto."""
+    out = [t for t in terms if t["purchases7d"] == 0 and t["clicks"] > 0]
+    out.sort(key=lambda e: e["spend"], reverse=True)
+    return out
+
+
 def format_search_terms_md(terms: List[Dict[str, Any]], scope: str,
                            marketplace: str, asin: str,
                            top: int = 20, generated_at: str = "") -> str:
@@ -138,8 +148,7 @@ def format_search_terms_md(terms: List[Dict[str, Any]], scope: str,
                       f"| {t['cvr'] * 100:.0f}% | {t['cpc']:.2f} € | {acos} |")
         md.append("")
 
-    spenders = [t for t in terms if t["purchases7d"] == 0 and t["clicks"] > 0]
-    spenders.sort(key=lambda e: e["spend"], reverse=True)
+    spenders = avoid_terms(terms)
     if spenders:
         md.append("**Traffico che NON converte — la copy non risponde a questa intenzione, "
                   "o il prodotto non e' pertinente:**\n")
@@ -173,5 +182,8 @@ def search_terms_section(marketplace: str, asin: str, data_dir: str,
         "terms_total": len(terms),
         "terms_converting": len(converting_terms(terms)),
         "top_terms": [t["searchTerm"] for t in converting_terms(terms)[:top]],
+        # Stessi termini mostrati nel brief sotto "traffico che NON converte":
+        # check_quality.py li usa per segnalare se sono finiti nel titolo.
+        "avoid_terms": [t["searchTerm"] for t in avoid_terms(terms)[:top]],
     }
     return md, meta
