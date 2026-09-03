@@ -89,27 +89,7 @@ jobs:
       # Eseguito dalla root: python/ finisce comunque in sys.path (e' la cartella
       # dello script), cosi' gli import fra i moduli funzionano e gli output
       # relativi (listings/...) cadono alla root del repo, non dentro python/.
-     # TEMPORANEO -----------------------------------
-      - name: Debug lunghezze secret
-        env:
-          LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
-          LWA_CLIENT_SECRET: ${{ secrets.LWA_CLIENT_SECRET }}
-          LWA_REFRESH_TOKEN: ${{ secrets.LWA_REFRESH_TOKEN }}
-        run: |
-          printf 'client_id     len=%s\n' "${#LWA_CLIENT_ID}"
-          printf 'client_secret len=%s\n' "${#LWA_CLIENT_SECRET}"
-          printf 'refresh_token len=%s\n' "${#LWA_REFRESH_TOKEN}"
-          case "$LWA_CLIENT_ID" in
-            amzn1.application-oa2-client.*) echo "client_id: prefisso ok" ;;
-            "") echo "client_id: VUOTO — nome del secret sbagliato" ;;
-            *) echo "client_id: prefisso inatteso" ;;
-          esac
-          [ "$LWA_CLIENT_ID" != "$(printf '%s' "$LWA_CLIENT_ID" | tr -d '\r\n ')" ] \
-            && echo "ATTENZIONE: spazi o newline nel client_id"
-          [ "$LWA_CLIENT_SECRET" != "$(printf '%s' "$LWA_CLIENT_SECRET" | tr -d '\r\n ')" ] \
-            && echo "ATTENZIONE: spazi o newline nel client_secret"
-          echo ok
-        # TEMPORANEO -----------------------------------
+
       - name: Costruisci brief e copy
         env:
           LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
