@@ -50,6 +50,11 @@ on:
         description: 'Quanti termini di ricerca includere nel brief'
         required: false
         default: '20'
+      no_image:
+        description: 'Non passare la foto del prodotto al modello'
+        type: boolean
+        required: false
+        default: false
       no_search_terms:
         description: 'Escludi i termini di ricerca dal brief'
         type: boolean
@@ -89,7 +94,6 @@ jobs:
       # Eseguito dalla root: python/ finisce comunque in sys.path (e' la cartella
       # dello script), cosi' gli import fra i moduli funzionano e gli output
       # relativi (listings/...) cadono alla root del repo, non dentro python/.
-
       - name: Costruisci brief e copy
         env:
           LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
@@ -104,6 +108,7 @@ jobs:
           [ -n "${{ github.event.inputs.sku }}" ] && EXTRA="$EXTRA --sku ${{ github.event.inputs.sku }}"
           [ "${{ github.event.inputs.generate }}" = "true" ] && EXTRA="$EXTRA --generate"
           [ "${{ github.event.inputs.family }}" = "true" ] && EXTRA="$EXTRA --family"
+          [ "${{ github.event.inputs.no_image }}" = "true" ] && EXTRA="$EXTRA --no-image"
           [ "${{ github.event.inputs.no_search_terms }}" = "true" ] && EXTRA="$EXTRA --no-search-terms"
           [ -n "${{ github.event.inputs.source_marketplace }}" ] && \
             EXTRA="$EXTRA --source-marketplace ${{ github.event.inputs.source_marketplace }}"
@@ -116,6 +121,7 @@ jobs:
             --search-terms-top "${{ github.event.inputs.search_terms_top }}" \
             --outdir listings/context \
             $EXTRA
+
       - name: Commit output per la UI
         run: |
           git config user.name "github-actions[bot]"
