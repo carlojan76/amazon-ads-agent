@@ -100,12 +100,18 @@ def request(method: str, path: str, params=None, json_body=None,
 
 # --- Reports API -------------------------------------------------------------
 
-def create_report(report_type: str, marketplace_ids, data_start=None, data_end=None) -> str:
+def create_report(report_type: str, marketplace_ids, data_start=None, data_end=None,
+                   report_options=None) -> str:
     body = {"reportType": report_type, "marketplaceIds": marketplace_ids}
     if data_start:
         body["dataStartTime"] = data_start
     if data_end:
         body["dataEndTime"] = data_end
+    if report_options:
+        # Alcuni report type (es. i report Brand Analytics come Search Query
+        # Performance) richiedono parametri extra qui dentro, es.
+        # {"asin": "...", "reportPeriod": "WEEK"}.
+        body["reportOptions"] = report_options
     out = request("POST", "/reports/2021-06-30/reports", json_body=body)
     return out["reportId"]
 
