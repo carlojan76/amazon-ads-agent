@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { C, F, T, S, R, button, input, card, GLOBAL_CSS } from "./theme";
 import ActionsPanel from "./ActionsPanel";
+import ListingPanel from "./ListingPanel";
 import CampaignPlanner from "./CampaignPlanner";
 import { ACTIONS_PROMPT, extractActionsFromText, validateAgainstData, actionSignature, dedupeActions } from "./actions";
 import { parseCSV, processJSON, processCSV } from "./parse";
@@ -496,6 +497,7 @@ export default function App() {
     ...(metrics.searchTerms?.length ? [{ id: "searchterms", label: "Search term" }] : []),
     { id: "ai", label: "Consulente" },
     { id: "actions", label: "Azioni", badge: pendingActions || null },
+    { id: "listing", label: "Scheda prodotto" },
   ];
 
   return (
@@ -733,6 +735,11 @@ export default function App() {
               onSelectionChange={setSelectedCount}
             />
           </div>
+        )}
+
+        {/* Scheda prodotto (listing copy) */}
+        {tab === "listing" && (
+          <ListingPanel marketplace={metrics.meta?.marketplace || ""} />
         )}
       </div>
     </div>
