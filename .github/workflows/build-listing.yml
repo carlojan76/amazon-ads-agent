@@ -7,9 +7,15 @@ name: Build Listing Copy (context + generazione)
 #
 # Output committati nel repo (li rilegge la UI con getRepoFileContents):
 #   listings/context/<ASIN>_<MKT>.md    brief leggibile
-#   listings/context/<ASIN>_<MKT>.json  pack grezzo
+#   listings/context/<ASIN>_<MKT>.json  pack grezzo (termini di ricerca/SQP inclusi:
+#                                        SEMPRE riscritto, anche con generate=false)
 #   listings/content/<ASIN>_<MKT>.json  copy generata (solo con generate=true)
-#   listings/family/...                 variante famiglia (solo con family=true)
+#   listings/family/...                 variante famiglia — con generate=true la
+#                                        (ri)genera con Claude; con generate=false
+#                                        E il file esiste gia', NON lo tocca (solo
+#                                        il context pack sopra si aggiorna): utile
+#                                        per aggiornare i termini di ricerca senza
+#                                        perdere una copy condivisa gia' approvata.
 
 on:
   workflow_dispatch:

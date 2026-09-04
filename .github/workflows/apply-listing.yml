@@ -1,0 +1,239 @@
+name: Apply Listing Copy
+
+# Chiude il ciclo di build-listing.yml: prende la copy GIA' generata e committata
+# in listings/content/<ASIN>_<MKT>.json (build-listing.yml con generate=true) e la
+# scrive davvero sul listing Amazon via update_listing.py --apply.
+#
+# Si lancia dalla UI di GitHub: tab Actions -> Apply Listing Copy -> Run workflow.
+# Non serve incollare nessun JSON (a differenza di apply-actions.yml): il file e'
+# gia' nel repo, basta indicare ASIN e marketplace.
+#
+# Sicurezza in due livelli, in quest'ordine:
+#   1. Controllo qualita' (check_quality.py) offline, PRIMA di qualunque chiamata
+#      API: se trova un ERROR (limite caratteri superato, termine convertitore
+#      mancante, termine che non converte nel titolo, ...) il workflow si ferma
+#      qui, non prova nemmeno l'anteprima.
+#   2. update_listing.py --apply fa comunque una PATCH in VALIDATION_PREVIEW prima
+#      di scrivere davvero: se quella da errori, si ferma anche lui.
+# In piu': o dry_run=true (mostra controllo qualita' + diff, non scrive nulla,
+# non serve digitare conferma), o confirm=APPLICA per davvero — qualunque altra
+# combinazione blocca il workflow al primo step, prima ancora del checkout.
+#
+# content_json (opzionale): la UI (scheda "Scheda prodotto") lo passa quando
+# modifichi titolo/bullet/descrizione li' invece di editare listings/content/
+# a mano — sovrascrive 'attributes' SOLO nel checkout di questo run, il file
+# nel repo resta quello generato da build-listing.yml finche' non lo rigeneri.
+
+on:
+  workflow_dispatch:
+    inputs:
+      marketplace:
+        description: 'Marketplace'
+        type: choice
+        required: true
+        options: [IT, FR, DE, ES, UK]
+      asin:
+        description: 'ASIN della copy da applicare (deve avere gia'' un file in listings/content/)'
+        required: true
+      confirm:
+        description: 'Per scrivere davvero su Amazon, digita APPLICA (case sensitive)'
+        required: true
+        default: 'NO'
+      dry_run:
+        description: 'Se true: solo controllo qualita'' + anteprima diff, non scrive nulla'
+        type: boolean
+        required: false
+        default: false
+      content_json:
+        description: >-
+          JSON opzionale con override di 'attributes' (lo passa la UI quando modifichi
+          titolo/bullet/descrizione li'): {"attributes": {"item_name": "...",
+          "bullet_point": [...], "product_description": "..."}}. Se vuoto, si usa il file
+          listings/content/<asin>_<marketplace>.json cosi' com'e' nel repo.
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: ✋ Verifica conferma
+        if: ${{ github.event.inputs.confirm != 'APPLICA' && github.event.inputs.dry_run != 'true' }}
+        run: |
+          echo "❌ Conferma non fornita o errata."
+          echo "   Per scrivere davvero su Amazon devi digitare esattamente: APPLICA"
+          echo "   Hai digitato: '${{ github.event.inputs.confirm }}'"
+          echo ""
+          echo "Se vuoi solo vedere controllo qualita' e anteprima senza applicare,"
+          echo "spunta invece il flag dry_run."
+          exit 1
+
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Install dependencies
+        run: pip install requests
+
+      - name: 🔍 Verifica che la copy esista
+        run: |
+          CONTENT="listings/content/${{ github.event.inputs.asin }}_${{ github.event.inputs.marketplace }}.json"
+          if [ ! -f "$CONTENT" ]; then
+            echo "::error::$CONTENT non esiste nel repo."
+            echo "Lancia prima 'Build Listing Copy' (build-listing.yml) con generate=true"
+            echo "per questo ASIN/marketplace: e' quello che genera e committa il file."
+            exit 1
+          fi
+          echo "CONTENT_PATH=$CONTENT" >> "$GITHUB_ENV"
+          echo "Trovato: $CONTENT"
+
+      # La UI (ListingPanel) permette di modificare titolo/bullet/descrizione
+      # prima di generare l'anteprima o applicare, senza dover rigenerare la
+      # copy o committare nulla a mano: passa l'override come input JSON, qui
+      # lo fondiamo nel file SOLO nel checkout di questo run (non viene
+      # committato: il file in listings/content/ nel repo resta quello
+      # originale, generato da build-listing.yml, finche' non lo rigeneri).
+      - name: ✏️ Applica override dalla UI (se presenti)
+        if: ${{ github.event.inputs.content_json != '' }}
+        env:
+          CONTENT_JSON: ${{ github.event.inputs.content_json }}
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+
+          path = pathlib.Path(os.environ["CONTENT_PATH"])
+          content = json.loads(path.read_text(encoding="utf-8"))
+          override = json.loads(os.environ["CONTENT_JSON"])
+
+          if "attributes" in override:
+              content["attributes"] = override["attributes"]
+
+          path.write_text(json.dumps(content, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(f"Override applicato a {path} (solo per questo run, non committato).")
+          PY
+
+      # Nessuna credenziale SP-API qui: check_quality.py e' offline, legge solo il
+      # content JSON e il suo context pack. E' il gate vero: un ERROR ferma tutto
+      # PRIMA di provare l'anteprima o l'apply, cosi' non si spreca nemmeno una
+      # chiamata SP-API su una copy che sappiamo gia' non rispettare il brief.
+      - name: ✅ Controllo qualita'
+        run: |
+          set -euo pipefail
+          python python/check_quality.py --content "$CONTENT_PATH" 2>&1 | tee quality.log
+
+      - name: 👀 Anteprima (diff)
+        env:
+          LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
+          LWA_CLIENT_SECRET: ${{ secrets.LWA_CLIENT_SECRET }}
+          LWA_REFRESH_TOKEN: ${{ secrets.LWA_REFRESH_TOKEN }}
+          SP_API_SELLER_ID: ${{ secrets.SP_API_SELLER_ID }}
+          SPAPI_ENDPOINT: https://sellingpartnerapi-eu.amazon.com
+        run: |
+          set -euo pipefail
+          python python/update_listing.py --content "$CONTENT_PATH" --diff 2>&1 | tee diff.log
+
+      - name: 🚀 Applica
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
+          LWA_CLIENT_SECRET: ${{ secrets.LWA_CLIENT_SECRET }}
+          LWA_REFRESH_TOKEN: ${{ secrets.LWA_REFRESH_TOKEN }}
+          SP_API_SELLER_ID: ${{ secrets.SP_API_SELLER_ID }}
+          SPAPI_ENDPOINT: https://sellingpartnerapi-eu.amazon.com
+        run: |
+          set -euo pipefail
+          python python/update_listing.py --content "$CONTENT_PATH" --apply 2>&1 | tee apply.log
+
+      # Registro leggibile da cui in futuro la UI potra' capire cosa e' stato
+      # applicato e quando (getRepoFileContents su listings/applied/), senza
+      # dover riscavare nei log dei run passati.
+      - name: 🧾 Registra l'esito
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          python - <<'PY'
+          import json, re, datetime, pathlib, os
+
+          content = json.loads(pathlib.Path(os.environ["CONTENT_PATH"]).read_text(encoding="utf-8"))
+          log = pathlib.Path("apply.log")
+          text = log.read_text(encoding="utf-8") if log.exists() else ""
+          # "status:" compare due volte nel log (prima il DRY RUN di verifica, poi
+          # l'APPLY vero): ci interessa solo la seconda, quindi cerchiamo a partire
+          # dal marker "--- APPLY", non nel testo intero.
+          apply_section = text.split("--- APPLY", 1)[-1]
+          status = re.search(r"^\s*status:\s*(.+)$", apply_section, re.MULTILINE)
+          submission = re.search(r"^\s*submissionId:\s*(.+)$", apply_section, re.MULTILINE)
+
+          out = {
+              "asin": content["asin"],
+              "sku": content.get("sku"),
+              "marketplace": content["marketplace"],
+              "appliedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+              "status": status.group(1).strip() if status else None,
+              "submissionId": submission.group(1).strip() if submission else None,
+              "runNumber": os.environ.get("GITHUB_RUN_NUMBER"),
+              "runUrl": (f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}"
+                        f"/actions/runs/{os.environ.get('GITHUB_RUN_ID')}"),
+          }
+          out_path = pathlib.Path("listings/applied") / f"{content['asin']}_{content['marketplace']}.json"
+          out_path.parent.mkdir(parents=True, exist_ok=True)
+          out_path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(f"Scritto {out_path}")
+          PY
+
+      - name: 📝 Commit registro applicazioni
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f listings/applied
+          git status --short
+          if git diff --staged --quiet; then
+            echo "Nessun registro da committare."
+          else
+            git commit -m "listing applicato: ${{ github.event.inputs.marketplace }}/${{ github.event.inputs.asin }} [skip ci]"
+            git pull --rebase --autostash || true
+            git push
+          fi
+
+      - name: 📋 Riepilogo
+        if: always()
+        run: |
+          {
+            echo "## Controllo qualita'"
+            echo '```'
+            [ -f quality.log ] && cat quality.log || echo "(non eseguito)"
+            echo '```'
+            echo
+            echo "## Anteprima (diff)"
+            echo '```'
+            [ -f diff.log ] && cat diff.log || echo "(non eseguito)"
+            echo '```'
+            if [ -f apply.log ]; then
+              echo
+              echo "## Applicazione"
+              echo '```'
+              cat apply.log
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📦 Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apply-listing-${{ github.event.inputs.marketplace }}-${{ github.event.inputs.asin }}-${{ github.run_number }}
+          path: |
+            quality.log
+            diff.log
+            apply.log
+          retention-days: 90
+          if-no-files-found: ignore
