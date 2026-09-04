@@ -1,0 +1,126 @@
+name: Fetch Search Query Performance
+
+# Pipeline vera (punto 2 del roadmap keyword), da lanciare SOLO dopo che
+# "Check Search Query Performance Access" ha confermato l'accesso (gia' fatto:
+# vedi run precedenti). Per ogni ASIN pubblicizzato in un mercato (scoperto da
+# public/data/<MKT>.json, gia' pubblicato da weekly-analysis.yml) scarica il
+# report Brand Analytics Search Query Performance e pubblica il risultato in
+# public/data/SQP_<MKT>.json, che build_context.py legge automaticamente per
+# arricchire il context pack con il volume di ricerca REALE di mercato (non
+# solo le tue campagne ads).
+#
+# SOLO workflow_dispatch per ora, non schedulato: e' il primo run vero della
+# pipeline completa, meglio verificarlo manualmente su uno o pochi ASIN prima
+# di programmarlo settimanale (si puo' aggiungere uno "schedule:" dopo, come
+# in weekly-analysis.yml).
+#
+# Puo' richiedere diversi minuti per ASIN (createReport ha un rate limit
+# Amazon basso, gia' gestito con retry/backoff in spapi.py): con molti ASIN
+# il run e' lungo ma un ASIN che fallisce non blocca gli altri (vedi il campo
+# "errors" nel JSON pubblicato).
+
+on:
+  workflow_dispatch:
+    inputs:
+      marketplace:
+        description: 'Un solo mercato (IT/FR/DE/ES/UK). Vuoto = tutti quelli attivi (ACTIVE_MARKETS)'
+        required: false
+        default: ''
+      period:
+        description: 'Periodo del report'
+        type: choice
+        required: true
+        options: [WEEK, MONTH, QUARTER]
+        default: WEEK
+      start:
+        description: >-
+          Data inizio YYYY-MM-DD (default: settimana civile completa piu'
+          recente, solo per period=WEEK). Deve essere una domenica se WEEK.
+        required: false
+        default: ''
+      end:
+        description: 'Data fine YYYY-MM-DD (sabato successivo a start se WEEK)'
+        required: false
+        default: ''
+      asins:
+        description: >-
+          ASIN specifici separati da virgola, per testare su pochi prodotti
+          invece di tutto il catalogo attivo (es. per il primo run). Vuoto =
+          scopri automaticamente gli ASIN pubblicizzati dal mercato/i scelto/i.
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Install dependencies
+        run: pip install requests
+
+      - name: 🚀 Fetch Search Query Performance
+        env:
+          LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
+          LWA_CLIENT_SECRET: ${{ secrets.LWA_CLIENT_SECRET }}
+          LWA_REFRESH_TOKEN: ${{ secrets.LWA_REFRESH_TOKEN }}
+          SPAPI_ENDPOINT: https://sellingpartnerapi-eu.amazon.com
+        run: |
+          set -euo pipefail
+          cd python
+          EXTRA=""
+          [ -n "${{ github.event.inputs.marketplace }}" ] && EXTRA="$EXTRA --marketplace ${{ github.event.inputs.marketplace }}"
+          [ -n "${{ github.event.inputs.start }}" ] && EXTRA="$EXTRA --start ${{ github.event.inputs.start }}"
+          [ -n "${{ github.event.inputs.end }}" ] && EXTRA="$EXTRA --end ${{ github.event.inputs.end }}"
+          if [ -n "${{ github.event.inputs.asins }}" ]; then
+            IFS=',' read -ra ASIN_ARR <<< "${{ github.event.inputs.asins }}"
+            for a in "${ASIN_ARR[@]}"; do
+              EXTRA="$EXTRA --asin $(echo "$a" | xargs)"
+            done
+          fi
+          python -u fetch_search_query_performance.py --period "${{ github.event.inputs.period }}" $EXTRA
+
+      - name: 📦 Upload reports as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sqp-reports-${{ github.run_number }}
+          path: python/reports/sqp/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: 🌐 Pubblica dati per la UI online (GitHub Pages)
+        if: always()
+        run: |
+          mkdir -p public/data
+          if [ -d python/reports/sqp ]; then
+            for f in python/reports/sqp/*.json; do
+              [ -e "$f" ] || continue
+              cp "$f" "public/data/SQP_$(basename "$f")"
+            done
+          fi
+          if [ -z "$(ls -A public/data/SQP_*.json 2>/dev/null)" ]; then
+            echo "Nessun dato Search Query Performance da pubblicare."
+            exit 0
+          fi
+          git config user.name "amazon-ads-bot"
+          git config user.email "actions@github.com"
+          git add public/data/SQP_*.json
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica ai dati pubblicati, skip commit."
+          else
+            git commit -m "chore: aggiorna Search Query Performance per la UI online"
+            git pull --rebase --autostash || true
+            git push
+          fi
