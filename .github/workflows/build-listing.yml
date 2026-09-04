@@ -16,6 +16,14 @@ name: Build Listing Copy (context + generazione)
 #                                        il context pack sopra si aggiorna): utile
 #                                        per aggiornare i termini di ricerca senza
 #                                        perdere una copy condivisa gia' approvata.
+#   public/data/SQP_<MKT>.json          AGGIORNATO (non riscritto da zero): prima di
+#                                        leggere i dati Search Query Performance, questo
+#                                        workflow chiama ensure_sqp_for_asins() per l'ASIN
+#                                        (+ i child, se family=true) che NON hanno ancora un
+#                                        risultato qui — utile per prodotti mai pubblicizzati,
+#                                        che il fetch periodico (weekly-analysis, limitato
+#                                        agli ASIN con campagna) non raggiunge mai da solo.
+#                                        Gli ASIN gia' presenti restano intatti.
 
 on:
   workflow_dispatch:
@@ -78,7 +86,12 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 45 (prima 20): il backfill SQP per ASIN mai pubblicizzati (vedi sopra) crea e
+    # attende un report Amazon per ASIN, fino a 5 minuti di polling ciascuno nel
+    # caso peggiore — con una famiglia di piu' child il totale puo' superare i 20
+    # minuti originari anche se in pratica i report processano quasi sempre in meno
+    # di un minuto.
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -145,6 +158,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f listings/ 2>/dev/null || true
+          # Solo il file SQP di QUESTO marketplace: il backfill (ensure_sqp_for_asins,
+          # dentro build_context.py) puo' averlo aggiornato con gli ASIN di questa build
+          # che non erano ancora coperti. Path esplicito, non public/data/ intero: non
+          # vogliamo committare per sbaglio altri file di quella cartella.
+          git add -f "public/data/SQP_${{ github.event.inputs.marketplace }}.json" 2>/dev/null || true
           git status --short
           if git diff --staged --quiet; then
             echo "Nessun output da committare."
