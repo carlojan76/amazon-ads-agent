@@ -950,11 +950,23 @@ def main() -> int:
             fc = generate_family_copy(brief, market, image=main_img)
             family = build_family_json(market, fc["shared"], fc.get("title_template"),
                                        parent_sku=sku)
+            with open(fam_out, "w", encoding="utf-8") as fh:
+                json.dump(family, fh, ensure_ascii=False, indent=2)
+            print(f"Family file salvato in {fam_out}")
+        elif os.path.isfile(fam_out):
+            # SOLO REFRESH: senza --generate, se il family.json esiste gia' NON lo
+            # tocchiamo — la copy condivisa che hai gia' generato/rivisto resta
+            # quella che e'. Serve solo ad aggiornare il context pack (termini di
+            # ricerca/SQP aggregati dai child), scritto sopra comunque, senza
+            # perdere il testo che avevi gia' approvato.
+            print(f"Family file gia' esistente in {fam_out}: NON toccato (nessun --generate). "
+                 f"Solo il context pack (termini di ricerca) e' stato aggiornato.")
         else:
             family = skeleton_family(pack, parent_sku=sku, parent_asin=None)
-        with open(fam_out, "w", encoding="utf-8") as fh:
-            json.dump(family, fh, ensure_ascii=False, indent=2)
-        print(f"Family file salvato in {fam_out}")
+            with open(fam_out, "w", encoding="utf-8") as fh:
+                json.dump(family, fh, ensure_ascii=False, indent=2)
+            print(f"Family file salvato in {fam_out} (scheletro: nessuna copy generata, "
+                 f"usa --generate per chiederla a Claude)")
 
         if args.generate:
             # Stesso controllo di check_quality.py --family, lanciato qui in automatico:
