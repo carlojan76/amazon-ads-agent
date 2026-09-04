@@ -23,6 +23,51 @@ function fullText(attrs) {
   return parts.filter((p) => typeof p === "string").join(" \n ").toLowerCase();
 }
 
+// Parole comuni (articoli/preposizioni/congiunzioni) nelle lingue dei 5
+// marketplace supportati (IT/FR/DE/ES/UK), escluse dal conteggio ripetizioni
+// di checkRepeatedWords — specchio di _TITLE_STOPWORDS in check_quality.py.
+const TITLE_STOPWORDS = new Set([
+  // italiano
+  "e", "il", "lo", "la", "i", "gli", "le", "di", "del", "dello", "della",
+  "dei", "degli", "delle", "da", "dal", "dallo", "dalla", "dai", "dagli",
+  "dalle", "in", "nel", "nello", "nella", "nei", "negli", "nelle", "con",
+  "su", "sul", "sullo", "sulla", "sui", "sugli", "sulle", "per", "tra",
+  "fra", "un", "uno", "una", "o", "che", "non", "come", "piu", "anche",
+  // francese
+  "et", "les", "des", "du", "un", "une", "pour", "avec", "dans", "en",
+  "au", "aux", "sur", "ou", "que", "ne", "se", "ce", "ces", "son", "sa",
+  "ses", "sans",
+  // spagnolo
+  "y", "el", "los", "las", "de", "del", "para", "con", "en", "una",
+  "unos", "unas", "al", "sobre", "o", "que", "sin",
+  // tedesco
+  "und", "der", "die", "das", "den", "dem", "des", "ein", "eine",
+  "einen", "einem", "einer", "eines", "fur", "mit", "auf", "oder",
+  "dass", "ohne",
+  // inglese
+  "and", "for", "with", "on", "of", "a", "an", "to", "or", "the",
+]);
+
+// La SP-API (Listings Items) rifiuta un titolo dove la stessa parola compare
+// piu' di due volte (issue 100470). Controllo SOLO sul titolo (item_name),
+// specchio di check_repeated_words in check_quality.py.
+function checkRepeatedWords(attrs) {
+  const title = attrs.item_name;
+  if (typeof title !== "string" || !title.trim()) return [];
+  const words = title.toLowerCase().match(/[^\W\d_]+/gu) || [];
+  const counts = {};
+  for (const w of words) {
+    if (w.length <= 2 || TITLE_STOPWORDS.has(w)) continue;
+    counts[w] = (counts[w] || 0) + 1;
+  }
+  const repeated = Object.keys(counts).filter((w) => counts[w] > 2).sort();
+  if (!repeated.length) return [];
+  return [{
+    severity: "ERROR",
+    message: `parola ripetuta piu' di 2 volte nel titolo: ${repeated.join(", ")} — la SP-API rifiuta questi titoli (issue 100470), riformula per usarla al massimo 2 volte`,
+  }];
+}
+
 function checkSupportedAttrs(attrs) {
   const bad = Object.keys(attrs).filter((k) => !SUPPORTED_ATTRIBUTES.includes(k));
   if (bad.length) {
@@ -143,7 +188,7 @@ export function checkContent(attrs, context) {
   const meta = context?.search_terms_meta || {};
   const sqpMeta = context?.sqp_meta || {};
 
-  let problems = [...checkSupportedAttrs(attrs), ...checkLengths(attrs, maxLengths)];
+  let problems = [...checkSupportedAttrs(attrs), ...checkLengths(attrs, maxLengths), ...checkRepeatedWords(attrs)];
 
   if (meta.available) {
     problems = problems.concat(checkConvertingTerms(attrs, meta));

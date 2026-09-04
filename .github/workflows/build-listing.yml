@@ -79,6 +79,13 @@ on:
         type: boolean
         required: false
         default: false
+      extra_instructions:
+        description: >-
+          Istruzione libera per Claude, valida SOLO per questa generazione (es. "niente
+          emoji", "e' MDF non legno"): ha priorita' sulle regole generiche del contratto
+          se in conflitto. La passa la UI (campo "Istruzioni particolari"), opzionale.
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -132,6 +139,12 @@ jobs:
           SPAPI_ENDPOINT: https://sellingpartnerapi-eu.amazon.com
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+          # Passato come variabile d'ambiente, MAI interpolato dentro la riga di comando
+          # qui sotto: e' testo libero scritto dall'utente (puo' contenere virgolette,
+          # $, backtick, a capo...) e build_context.py lo legge da EXTRA_INSTRUCTIONS
+          # se --extra-instructions non e' passato — stesso principio di CONTENT_JSON
+          # in apply-listing.yml, per evitare injection nella shell.
+          EXTRA_INSTRUCTIONS: ${{ github.event.inputs.extra_instructions }}
         run: |
           EXTRA=""
           [ -n "${{ github.event.inputs.sku }}" ] && EXTRA="$EXTRA --sku ${{ github.event.inputs.sku }}"

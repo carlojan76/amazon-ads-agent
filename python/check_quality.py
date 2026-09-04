@@ -36,6 +36,22 @@ e verifica il risultato:
      (sqp_meta.purchase_confirmed_terms) assenti dal testo: SEMPRE warning,
      mai errore — segnale piu' debole dei termini che convertono di Ads (un
      solo periodo, campione spesso piccolo, nessuna attribuzione ad group).
+  7. Parole ripetute nel titolo: la SP-API (Listings Items) rifiuta un titolo
+     dove la stessa parola compare piu' di due volte (issue code 100470,
+     "Vous avez utilise les mots suivants plus de deux fois dans Titre" —
+     visto in un run reale su B0G5JC2YZ2_FR). E' un rischio in piu' proprio
+     perche' il punto 3 sopra chiede di infilare nel titolo le PAROLE ESATTE
+     dei termini che convertono: se piu' termini condividono una parola (es.
+     "chat" in francese, "gatto" in italiano) si puo' superare il limite
+     senza accorgersene finche' non arriva l'errore dalla API vera. Qui lo
+     controlliamo offline PRIMA di lanciare update_listing.py, cosi' il
+     problema si vede nella UI/nel log di build invece che in un
+     VALIDATION_PREVIEW fallito a parte. Solo sul titolo (item_name): e' li'
+     che la API applica questa regola, non su bullet/descrizione. Un elenco
+     di parole comuni (articoli, preposizioni, congiunzioni di IT/FR/ES/DE/EN
+     e i marketplace supportati) e' escluso dal conteggio per non generare
+     falsi allarmi su parole come "e"/"et"/"und"/"per"/"pour" che ripetersi
+     spesso e' normale.
 
 Uso:
   python check_quality.py --content listings/content/B0G5JC2YZ2_IT.json
@@ -80,7 +96,60 @@ import os
 import sys
 from typing import Any, Dict, List, Optional, Tuple
 
+import re
+
 import update_listing as ul  # riusa validate_lengths/SUPPORTED_ATTRIBUTES: niente doppio standard
+
+
+# Parole comuni (articoli/preposizioni/congiunzioni) nelle lingue dei 5
+# marketplace supportati (config.MARKETPLACES: IT/FR/DE/ES/UK), escluse dal
+# conteggio ripetizioni: ripetersi tre o piu' volte in un titolo e' normale
+# per queste, e non e' quello che l'issue 100470 della SP-API segnala.
+_TITLE_STOPWORDS = {
+    # italiano
+    "e", "il", "lo", "la", "i", "gli", "le", "di", "del", "dello", "della",
+    "dei", "degli", "delle", "da", "dal", "dallo", "dalla", "dai", "dagli",
+    "dalle", "in", "nel", "nello", "nella", "nei", "negli", "nelle", "con",
+    "su", "sul", "sullo", "sulla", "sui", "sugli", "sulle", "per", "tra",
+    "fra", "un", "uno", "una", "o", "che", "non", "come", "piu", "anche",
+    # francese
+    "et", "les", "des", "du", "un", "une", "pour", "avec", "dans", "en",
+    "au", "aux", "sur", "ou", "que", "ne", "se", "ce", "ces", "son", "sa",
+    "ses", "sans",
+    # spagnolo
+    "y", "el", "los", "las", "de", "del", "para", "con", "en", "una",
+    "unos", "unas", "al", "sobre", "o", "que", "sin",
+    # tedesco
+    "und", "der", "die", "das", "den", "dem", "des", "ein", "eine",
+    "einen", "einem", "einer", "eines", "fur", "mit", "auf", "oder",
+    "dass", "ohne",
+    # inglese
+    "and", "for", "with", "on", "of", "a", "an", "to", "or", "the",
+}
+
+
+def check_repeated_words(attrs: Dict[str, Any]) -> List[str]:
+    """La SP-API (Listings Items) rifiuta un titolo dove la stessa parola
+    compare piu' di due volte (issue 100470: "Vous avez utilise les mots
+    suivants plus de deux fois dans Titre"). Controllo SOLO sul titolo
+    (item_name): e' li' che la regola si applica, non su bullet/descrizione.
+    Parole di 2 caratteri o meno e numeri sono ignorati (spesso unita' di
+    misura/taglie, es. "x" in "54x44x28"), cosi' come le stopword comuni
+    sopra: solo parole "di contenuto" ripetute 3+ volte contano."""
+    title = attrs.get("item_name")
+    if not isinstance(title, str) or not title.strip():
+        return []
+    words = re.findall(r"[^\W\d_]+", title.lower(), flags=re.UNICODE)
+    counts: Dict[str, int] = {}
+    for w in words:
+        if len(w) <= 2 or w in _TITLE_STOPWORDS:
+            continue
+        counts[w] = counts.get(w, 0) + 1
+    repeated = sorted(w for w, n in counts.items() if n > 2)
+    if not repeated:
+        return []
+    return [f"ERROR    parola ripetuta piu' di 2 volte nel titolo: {', '.join(repeated)} "
+            f"— la SP-API rifiuta questi titoli (issue 100470), riformula per usarla al massimo 2 volte"]
 
 
 # --------------------------------------------------------------------------- IO
@@ -250,7 +319,8 @@ def check_one(content_path: str, context_path: Optional[str]) -> Tuple[int, int]
     max_lengths = context.get("max_lengths") or {}
     meta = context.get("search_terms_meta") or {}
 
-    problems = check_supported_attrs(attrs) + check_lengths(attrs, max_lengths)
+    problems = (check_supported_attrs(attrs) + check_lengths(attrs, max_lengths)
+                + check_repeated_words(attrs))
 
     if meta.get("available"):
         problems += check_converting_terms(attrs, meta)

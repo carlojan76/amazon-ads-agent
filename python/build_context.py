@@ -500,12 +500,32 @@ STILE:
   caratteristiche che nella foto non si vedono e che nessuna fonte del brief conferma.
 - Usa gli insight delle recensioni: rafforza cio' che i clienti apprezzano, anticipa
   le obiezioni dei topic negativi. Non citare mai "recensioni" esplicitamente.
-- Se il brief contiene la sezione "Termini che convertono", i termini che hanno
-  generato acquisti vanno usati con le PAROLE ESATTE dei clienti: i primi due nel
-  titolo, gli altri distribuiti nei bullet. Sono dati di vendita reali, non stime.
-  Se pero' quella sezione e' marcata come dati "dell'intero account" e non di questo
-  ASIN, trattala solo come indizio sul linguaggio del brand: non promettere
-  caratteristiche che il prodotto non ha pur di includere un termine.
+- Se il brief contiene la sezione "Termini che convertono" E quella sezione dice che
+  i dati sono di QUESTO ASIN (non dell'intero account, vedi sotto): ogni termine
+  elencato deve comparire come FRASE ESATTA, lettera per lettera, da qualche parte nel
+  testo finale (titolo, bullet o descrizione) — i primi due (per acquisti/click) nel
+  titolo, gli altri distribuiti nei bullet. "Frase esatta" vuol dire proprio quella
+  stringa, non un sinonimo o un concetto equivalente: se il termine e' "grattoir a
+  chat" non basta aver gia' scritto "griffoir" da un'altra parte (sono parole diverse
+  anche se sinonimi), e se il termine e' "poteau griffoir chat" non basta descrivere
+  la struttura in altro modo — va usata quella sequenza di parole. Un controllo
+  automatico dopo la generazione verifica ogni termine carattere per carattere
+  (case-insensitive, ma non tollera sinonimi): se un termine ti sembra ridondante con
+  un altro gia' usato, includilo comunque, in un punto diverso del testo (un bullet
+  dedicato, o "noto anche come ..."), non ometterlo. Sono dati di vendita reali, non
+  stime. Se invece quella sezione e' marcata come dati "dell'intero account" e non di
+  questo ASIN, trattala solo come indizio sul linguaggio del brand: non promettere
+  caratteristiche che il prodotto non ha pur di includere un termine, e in quel caso
+  puoi parafrasare liberamente, senza dover riprodurre la frase esatta.
+- ATTENZIONE nel TITOLO: la SP-API rifiuta un titolo dove la STESSA PAROLA compare piu'
+  di due volte (es. tre volte "chat" in un titolo francese -> errore, non si applica
+  nulla). Questo rischio cresce proprio quando infili nel titolo piu' termini che
+  convertono che condividono una parola (es. "chat"/"gatto" ricorre spesso in piu'
+  termini insieme al nome del prodotto). Prima di scrivere il titolo definitivo, conta
+  quante volte ripeti ogni parola di contenuto: se superi due occorrenze, riformula
+  (sinonimo, o sposta quella parte del termine in un bullet) — resta comunque valido
+  l'obbligo sopra di includere la frase esatta da qualche parte nel testo, ma nel
+  TITOLO devi restare entro il limite delle due ripetizioni.
 - I termini elencati come "traffico che NON converte" NON possono comparire nel titolo.
   Puoi usarli al massimo in un bullet, e solo se la foto e il brief confermano che il
   prodotto risponde davvero a quell'intenzione di ricerca. Se un termine non converte
@@ -597,8 +617,27 @@ def _claude_json(system: str, user: str, max_tokens: int = 4096,
             f"richiesta o alza ANTHROPIC_MAX_TOKENS.")
 
 
+def _extra_instructions_block(extra_instructions: str) -> str:
+    """Sezione da accodare allo user message quando l'utente ha scritto un'istruzione
+    particolare per QUESTA generazione (campo "Istruzioni particolari" nella UI, o
+    --extra-instructions/EXTRA_INSTRUCTIONS da riga di comando). Va per ultima nel
+    messaggio e dichiarata a priorita' massima: e' la cosa piu' specifica e piu'
+    recente che l'utente ha chiesto, deve poter correggere o restringere qualunque
+    regola generica sopra (es. "niente emoji", "e' MDF non legno")."""
+    if not extra_instructions:
+        return ""
+    return (
+        "\n\nISTRUZIONI PARTICOLARI per QUESTA generazione (scritte dall'utente apposta per "
+        "questo prodotto: hanno PRIORITA' su qualunque regola generica del system prompt o "
+        "del brief sopra, se in conflitto — es. se qui c'e' scritto \"niente emoji\" o \"e' MDF "
+        "non legno\", vale questo anche se altrove nel brief si dice il contrario):\n"
+        f"{extra_instructions.strip()}\n"
+    )
+
+
 def generate_copy(brief_md: str, asin: str, marketplace: str,
-                  image: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                  image: Optional[Dict[str, Any]] = None,
+                  extra_instructions: str = "") -> Dict[str, Any]:
     """Copy per un singolo prodotto, nel formato che update_listing.py applica."""
     img_note = (
         "\n\nIn testa al messaggio trovi la FOTO PRINCIPALE del prodotto. "
@@ -610,6 +649,7 @@ def generate_copy(brief_md: str, asin: str, marketplace: str,
         f"Marketplace: {marketplace}. ASIN: {asin}.{img_note}"
         f"Ecco il brief con copy attuale, scheda prodotto e insight recensioni:\n\n{brief_md}\n\n"
         "Riscrivi item_name, bullet_point (5) e product_description. Restituisci solo il JSON."
+        f"{_extra_instructions_block(extra_instructions)}"
     )
     copy = _claude_json(COPY_CONTRACT, user_msg, images=[image] if image else None)
     copy["asin"] = asin
@@ -646,6 +686,18 @@ STILE:
   caratteristiche che nella foto non si vedono e che nessuna fonte del brief conferma.
 - Usa gli insight delle recensioni: rafforza cio' che i clienti apprezzano, anticipa le obiezioni negative.
   Non citare mai "recensioni" esplicitamente.
+- Se il brief contiene la sezione "Termini che convertono" E quella sezione dice che i dati sono
+  di questo ASIN o aggregati dai child (non dell'intero account, vedi sotto): ogni termine elencato
+  deve comparire come FRASE ESATTA, lettera per lettera, da qualche parte nel testo CONDIVISO (bullet
+  o descrizione — il title_template e' per-child, quindi qui non conta ai fini di questo controllo).
+  "Frase esatta" vuol dire proprio quella stringa, non un sinonimo o un concetto equivalente: se il
+  termine e' "grattoir a chat" non basta aver gia' scritto "griffoir" da un'altra parte (sono parole
+  diverse anche se sinonimi). Un controllo automatico dopo la generazione verifica ogni termine
+  carattere per carattere (case-insensitive, ma non tollera sinonimi): se un termine ti sembra
+  ridondante con un altro gia' usato, includilo comunque, in un punto diverso del testo, non
+  ometterlo. Sono dati di vendita reali, non stime. Se invece quella sezione e' marcata come dati
+  "dell'intero account" (nessun ASIN della famiglia ha dati propri), trattala solo come indizio sul
+  linguaggio del brand: parafrasa pure liberamente, senza dover riprodurre la frase esatta.
 - Se il brief contiene la sezione "Concorrenti sui termini reali di questo prodotto", guardala
   con due obiettivi: capire il linguaggio della categoria, e individuare termini descrittivi
   (materiale, stile, sinonimi — es. "tessuto", "sisal", "di design") che i concorrenti usano nei
@@ -658,7 +710,8 @@ STILE:
 
 
 def generate_family_copy(brief_md: str, marketplace: str,
-                         image: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                         image: Optional[Dict[str, Any]] = None,
+                         extra_instructions: str = "") -> Dict[str, Any]:
     """Copy condivisa + template titolo per una famiglia (formato di update_family.py)."""
     img_note = ("In testa trovi la FOTO PRINCIPALE del parent: descrive la forma reale "
                 "del prodotto e prevale sulla copy attuale se la contraddice.\n\n"
@@ -667,6 +720,7 @@ def generate_family_copy(brief_md: str, marketplace: str,
         f"Marketplace: {marketplace}.\n\n{img_note}"
         f"Brief della famiglia (copy attuale del parent + insight recensioni):\n\n{brief_md}\n\n"
         "Scrivi shared.bullet_point (5), shared.product_description e title_template. Solo JSON."
+        f"{_extra_instructions_block(extra_instructions)}"
     )
     out = _claude_json(FAMILY_CONTRACT, user_msg, images=[image] if image else None)
     shared = out.get("shared", {})
@@ -828,7 +882,20 @@ def main() -> int:
     ap.add_argument("--no-competitors", action="store_true",
                     help="Non cercare i concorrenti sui termini reali di questo prodotto "
                          "(convertitori e/o SQP ad alto volume, via searchCatalogItems)")
+    ap.add_argument("--extra-instructions", default=None,
+                    help="Istruzione libera aggiuntiva per Claude, valida SOLO per questa "
+                         "generazione (es. 'niente emoji', 'e' MDF non legno'): ha priorita' "
+                         "sulle regole generiche del contratto se in conflitto. Se omesso, si "
+                         "legge la variabile d'ambiente EXTRA_INSTRUCTIONS (cosi' il workflow "
+                         "puo' passarla senza interpolarla in una riga di comando).")
     args = ap.parse_args()
+
+    extra_instructions = (
+        args.extra_instructions if args.extra_instructions is not None
+        else os.environ.get("EXTRA_INSTRUCTIONS", "")
+    ).strip()
+    if extra_instructions:
+        print(f"Istruzioni particolari per questa generazione: {extra_instructions!r}")
 
     market = args.marketplace.upper()
     if market not in config.MARKETPLACES:
@@ -1041,7 +1108,8 @@ def main() -> int:
         fam_out = os.path.join("listings", "family", f"{args.asin}_{market}.json")
         if args.generate:
             print("Chiedo a Claude la copy condivisa della famiglia...")
-            fc = generate_family_copy(brief, market, image=main_img)
+            fc = generate_family_copy(brief, market, image=main_img,
+                                      extra_instructions=extra_instructions)
             family = build_family_json(market, fc["shared"], fc.get("title_template"),
                                        parent_sku=sku)
             with open(fam_out, "w", encoding="utf-8") as fh:
@@ -1095,7 +1163,8 @@ def main() -> int:
                 print("--source-marketplace di un mercato che ha la copy.", file=sys.stderr)
                 return 1
         print("\nChiedo la copy a Claude...")
-        copy = generate_copy(brief, args.asin, market, image=main_img)
+        copy = generate_copy(brief, args.asin, market, image=main_img,
+                             extra_instructions=extra_instructions)
         os.makedirs("listings/content", exist_ok=True)
         out = os.path.join("listings", "content", f"{args.asin}_{market}.json")
         with open(out, "w", encoding="utf-8") as fh:
