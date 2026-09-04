@@ -1,0 +1,52 @@
+{
+  "marketplace": "DE",
+  "period": "WEEK",
+  "start": "2026-08-16",
+  "end": "2026-08-22",
+  "generated_at": "2026-09-04T23:04:39+00:00",
+  "by_asin": {
+    "B0G5JC2YZ2": [
+      {
+        "asin": "B0G5JC2YZ2",
+        "startDate": "2026-08-16",
+        "endDate": "2026-08-22",
+        "searchQuery": "katzenbett xxl wandmontage",
+        "searchQueryScore": 1,
+        "searchQueryVolume": 7,
+        "asinImpressionCount": 1,
+        "totalQueryImpressionCount": 152,
+        "asinImpressionShare": 0.66,
+        "asinClickCount": 1,
+        "totalClickCount": 5,
+        "asinClickShare": 20.0,
+        "asinCartAddCount": 0,
+        "totalCartAddCount": 0,
+        "asinCartAddShare": null,
+        "asinPurchaseCount": 0,
+        "totalPurchaseCount": 0,
+        "asinPurchaseShare": null
+      },
+      {
+        "asin": "B0G5JC2YZ2",
+        "startDate": "2026-08-16",
+        "endDate": "2026-08-22",
+        "searchQuery": "stoff für kratzbaum outdoor",
+        "searchQueryScore": 2,
+        "searchQueryVolume": 2,
+        "asinImpressionCount": 1,
+        "totalQueryImpressionCount": 100,
+        "asinImpressionShare": 1.0,
+        "asinClickCount": 1,
+        "totalClickCount": 1,
+        "asinClickShare": 100.0,
+        "asinCartAddCount": 0,
+        "totalCartAddCount": 0,
+        "asinCartAddShare": null,
+        "asinPurchaseCount": 0,
+        "totalPurchaseCount": 0,
+        "asinPurchaseShare": null
+      }
+    ]
+  },
+  "errors": {}
+}
