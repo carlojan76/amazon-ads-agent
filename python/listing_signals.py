@@ -227,18 +227,20 @@ def load_sqp_data(marketplace: str, data_dir: str) -> Optional[Dict[str, Any]]:
 
 
 def _fmt_share(value: Any) -> str:
-    """La documentazione Amazon non specifica se le quote (asin*Share) sono
-    espresse come frazione (0-1) o gia' in percentuale (0-100): trattiamo
-    <=1 come frazione (moltiplico per 100) e il resto come gia' in scala
-    percentuale, cosi' il numero mostrato resta leggibile in entrambi i casi
-    senza dare per scontata una convenzione non confermata."""
+    """Le quote (asin*Share) sono GIA' in scala percentuale 0-100, non
+    frazioni 0-1: confermato su un report reale (836 valori su account vero,
+    min 0.0 / max 100.0 esatti, 17% dei valori <=1 che una formattazione a
+    frazione avrebbe gonfiato di 100x — es. 0.12 mostrato come "12.0%"
+    invece di "0.12%"). Prima di questo dato reale la doc Amazon non
+    specificava la scala: NON reintrodurre l'euristica <=1 senza nuova
+    evidenza altrettanto solida."""
     if value is None:
         return "-"
     try:
         v = float(value)
     except (TypeError, ValueError):
         return "-"
-    return f"{v * 100:.1f}%" if v <= 1 else f"{v:.1f}%"
+    return f"{v:.2f}%"
 
 
 def search_query_performance_section(marketplace: str, asin: str, data_dir: str,
