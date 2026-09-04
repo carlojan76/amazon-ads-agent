@@ -268,6 +268,32 @@ export default function FamilyPanel({ marketplace = "" }) {
     }
   };
 
+  // Rilancia build-listing.yml con generate:"false": aggiorna SOLO il context
+  // pack (termini di ricerca/SQP, ora aggregati dai child) senza chiedere a
+  // Claude una nuova copy — se listings/family/... esiste gia', il workflow lo
+  // lascia intatto. Aggiorniamo qui SOLO lo stato "context", mai i campi
+  // modificabili (bullet/descrizione/template): non vogliamo perdere modifiche
+  // che stai ancora scrivendo nei campi qui sotto.
+  const doRefreshTerms = async () => {
+    if (!repoOk || !asinOk) return;
+    setBusy("refresh"); setError(null); setRun(null);
+    try {
+      const final = await runWorkflow(buildWorkflow, {
+        marketplace: mkt, asin, sku: "", generate: "false", family: "true",
+        source_marketplace: "", reviews_sort: "MENTIONS", search_terms_top: "20",
+        no_image: "false", no_search_terms: "false", no_sqp: "false",
+      });
+      if (final?.conclusion === "success") {
+        const ctxRes = await getRepoFileContents({ token: ghToken, owner, repo, path: `listings/context/${asin}_${mkt}.json` });
+        setContext(ctxRes?.json || null);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const doPreview = async () => {
     if (!repoOk || !asinOk || !family) return;
     setBusy("preview"); setError(null); setRun(null);
@@ -305,6 +331,7 @@ export default function FamilyPanel({ marketplace = "" }) {
   };
 
   const canBuild = repoOk && asinOk && ghUser && !busy;
+  const canRefreshTerms = repoOk && asinOk && ghUser && !busy;
   const canPreview = repoOk && asinOk && ghUser && !!family && !busy;
   const hasErrors = (checkResult?.nError || 0) > 0;
   const canApply = previewValid && confirmText === "APPLICA" && !hasErrors && !busy;
@@ -397,7 +424,7 @@ export default function FamilyPanel({ marketplace = "" }) {
         </div>
 
         {/* Passo 2: genera */}
-        <div style={{ display: "flex", alignItems: "center", gap: S.md, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: S.md, flexWrap: "wrap", marginBottom: S.sm }}>
           <Chip color={family ? C.green : C.textMuted} bg={family ? C.greenDim : "transparent"}>2. Genera</Chip>
           <button onClick={doBuild} disabled={!canBuild} style={button("ghost", { disabled: !canBuild })}>
             {busy === "build" ? "Genero…" : "Genera brief + copy famiglia con Claude"}
@@ -407,8 +434,75 @@ export default function FamilyPanel({ marketplace = "" }) {
             bullet/descrizione condivisi e un titolo con placeholder ({"{color}"}/{"{size}"}).
           </span>
         </div>
+        <div style={{ display: "flex", alignItems: "center", gap: S.md, flexWrap: "wrap" }}>
+          <div style={{ width: 78, flexShrink: 0 }} />
+          <button onClick={doRefreshTerms} disabled={!canRefreshTerms} style={button("quiet", { small: true, disabled: !canRefreshTerms })}>
+            {busy === "refresh" ? "Aggiorno…" : "↻ Aggiorna solo termini di ricerca"}
+          </button>
+          <span style={{ fontSize: T.micro, color: C.textDim, flex: "1 1 240px", lineHeight: 1.5 }}>
+            Rilancia "{buildWorkflow}" senza chiedere copy nuova a Claude: aggiorna solo i termini di
+            ricerca/SQP (utile dopo che i child hanno accumulato dati ads) senza toccare bullet/descrizione
+            che hai gia' approvato qui sotto.
+          </span>
+        </div>
         {!ghUser && <div style={{ fontSize: T.micro, color: C.textDim, marginTop: S.sm }}>Connetti prima un token GitHub (passo 1).</div>}
       </div>
+
+      {context && (
+        <div style={{ ...card, padding: S.lg, marginBottom: S.md }}>
+          <div style={{ fontSize: T.lead, fontWeight: 700, color: C.text, marginBottom: S.sm }}>Termini di ricerca usati</div>
+          {(() => {
+            const meta = context.search_terms_meta || {};
+            const sqpMeta = context.sqp_meta || {};
+            const scopeLabel = {
+              asin: "di questo ASIN (ha una sua campagna)",
+              family: "aggregati dai child con dati propri",
+            }[meta.scope] || "dell'intero account (nessun ASIN della famiglia ha dati propri — verifica se sono pertinenti)";
+            return (
+              <>
+                {meta.available ? (
+                  <>
+                    <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.sm }}>
+                      Ambito: <strong style={{ color: meta.scope === "asin" || meta.scope === "family" ? C.green : C.yellow }}>{scopeLabel}</strong>
+                      {meta.contributing_asins?.length ? ` — ${meta.contributing_asins.join(", ")}` : ""}
+                    </div>
+                    {!!meta.top_terms?.length && (
+                      <div style={{ marginBottom: S.sm }}>
+                        <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: 4 }}>Termini che convertono (devono comparire nel testo):</div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {meta.top_terms.map((t) => <Chip key={t} color={C.green} bg={C.greenDim}>{t}</Chip>)}
+                        </div>
+                      </div>
+                    )}
+                    {!!meta.avoid_terms?.length && (
+                      <div>
+                        <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: 4 }}>Termini che NON convertono (mai nel titolo):</div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {meta.avoid_terms.map((t) => <Chip key={t} color={C.yellow} bg={C.yellowDim}>{t}</Chip>)}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ fontSize: T.small, color: C.textMuted }}>Nessun termine di ricerca disponibile ({meta.reason || "motivo non specificato"}).</div>
+                )}
+                {sqpMeta.available && !!sqpMeta.purchase_confirmed_terms?.length && (
+                  <div style={{ marginTop: S.md, paddingTop: S.md, borderTop: `1px solid ${C.border}` }}>
+                    <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: 4 }}>
+                      Query Search Query Performance con acquisti reali{sqpMeta.scope === "family" ? " (sommati sui child)" : ""}:
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {sqpMeta.purchase_confirmed_terms.map((t) => (
+                        <Chip key={t.query} color={C.blue} bg={C.blueDim}>{t.query} ({t.purchases})</Chip>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       {family && (
         <div style={{ ...card, padding: S.lg, marginBottom: S.md }}>

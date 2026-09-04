@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { C, F, T, S, R, button, input, card } from "./theme";
 import {
   getUser, checkRepoAccess, dispatchWorkflow,
@@ -13,6 +13,12 @@ import { checkContent } from "./qualityCheck";
  * (anteprima obbligatoria, poi applicazione vera solo dopo conferma scritta
  * "APPLICA"). Stesso pattern di sicurezza di ActionsPanel: account -> anteprima
  * -> applica, nessuna scorciatoia sul dry-run.
+ *
+ * Titolo/bullet/descrizione sono modificabili qui prima di anteprima/applica
+ * (sezione "Prima / dopo"): le modifiche le mandi al workflow come input
+ * (content_json), NON riscrivono il file listings/content/ nel repo — quello
+ * resta quello generato da "Genera", finche' non lo rigeneri. Stesso pattern
+ * di FamilyPanel (shared_json).
  *
  * Riusa la connessione GitHub di ActionsPanel (stesse chiavi localStorage
  * gh_repo/gh_token): se sei gia' connesso li', qui non serve rifarlo.
@@ -111,22 +117,32 @@ function bulletsText(v) {
   return v || "";
 }
 
-function FieldDiff({ label, before, after }) {
-  const changed = (before || "") !== (after || "");
+const textareaStyle = { ...input, width: "100%", minHeight: 96, resize: "vertical", lineHeight: 1.5, fontFamily: F.ui };
+
+// Sinistra: sola lettura (cosa c'e' ora sul listing Amazon, da context.current_copy).
+// Destra: campo modificabile — parte precompilato con la copy generata, ma puoi
+// riscriverlo prima di anteprima/applica. "modificato" confronta col prima, non
+// con la copy generata in origine.
+function EditableFieldDiff({ label, before, value, onChange, multiline }) {
+  const changed = (before || "") !== (value || "");
+  const fieldStyle = {
+    ...(multiline ? textareaStyle : input),
+    width: "100%", fontFamily: F.ui,
+    background: changed ? C.accentGlow : C.surface2,
+  };
   return (
     <div style={{ marginBottom: S.md }}>
       <div style={{ fontSize: T.micro, color: C.textDim, fontWeight: 600, marginBottom: 4 }}>
-        {label} {changed && <span style={{ color: C.accent }}>· modificato</span>}
+        {label} {changed && <span style={{ color: C.accent }}>· modificato rispetto al listing attuale</span>}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: S.sm }}>
         <div style={{
           fontSize: T.small, color: C.textMuted, whiteSpace: "pre-wrap", lineHeight: 1.5,
           background: C.surface2, borderRadius: R.sm, padding: S.sm, minHeight: 28,
         }}>{before || <em style={{ color: C.textDim }}>vuoto</em>}</div>
-        <div style={{
-          fontSize: T.small, color: C.text, whiteSpace: "pre-wrap", lineHeight: 1.5,
-          background: changed ? C.accentGlow : C.surface2, borderRadius: R.sm, padding: S.sm, minHeight: 28,
-        }}>{after || <em style={{ color: C.textDim }}>vuoto</em>}</div>
+        {multiline
+          ? <textarea value={value} onChange={onChange} style={fieldStyle} />
+          : <input value={value} onChange={onChange} style={fieldStyle} />}
       </div>
     </div>
   );
@@ -189,11 +205,14 @@ export default function ListingPanel({ marketplace = "" }) {
   const [error, setError] = useState(null);
   const [context, setContext] = useState(null);
   const [content, setContent] = useState(null);
-  const [contentSha, setContentSha] = useState(null);
-  const [checkResult, setCheckResult] = useState(null);
-  const [previewedSha, setPreviewedSha] = useState(null);
+  const [previewedJson, setPreviewedJson] = useState(null);
   const [confirmText, setConfirmText] = useState("");
   const [appliedInfo, setAppliedInfo] = useState(null);
+
+  // ---- campi modificabili (titolo/bullet/descrizione) ----
+  const [titleText, setTitleText] = useState("");
+  const [bulletText, setBulletText] = useState("");
+  const [descriptionText, setDescriptionText] = useState("");
 
   const repoOk = isValidRepo(ghRepo);
   const asinOk = isValidAsin(asin);
@@ -201,11 +220,35 @@ export default function ListingPanel({ marketplace = "" }) {
 
   // Cambiando ASIN/mercato tutto quello che avevi caricato prima non e' piu' valido.
   useEffect(() => {
-    setContext(null); setContent(null); setContentSha(null); setCheckResult(null);
-    setPreviewedSha(null); setConfirmText(""); setAppliedInfo(null); setRun(null); setError(null);
+    setContext(null); setContent(null); setPreviewedJson(null); setConfirmText("");
+    setAppliedInfo(null); setRun(null); setError(null);
+    setTitleText(""); setBulletText(""); setDescriptionText("");
   }, [asin, mkt]);
 
-  const previewValid = previewedSha !== null && previewedSha === contentSha;
+  const populateEditableFields = (cont) => {
+    const attrs = cont?.attributes || {};
+    const bp = Array.isArray(attrs.bullet_point) ? attrs.bullet_point
+      : (typeof attrs.bullet_point === "string" ? [attrs.bullet_point] : []);
+    setTitleText(attrs.item_name || "");
+    setBulletText(bp.join("\n"));
+    setDescriptionText(attrs.product_description || "");
+  };
+
+  const payload = useMemo(() => ({
+    attributes: {
+      item_name: titleText.trim(),
+      bullet_point: bulletText.split("\n").map((s) => s.trim()).filter(Boolean),
+      product_description: descriptionText.trim(),
+    },
+  }), [titleText, bulletText, descriptionText]);
+  const payloadJson = useMemo(() => JSON.stringify(payload), [payload]);
+
+  const checkResult = useMemo(() => {
+    if (!content) return null;
+    return checkContent(payload.attributes, context);
+  }, [content, context, payload]);
+
+  const previewValid = previewedJson !== null && previewedJson === payloadJson;
   useEffect(() => { if (!previewValid) setConfirmText(""); }, [previewValid]);
 
   const loadFiles = async () => {
@@ -213,12 +256,7 @@ export default function ListingPanel({ marketplace = "" }) {
     const contRes = await getRepoFileContents({ token: ghToken, owner, repo, path: `listings/content/${asin}_${mkt}.json` });
     setContext(ctxRes?.json || null);
     setContent(contRes?.json || null);
-    setContentSha(contRes?.sha || null);
-    if (contRes?.json?.attributes) {
-      setCheckResult(checkContent(contRes.json.attributes, ctxRes?.json || null));
-    } else {
-      setCheckResult(null);
-    }
+    if (contRes?.json) populateEditableFields(contRes.json);
     return { ctxRes, contRes };
   };
 
@@ -273,9 +311,9 @@ export default function ListingPanel({ marketplace = "" }) {
     setBusy("preview"); setError(null); setRun(null);
     try {
       const final = await runWorkflow(applyWorkflow, {
-        marketplace: mkt, asin, confirm: "NO", dry_run: "true",
+        marketplace: mkt, asin, confirm: "NO", dry_run: "true", content_json: payloadJson,
       });
-      if (final?.conclusion === "success") setPreviewedSha(contentSha);
+      if (final?.conclusion === "success") setPreviewedJson(payloadJson);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -288,10 +326,10 @@ export default function ListingPanel({ marketplace = "" }) {
     setBusy("apply"); setError(null); setRun(null);
     try {
       const final = await runWorkflow(applyWorkflow, {
-        marketplace: mkt, asin, confirm: "APPLICA", dry_run: "false",
+        marketplace: mkt, asin, confirm: "APPLICA", dry_run: "false", content_json: payloadJson,
       });
       if (final?.conclusion === "success") {
-        setPreviewedSha(null); setConfirmText("");
+        setPreviewedJson(null); setConfirmText("");
         const res = await getRepoFileContents({ token: ghToken, owner, repo, path: `listings/applied/${asin}_${mkt}.json` });
         setAppliedInfo(res?.json || null);
       }
@@ -307,7 +345,6 @@ export default function ListingPanel({ marketplace = "" }) {
   const hasErrors = (checkResult?.nError || 0) > 0;
   const canApply = previewValid && confirmText === "APPLICA" && !hasErrors && !busy;
 
-  const attrs = content?.attributes || {};
   const cur = context?.current_copy || {};
 
   return (
@@ -421,13 +458,22 @@ export default function ListingPanel({ marketplace = "" }) {
 
           {content && (
             <div style={{ marginTop: S.lg, paddingTop: S.lg, borderTop: `1px solid ${C.border}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: S.md }}>
-                <div style={{ fontSize: T.body, fontWeight: 700, color: C.text }}>Prima / dopo</div>
-                <div style={{ fontSize: T.micro, color: C.textDim }}>sinistra: sul listing ora — destra: copy generata</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: S.sm }}>
+                <div style={{ fontSize: T.body, fontWeight: 700, color: C.text }}>Prima / dopo (modificabile)</div>
+                <div style={{ fontSize: T.micro, color: C.textDim }}>sinistra: sul listing ora — destra: modifica qui prima di applicare</div>
               </div>
-              <FieldDiff label="Titolo" before={cur.item_name} after={attrs.item_name} />
-              <FieldDiff label="Bullet point" before={bulletsText(cur.bullet_point)} after={bulletsText(attrs.bullet_point)} />
-              <FieldDiff label="Descrizione" before={cur.product_description} after={attrs.product_description} />
+              <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.md, lineHeight: 1.6 }}>
+                I campi a destra partono precompilati con la copy generata, ma puoi riscriverli liberamente.
+                Le modifiche NON riscrivono listings/content/ nel repo: valgono solo per l'anteprima/applicazione
+                che lanci da qui. Per renderle permanenti, rigenera la copy dopo aver aggiornato il brief, oppure
+                editane il file a mano nel repo.
+              </div>
+              <EditableFieldDiff label="Titolo" before={cur.item_name} value={titleText}
+                onChange={(e) => setTitleText(e.target.value)} />
+              <EditableFieldDiff label="Bullet point (uno per riga)" before={bulletsText(cur.bullet_point)} value={bulletText}
+                onChange={(e) => setBulletText(e.target.value)} multiline />
+              <EditableFieldDiff label="Descrizione" before={cur.product_description} value={descriptionText}
+                onChange={(e) => setDescriptionText(e.target.value)} multiline />
             </div>
           )}
         </div>
@@ -442,7 +488,8 @@ export default function ListingPanel({ marketplace = "" }) {
               {busy === "preview" ? "Anteprima in corso…" : "Genera anteprima"}
             </button>
             <span style={{ fontSize: T.micro, color: C.textDim, flex: "1 1 240px", lineHeight: 1.5 }}>
-              Esegue di nuovo il controllo qualita' e una VALIDATION_PREVIEW su Amazon, senza scrivere nulla.
+              Esegue il controllo qualita' e una VALIDATION_PREVIEW su Amazon sulla copy modificata qui sopra,
+              senza scrivere nulla.
             </span>
           </div>
 
@@ -460,9 +507,9 @@ export default function ListingPanel({ marketplace = "" }) {
           {!previewValid && (
             <div style={{ fontSize: T.micro, color: C.textDim, marginTop: S.sm, lineHeight: 1.6 }}>
               {hasErrors
-                ? "Il controllo qualita' ha trovato errori: correggi la copy (rigenerala, o modifica listings/content/ a mano) prima di poter applicare."
-                : previewedSha !== null
-                  ? "La copy e' cambiata dopo l'ultima anteprima: rigenerala prima di applicare."
+                ? "Il controllo qualita' ha trovato errori: correggi i campi qui sopra (o rigenera la copy) prima di poter applicare."
+                : previewedJson !== null
+                  ? "Hai modificato il testo dopo l'ultima anteprima: rigenerala prima di applicare."
                   : "Genera prima l'anteprima (passo 3). Solo dopo si sblocca la conferma."}
             </div>
           )}
