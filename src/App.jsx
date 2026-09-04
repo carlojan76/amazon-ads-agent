@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { C, F, T, S, R, button, input, card, GLOBAL_CSS } from "./theme";
 import ActionsPanel from "./ActionsPanel";
 import ListingPanel from "./ListingPanel";
+import FamilyPanel from "./FamilyPanel";
 import CampaignPlanner from "./CampaignPlanner";
 import { ACTIONS_PROMPT, extractActionsFromText, validateAgainstData, actionSignature, dedupeActions } from "./actions";
 import { parseCSV, processJSON, processCSV } from "./parse";
@@ -498,6 +499,7 @@ export default function App() {
     { id: "ai", label: "Consulente" },
     { id: "actions", label: "Azioni", badge: pendingActions || null },
     { id: "listing", label: "Scheda prodotto" },
+    { id: "family", label: "Famiglia" },
   ];
 
   return (
@@ -740,6 +742,11 @@ export default function App() {
         {/* Scheda prodotto (listing copy) */}
         {tab === "listing" && (
           <ListingPanel marketplace={metrics.meta?.marketplace || ""} />
+        )}
+
+        {/* Famiglia di variazioni */}
+        {tab === "family" && (
+          <FamilyPanel marketplace={metrics.meta?.marketplace || ""} />
         )}
       </div>
     </div>
