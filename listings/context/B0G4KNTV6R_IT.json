@@ -49,15 +49,139 @@
       "PT06: https://m.media-amazon.com/images/I/31HBbpRmdqL._SL75_.jpg",
       "PT06: https://m.media-amazon.com/images/I/61D0gRKb9YL.jpg"
     ],
+    "image_candidates": [
+      {
+        "variant": "MAIN",
+        "link": "https://m.media-amazon.com/images/I/4131JoZbrKL.jpg",
+        "width": 500,
+        "height": 335
+      },
+      {
+        "variant": "MAIN",
+        "link": "https://m.media-amazon.com/images/I/4131JoZbrKL._SL75_.jpg",
+        "width": 75,
+        "height": 50
+      },
+      {
+        "variant": "MAIN",
+        "link": "https://m.media-amazon.com/images/I/7179DJeaC3L.jpg",
+        "width": 2528,
+        "height": 1696
+      },
+      {
+        "variant": "PT01",
+        "link": "https://m.media-amazon.com/images/I/31oJaJ4jj5L.jpg",
+        "width": 500,
+        "height": 333
+      },
+      {
+        "variant": "PT01",
+        "link": "https://m.media-amazon.com/images/I/31oJaJ4jj5L._SL75_.jpg",
+        "width": 75,
+        "height": 50
+      },
+      {
+        "variant": "PT01",
+        "link": "https://m.media-amazon.com/images/I/61ty0YOalxL.jpg",
+        "width": 1501,
+        "height": 1000
+      },
+      {
+        "variant": "PT02",
+        "link": "https://m.media-amazon.com/images/I/415n-llhhNL.jpg",
+        "width": 500,
+        "height": 335
+      },
+      {
+        "variant": "PT02",
+        "link": "https://m.media-amazon.com/images/I/415n-llhhNL._SL75_.jpg",
+        "width": 75,
+        "height": 50
+      },
+      {
+        "variant": "PT02",
+        "link": "https://m.media-amazon.com/images/I/614ZXv-Y4QL.jpg",
+        "width": 1492,
+        "height": 1000
+      },
+      {
+        "variant": "PT03",
+        "link": "https://m.media-amazon.com/images/I/41bxNxb3GZL.jpg",
+        "width": 500,
+        "height": 373
+      },
+      {
+        "variant": "PT03",
+        "link": "https://m.media-amazon.com/images/I/41bxNxb3GZL._SL75_.jpg",
+        "width": 75,
+        "height": 56
+      },
+      {
+        "variant": "PT03",
+        "link": "https://m.media-amazon.com/images/I/81Uf8Em3DAL.jpg",
+        "width": 2400,
+        "height": 1792
+      },
+      {
+        "variant": "PT04",
+        "link": "https://m.media-amazon.com/images/I/41gsLXvjYkL.jpg",
+        "width": 500,
+        "height": 373
+      },
+      {
+        "variant": "PT04",
+        "link": "https://m.media-amazon.com/images/I/41gsLXvjYkL._SL75_.jpg",
+        "width": 75,
+        "height": 56
+      },
+      {
+        "variant": "PT04",
+        "link": "https://m.media-amazon.com/images/I/81W7yls9fNL.jpg",
+        "width": 2400,
+        "height": 1792
+      },
+      {
+        "variant": "PT05",
+        "link": "https://m.media-amazon.com/images/I/51ODBe7XI6L.jpg",
+        "width": 465,
+        "height": 500
+      },
+      {
+        "variant": "PT05",
+        "link": "https://m.media-amazon.com/images/I/51ODBe7XI6L._SL75_.jpg",
+        "width": 70,
+        "height": 75
+      },
+      {
+        "variant": "PT05",
+        "link": "https://m.media-amazon.com/images/I/71CpbK4EQAL.jpg",
+        "width": 1000,
+        "height": 1075
+      },
+      {
+        "variant": "PT06",
+        "link": "https://m.media-amazon.com/images/I/31HBbpRmdqL.jpg",
+        "width": 500,
+        "height": 333
+      },
+      {
+        "variant": "PT06",
+        "link": "https://m.media-amazon.com/images/I/31HBbpRmdqL._SL75_.jpg",
+        "width": 75,
+        "height": 50
+      },
+      {
+        "variant": "PT06",
+        "link": "https://m.media-amazon.com/images/I/61D0gRKb9YL.jpg",
+        "width": 1501,
+        "height": 1000
+      }
+    ],
     "sales_ranks": [
-      "#23863 in Prodotti per animali domestici"
+      "#12964 in Prodotti per animali domestici"
     ]
   },
-  "aplus": {
-    "name": "",
-    "locale": "it_IT",
-    "texts": []
-  },
+  "aplus": null,
   "reviews": null,
   "search_terms_md": "\n## Termini che convertono (report search term Amazon Ads)\n\n⚠️ Questo ASIN non ha ancora dati ads propri: i termini sotto sono dell'intero account su IT e valgono solo come contesto di brand, NON come performance di questo prodotto.\n\n_Dati al 2026-09-03._\n\n**Hanno generato acquisti — devono comparire nel titolo o nei primi bullet:**\n\n| Termine | Click | Acquisti | CVR | CPC | ACoS |\n|---|---:|---:|---:|---:|---:|\n| tiragraffi divano | 47 | 4 | 9% | 0.39 € | 37% |\n| tappetino tiragraffi per gatti | 10 | 3 | 30% | 0.42 € | 12% |\n| protezione divano graffi gatto | 30 | 2 | 7% | 0.37 € | 49% |\n| sdraietta per gatti | 18 | 2 | 11% | 0.34 € | 16% |\n| tiragraffi per divano | 22 | 1 | 5% | 0.39 € | 105% |\n| tiragraffi adesivo | 19 | 1 | 5% | 0.37 € | 62% |\n| tappeto tiragraffi per gatti adesivo | 18 | 1 | 6% | 0.39 € | 85% |\n| sdraio gatto | 18 | 1 | 6% | 0.33 € | 23% |\n| tappeto tiragraffi per gatti | 16 | 1 | 6% | 0.35 € | 69% |\n| antigraffio gatto divano | 12 | 1 | 8% | 0.39 € | 44% |\n| sedia per gatti | 9 | 1 | 11% | 0.34 € | 12% |\n| tappeto tiragraffi | 7 | 1 | 14% | 0.39 € | 33% |\n| tiragraffi | 5 | 1 | 20% | 0.40 € | 8% |\n| spazzola peli cane auto | 3 | 1 | 33% | 0.25 € | 7% |\n| anti graffio gatti divano | 2 | 1 | 50% | 0.40 € | 2% |\n| antigraffio gatto | 2 | 1 | 50% | 0.33 € | 8% |\n| spazzola per peli cane auto | 1 | 1 | 100% | 0.32 € | 3% |\n| rimuovi peli animali auto | 1 | 1 | 100% | 0.39 € | 3% |\n| amaca gatto esterno | 1 | 1 | 100% | 0.35 € | 1% |\n| amaca gatto pavimento | 1 | 1 | 100% | 0.22 € | 1% |\n\n**Traffico che NON converte — la copy non risponde a questa intenzione, o il prodotto non e' pertinente:**\n\n- tiragraffi adesivo per divano — 18 click, 7.17 € spesi, 0 acquisti\n- tiragraffi per gatti — 21 click, 6.85 € spesi, 0 acquisti\n- amaca per gatti — 20 click, 6.56 € spesi, 0 acquisti\n- b0dg2xt2fr — 11 click, 4.35 € spesi, 0 acquisti\n- divano gatto — 12 click, 4.33 € spesi, 0 acquisti\n- divano per gatti — 13 click, 4.25 € spesi, 0 acquisti\n- tiragraffi gatto con amaca — 8 click, 2.78 € spesi, 0 acquisti\n- poltrona per gatti — 10 click, 2.73 € spesi, 0 acquisti\n- tiragraffi divano per gatti — 7 click, 2.67 € spesi, 0 acquisti\n- cuccia sospesa per gatti — 5 click, 2.39 € spesi, 0 acquisti\n- tiragraffi per gatti adulti — 5 click, 2.16 € spesi, 0 acquisti\n- letto per gatti — 6 click, 1.95 € spesi, 0 acquisti\n- tiragraffi per divano per gatti — 5 click, 1.88 € spesi, 0 acquisti\n- amaca gatto finestra — 5 click, 1.56 € spesi, 0 acquisti\n- amaca gatto — 5 click, 1.55 € spesi, 0 acquisti\n- amaca da muro per gatti — 3 click, 1.52 € spesi, 0 acquisti\n- proteggi divano gatti graffi — 4 click, 1.35 € spesi, 0 acquisti\n- amaca da parete per gatti — 3 click, 1.09 € spesi, 0 acquisti\n- sdraio per gatti — 4 click, 1.08 € spesi, 0 acquisti\n- tiragraffi proteggi divano — 3 click, 1.08 € spesi, 0 acquisti\n\nUsa i termini della prima lista con le parole esatte dei clienti. Per la seconda: se l'intenzione e' pertinente al prodotto, chiariscila nella copy; se non lo e', non forzarla nel testo.\n",
   "search_terms_meta": {
@@ -86,6 +210,35 @@
       "rimuovi peli animali auto",
       "amaca gatto esterno",
       "amaca gatto pavimento"
+    ],
+    "avoid_terms": [
+      "tiragraffi adesivo per divano",
+      "tiragraffi per gatti",
+      "amaca per gatti",
+      "b0dg2xt2fr",
+      "divano gatto",
+      "divano per gatti",
+      "tiragraffi gatto con amaca",
+      "poltrona per gatti",
+      "tiragraffi divano per gatti",
+      "cuccia sospesa per gatti",
+      "tiragraffi per gatti adulti",
+      "letto per gatti",
+      "tiragraffi per divano per gatti",
+      "amaca gatto finestra",
+      "amaca gatto",
+      "amaca da muro per gatti",
+      "proteggi divano gatti graffi",
+      "amaca da parete per gatti",
+      "sdraio per gatti",
+      "tiragraffi proteggi divano"
     ]
-  }
+  },
+  "sqp_md": "",
+  "sqp_meta": {
+    "available": false,
+    "reason": "nessuna riga Search Query Performance per questo ASIN (nessun dato Amazon per il periodo, o ASIN non incluso nel fetch)"
+  },
+  "competitors": {},
+  "competitors_md": ""
 }

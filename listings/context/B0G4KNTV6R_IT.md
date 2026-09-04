@@ -38,7 +38,7 @@ Comfort e Design: La forma semi-aperta ricorda una cuccia gatto igloo o un morbi
 ## Scheda prodotto
 
 - Brand: Lupo & Felix
-- Rank: #23863 in Prodotti per animali domestici
+- Rank: #12964 in Prodotti per animali domestici
 - Immagini (21):
     - MAIN: https://m.media-amazon.com/images/I/4131JoZbrKL.jpg
     - MAIN: https://m.media-amazon.com/images/I/4131JoZbrKL._SL75_.jpg
@@ -48,9 +48,6 @@ Comfort e Design: La forma semi-aperta ricorda una cuccia gatto igloo o un morbi
     - PT01: https://m.media-amazon.com/images/I/61ty0YOalxL.jpg
     - PT02: https://m.media-amazon.com/images/I/415n-llhhNL.jpg
     - PT02: https://m.media-amazon.com/images/I/415n-llhhNL._SL75_.jpg
-
-## Contenuti A+ (locale it_IT)
-
 
 ## Termini che convertono (report search term Amazon Ads)
 
