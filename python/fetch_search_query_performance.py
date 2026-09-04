@@ -32,6 +32,18 @@ weekly_analysis.py/public/data/<MKT>.json):
 Consumato da listing_signals.search_query_performance_section(), a sua volta
 incluso nel context pack da build_context.py.
 
+BACKFILL per ASIN mai pubblicizzati: la scoperta ASIN sopra (all_advertised_asins,
+da public/data/<MKT>.json) copre solo cio' che ha gia' una campagna Ads — un
+parent o un intero prodotto senza campagna non ci finisce mai, quindi il fetch
+periodico (weekly-analysis) non lo raggiunge. ensure_sqp_for_asins() e'
+pensata per essere IMPORTATA da build_context.py (sia in modalita' singolo ASIN
+sia famiglia): backfilla SOLO gli ASIN passati che NON hanno gia' un risultato
+nel file pubblicato (ne' righe ne' un errore precedente), fondendolo dentro
+SENZA MAI sovrascrivere gli ASIN gia' presenti — a differenza di run_market(),
+che scrive un file nuovo con solo gli ASIN che gli passi. E' cosi' che un
+prodotto "sdraio" mai pubblicizzato puo' comunque avere volume di ricerca
+reale nel brief, invece di restare senza search term ne' SQP.
+
 Uso:
   python fetch_search_query_performance.py                      # tutti i mercati in config.ACTIVE_MARKETS
   python fetch_search_query_performance.py --marketplace IT
@@ -186,6 +198,100 @@ def run_market(market: str, period: str, start: str, end: str,
         json.dump(out, fh, ensure_ascii=False, indent=2)
     print(f"  Salvato: {out_path}")
     return out
+
+
+def load_existing(out_path: str) -> Dict[str, Any]:
+    if os.path.isfile(out_path):
+        try:
+            with open(out_path, encoding="utf-8") as fh:
+                return json.load(fh)
+        except (OSError, json.JSONDecodeError):
+            pass
+    return {}
+
+
+def ensure_coverage(market: str, asins: List[str], period: str, start: str, end: str,
+                    out_path: str) -> Dict[str, Any]:
+    """Backfill SQP SOLO per gli ASIN di 'asins' senza gia' un risultato in
+    out_path (ne' righe ne' un errore registrato in precedenza): non rifa'
+    MAI gli ASIN gia' coperti, quello resta il lavoro del fetch periodico
+    completo (run_market, su tutti gli ASIN pubblicizzati). Fonde il
+    risultato nel file esistente: gli ASIN gia' presenti restano quelli che
+    erano anche se questa run ne tocca solo alcuni (a differenza di
+    run_market, che sovrascrive l'intero file con SOLO gli ASIN passati)."""
+    existing = load_existing(out_path)
+    by_asin: Dict[str, Any] = dict(existing.get("by_asin") or {})
+    errors: Dict[str, str] = dict(existing.get("errors") or {})
+    todo = [a for a in asins if a not in by_asin and a not in errors]
+    if not todo:
+        return existing  # gia' tutti coperti (con dati o con un errore gia' registrato)
+
+    marketplace_id = config.MARKETPLACES[market]
+    print(f"  [sqp backfill] {len(todo)} ASIN senza SQP: {', '.join(todo)}")
+    for i, asin in enumerate(todo, 1):
+        print(f"    ({i}/{len(todo)}) {asin}...", end=" ", flush=True)
+        try:
+            rows = fetch_for_asin(asin, marketplace_id, period, start, end)
+            by_asin[asin] = rows
+            errors.pop(asin, None)
+            print(f"{len(rows)} query")
+        except requests.HTTPError as exc:
+            resp = exc.response
+            code = resp.status_code if resp is not None else "?"
+            body = resp.text[:300] if resp is not None else str(exc)
+            errors[asin] = f"HTTP {code}: {body}"
+            print(f"ERRORE (HTTP {code})")
+        except Exception as exc:  # noqa: BLE001 - un ASIN che fallisce non deve fermare gli altri
+            errors[asin] = str(exc)
+            print(f"ERRORE ({exc})")
+
+    # period/start/end: se il file esisteva gia' (dal fetch periodico o da un
+    # backfill precedente) restano quelli che erano — i vari ASIN nel file
+    # possono cosi' avere periodi leggermente diversi nel tempo, ma dato che
+    # sia il fetch periodico sia questo backfill usano di default la stessa
+    # "ultima settimana completa", in pratica coincidono quasi sempre. Non
+    # sembrava valesse la complessita' di tracciare un periodo per-ASIN.
+    merged = {
+        "marketplace": market,
+        "period": existing.get("period", period),
+        "start": existing.get("start", start),
+        "end": existing.get("end", end),
+        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "by_asin": by_asin,
+        "errors": errors,
+    }
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump(merged, fh, ensure_ascii=False, indent=2)
+    print(f"  [sqp backfill] salvato: {out_path}")
+    return merged
+
+
+def ensure_sqp_for_asins(market: str, asins: List[str], out_dir: str = "public/data",
+                         period: str = "WEEK") -> Optional[Dict[str, Any]]:
+    """Entry point pensato per essere importato da build_context.py, sia in
+    modalita' singolo ASIN sia famiglia (con [args.asin] + child_asins).
+    Best-effort e silenzioso: se mancano le credenziali SP-API o il
+    marketplace non ha Brand Analytics, ritorna None senza sollevare —
+    build_context.py deve poter proseguire comunque, come le altre fonti."""
+    clean = [a.strip().upper() for a in (asins or []) if a and a.strip()]
+    if not clean:
+        return None
+    missing_env = [n for n, v in (
+        ("LWA_CLIENT_ID", config.LWA_CLIENT_ID), ("LWA_CLIENT_SECRET", config.LWA_CLIENT_SECRET),
+        ("LWA_REFRESH_TOKEN", config.LWA_REFRESH_TOKEN)) if not v]
+    if missing_env:
+        return None
+    try:
+        start, end = _default_dates(period, None, None)
+    except ValueError:
+        return None
+    out_path = os.path.join(out_dir, f"SQP_{market.upper()}.json")
+    try:
+        return ensure_coverage(market.upper(), clean, period, start, end, out_path)
+    except Exception as exc:  # noqa: BLE001 - mai bloccare build_context.py per questo
+        print(f"  [sqp backfill] errore inatteso, ignorato: {exc}", file=sys.stderr)
+        return None
 
 
 def main() -> int:

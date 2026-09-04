@@ -52,6 +52,7 @@ import spapi
 import update_listing as ul  # riusa resolve_sku, get_listing, get_max_lengths, LANGUAGE_TAGS
 import update_family as ufam  # riusa discover_children (relazione VARIATION)
 import listing_signals  # termini di ricerca reali dal report Amazon Ads
+import fetch_search_query_performance as sqp_fetch  # backfill SQP per ASIN mai pubblicizzati
 import product_image  # MAIN del prodotto, per non far inventare la forma al modello
 import check_quality as cq  # stesso controllo offline, lanciato qui subito dopo la generazione
 
@@ -220,10 +221,12 @@ def fetch_competitors(keyword: str, marketplace_id: str, exclude_asin: str = "",
     'keywords' al posto di 'identifiers'). Stesse credenziali SP-API gia'
     configurate, stesso helper _safe_get.
 
-    Il chiamante deve passare SOLO keyword da search_terms_meta['top_terms']
-    (scope 'asin'): sono le uniche su cui sappiamo che qualcuno ha davvero
-    comprato QUESTO prodotto. Cercare concorrenti su parole non verificate
-    (inventate o dell'intero account) produrrebbe un confronto fuorviante."""
+    Il chiamante deve passare SOLO keyword legate a QUESTO ASIN/famiglia:
+    termini che convertono (search_terms_meta['top_terms'], scope 'asin' o
+    'family' — acquisti REALI) e/o query Search Query Performance ad alto
+    volume (sqp_meta['top_queries_by_volume'] — intento di ricerca reale
+    anche senza campagna). Mai termini dell'intero account: confronterebbero
+    prodotti a caso, non concorrenti veri di questo prodotto."""
     out = _safe_get(
         "/catalog/2022-04-01/items",
         {"marketplaceIds": marketplace_id, "keywords": keyword,
@@ -263,11 +266,15 @@ def fetch_competitors_for_terms(terms: List[str], marketplace_id: str, asin: str
 def format_competitors_md(by_term: Dict[str, List[Dict[str, str]]]) -> str:
     if not by_term:
         return ""
-    md = ["\n## Concorrenti sui termini che convertono (Amazon Catalog, ricerca per keyword)\n",
-         "Come chiamano il prodotto gli altri venditori che compaiono cercando QUESTI termini "
-         "reali (quelli su cui questo ASIN ha gia' generato acquisti). Serve solo a capire il "
-         "linguaggio in uso nella categoria, non da copiare: non promettere caratteristiche che "
-         "la foto e la scheda di QUESTO prodotto non confermano.\n"]
+    md = ["\n## Concorrenti sui termini reali di questo prodotto (Amazon Catalog, ricerca per keyword)\n",
+         "Come chiamano il prodotto gli altri venditori che compaiono cercando questi termini "
+         "reali di QUESTO ASIN/famiglia (acquisti confermati e/o query di mercato ad alto "
+         "volume — mai termini generici dell'intero account). Usali per due cose: capire il "
+         "linguaggio in uso nella categoria, e individuare termini descrittivi (materiale, "
+         "stile, sinonimi) che i concorrenti usano nei loro titoli e che potrebbero valere "
+         "anche per questo prodotto. Aggiungili SOLO se la foto e il brief di QUESTO prodotto "
+         "li confermano davvero: non promettere mai una caratteristica vista solo nel titolo "
+         "di un concorrente.\n"]
     for term, hits in by_term.items():
         md.append(f"**\"{term}\":**")
         for h in hits:
@@ -504,11 +511,17 @@ STILE:
   prodotto risponde davvero a quell'intenzione di ricerca. Se un termine non converte
   perche' la copy attuale descrive male il prodotto, la correzione e' descrivere bene
   il prodotto, non ripetere il termine piu' volte.
-- Se il brief contiene la sezione "Concorrenti sui termini che convertono", usala solo per
-  capire il linguaggio della categoria (come i venditori concorrenti chiamano un prodotto
-  simile). Non copiare le loro affermazioni e non attribuire al TUO prodotto caratteristiche
-  che vedi nei loro titoli: quello che scrivi deve restare confermato dalla foto e dalla
-  scheda di questo ASIN.
+- Se il brief contiene la sezione "Concorrenti sui termini reali di questo prodotto", guardala
+  con due obiettivi: (1) capire il linguaggio della categoria; (2) individuare termini
+  descrittivi (materiale, stile, sinonimi — es. "tessuto", "sisal", "di design") che i
+  concorrenti usano nei loro titoli e che NON sono ancora nella copy attuale di questo
+  prodotto. Se uno di questi termini descrive DAVVERO questo prodotto — la foto e/o il brief
+  lo confermano (materiale visibile, forma, stile) — puoi aggiungerlo (nel titolo se c'e'
+  spazio e il limite lo permette, altrimenti in un bullet o in descrizione): puo' intercettare
+  ricerche con parole diverse per lo stesso bisogno. Se invece descrive una caratteristica che
+  QUESTO prodotto non ha (materiale diverso, stile diverso), non usarlo: non attribuire mai al
+  tuo prodotto una caratteristica vista solo nel titolo di un concorrente, senza conferma dalla
+  foto o dal brief.
 - Se il brief contiene la sezione "Volume di ricerca reale (Search Query Performance)", usala
   per capire QUALI query i clienti cercano davvero sul mercato e con che frequenza, anche
   query su cui non hai mai fatto pubblicita'. NON e' una conferma di acquisto per questo ASIN
@@ -618,9 +631,11 @@ REGOLE FERREE SUL FORMATO DELL'OUTPUT:
   {"shared": {"bullet_point": ["...", "..."], "product_description": "..."},
    "title_template": "... {color} {size} ..."}
 - "shared" contiene SOLO bullet_point (5 elementi) e product_description: sono identici per tutte le varianti.
-- "title_template" e' il titolo con i segnaposto {color} e {size} dove andranno colore e taglia del child.
-  Il template DEVE contenere sia {color} sia {size}. Rispetta il limite caratteri del titolo tenendo conto
-  che colore e taglia aggiungono ~15-25 caratteri.
+- "title_template" e' OBBLIGATORIO: e' il titolo con i segnaposto {color} e/o {size} dove andranno colore e/o
+  taglia del child. Deve contenere ALMENO UNO dei due segnaposto (usa {color} se la famiglia varia solo per
+  colore, {size} se varia solo per taglia, entrambi se varia per entrambi) — senza nessun segnaposto tutti i
+  child avrebbero lo stesso titolo, che e' proprio quello che questo flusso serve ad evitare. Rispetta il
+  limite caratteri del titolo tenendo conto che colore e/o taglia aggiungono ~15-25 caratteri.
 
 STILE:
 - Bullet: ognuno apre con un beneficio in MAIUSCOLO, poi la spiegazione. Non citare colori/taglie specifici
@@ -631,6 +646,13 @@ STILE:
   caratteristiche che nella foto non si vedono e che nessuna fonte del brief conferma.
 - Usa gli insight delle recensioni: rafforza cio' che i clienti apprezzano, anticipa le obiezioni negative.
   Non citare mai "recensioni" esplicitamente.
+- Se il brief contiene la sezione "Concorrenti sui termini reali di questo prodotto", guardala
+  con due obiettivi: capire il linguaggio della categoria, e individuare termini descrittivi
+  (materiale, stile, sinonimi — es. "tessuto", "sisal", "di design") che i concorrenti usano nei
+  loro titoli e che NON sono ancora nella copy condivisa attuale. Aggiungili (in un bullet o
+  nella descrizione condivisa — non nel title_template, che resta per-child) SOLO se la foto
+  e/o il brief li confermano davvero per questo prodotto. Non attribuire mai alla famiglia una
+  caratteristica vista solo nel titolo di un concorrente.
 - Voce del brand: pratica, calda, mai iperbolica. Chiudi la descrizione con la firma Lupo & Felix.
 """
 
@@ -651,6 +673,26 @@ def generate_family_copy(brief_md: str, marketplace: str,
     bad = set(shared) - {"bullet_point", "product_description"}
     if bad:
         raise ValueError(f"Claude ha prodotto chiavi shared non gestite: {', '.join(bad)}")
+
+    # title_template e' obbligatorio per il contratto (vedi FAMILY_CONTRACT): senza,
+    # build_family_json() lo ometterebbe silenziosamente dal file (fam["title_template"]
+    # si scrive solo "if title_template"), e il titolo dei child resterebbe quello
+    # attuale su Amazon senza che nessuno se ne accorga finche' non arriva in UI con
+    # il campo vuoto. Meglio far fallire la build subito, con un errore chiaro nel log.
+    title_template = (out.get("title_template") or "").strip()
+    if not title_template:
+        raise ValueError(
+            "Claude non ha prodotto 'title_template' (obbligatorio secondo il contratto): "
+            "senza un template i titoli dei child non verrebbero differenziati. Rilancia "
+            "la generazione (a volte basta riprovare); se persiste, controlla il brief."
+        )
+    if "{color}" not in title_template and "{size}" not in title_template:
+        raise ValueError(
+            f"'title_template' generato non contiene ne' {{color}} ne' {{size}}: "
+            f"'{title_template}'. Senza almeno un segnaposto tutti i child avrebbero "
+            "lo stesso titolo."
+        )
+    out["title_template"] = title_template
     return out
 
 
@@ -784,7 +826,8 @@ def main() -> int:
                     help="Non includere il volume di ricerca reale (Search Query Performance) nel brief")
     ap.add_argument("--sqp-top", type=int, default=15)
     ap.add_argument("--no-competitors", action="store_true",
-                    help="Non cercare i concorrenti sui termini che convertono (searchCatalogItems)")
+                    help="Non cercare i concorrenti sui termini reali di questo prodotto "
+                         "(convertitori e/o SQP ad alto volume, via searchCatalogItems)")
     args = ap.parse_args()
 
     market = args.marketplace.upper()
@@ -853,12 +896,27 @@ def main() -> int:
     if not args.no_search_terms and args.data_dir:
         st_md, st_meta = listing_signals.search_terms_section(
             market, args.asin, args.data_dir, top=args.search_terms_top)
-    # FAMIGLIA: il parent quasi mai ha una campagna ads propria (sono i child a
-    # essere pubblicizzati singolarmente), quindi st_meta sopra ricade quasi
-    # sempre su "marketplace" (l'intero account, spesso di un prodotto diverso
-    # — es. 'tiragraffi divano' su una famiglia di amache). Se almeno un child
-    # ha dati ads propri, preferisci l'aggregato dei child: e' lo stesso ASIN
-    # che verra' davvero pubblicizzato, solo raggruppato.
+        # FAMIGLIA: il parent quasi mai ha una campagna ads propria (sono i child
+        # a essere pubblicizzati singolarmente), quindi la chiamata sopra ricade
+        # quasi sempre su scope "marketplace" (l'intero account). Per un ASIN
+        # singolo questo resta un indizio debole ma innocuo sul linguaggio del
+        # brand; per una FAMIGLIA e' fuorviante e basta, perche' l'account vende
+        # categorie di prodotto diverse (es. 'tiragraffi divano' comparso su una
+        # famiglia di cucce): non e' nemmeno un indizio di brand affidabile
+        # quando il termine viene da un prodotto tutt'altro. Se il parent stesso
+        # NON ha dati suoi (scope resta "marketplace"), meglio nessun termine che
+        # uno sbagliato: si azzera qui, e sotto si prova l'aggregato dei child
+        # (l'unica altra fonte, con dati ads REALI anche se non del parent).
+        if args.family and st_meta.get("scope") == "marketplace":
+            st_md, st_meta = "", {
+                "available": False,
+                "reason": "il parent non ha una campagna propria: i termini dell'intero "
+                         "account mescolerebbero prodotti di categorie diverse, quindi "
+                         "non sono stati inclusi (si prova l'aggregato dai child sotto)",
+            }
+    # Se almeno un child ha dati ads propri, preferisci l'aggregato dei child:
+    # e' lo stesso ASIN che verra' davvero pubblicizzato, solo raggruppato — un
+    # dato REALE, a differenza del fallback sull'intero account appena escluso.
     if args.family and child_asins and not args.no_search_terms and args.data_dir:
         fam_md, fam_meta = listing_signals.aggregate_search_terms_for_family(
             market, child_asins, args.data_dir, top=args.search_terms_top)
@@ -872,6 +930,21 @@ def main() -> int:
               f"su {st_meta['terms_total']} termini")
     else:
         print(f"  [search term] non inclusi ({st_meta.get('reason')})")
+
+    # Backfill SQP per gli ASIN di QUESTA build (il parent/ASIN singolo + i
+    # child, se famiglia) che non hanno ancora un risultato nel file
+    # pubblicato: il fetch periodico (weekly-analysis) copre solo gli ASIN
+    # gia' pubblicizzati (all_advertised_asins), quindi un prodotto senza
+    # campagna propria non ci finisce mai da solo. Best-effort e silenzioso
+    # (vedi ensure_sqp_for_asins): se manca il ruolo Brand Analytics o le
+    # credenziali, non fa fallire la build, semplicemente sqp_meta sotto
+    # restera' "non disponibile" come oggi. Va PRIMA delle letture sotto,
+    # cosi' search_query_performance_section/aggregate_sqp_for_family vedono
+    # gia' i dati appena scaricati invece di quelli (assenti) di prima.
+    if not args.no_sqp and args.sqp_dir:
+        target_asins = [args.asin] + child_asins
+        print(f"  [sqp backfill] verifico copertura per {len(target_asins)} ASIN...")
+        sqp_fetch.ensure_sqp_for_asins(market, target_asins, out_dir=args.sqp_dir)
 
     sqp_md, sqp_meta = "", {"available": False, "reason": "disattivato"}
     if not args.no_sqp and args.sqp_dir:
@@ -888,17 +961,38 @@ def main() -> int:
     else:
         print(f"  [sqp] non incluso ({sqp_meta.get('reason')})")
 
-    # Concorrenti SOLO sui termini confermati (scope 'asin' o, per una famiglia,
-    # 'family'): se i termini sono dell'intero account (nessun dato ads ancora
-    # per l'ASIN ne' per i suoi child) non sono confermati come intento di
-    # ricerca per questo prodotto, quindi cercare "concorrenti" su quelle
-    # parole confronterebbe cose a caso.
+    # Termini seme per la ricerca concorrenti: due fonti, entrambe legate a
+    # QUESTO ASIN/famiglia (mai all'intero account, che confronterebbe
+    # prodotti a caso):
+    #   1. i termini che convertono (scope 'asin' o 'family'): acquisti REALI.
+    #   2. le query Search Query Performance ad alto volume (scope sempre
+    #      per-ASIN, disponibili anche SENZA campagna grazie al backfill sopra):
+    #      non confermano un acquisto, ma sono comunque intento di ricerca
+    #      reale di mercato per QUESTO prodotto, utile a trovare concorrenti
+    #      anche quando non c'e' ancora nessun dato ads.
+    # Il secondo elenco allarga la ricerca oltre le sole parole gia' vincenti,
+    # cosi' si scoprono concorrenti (e i termini descrittivi che usano nei
+    # loro titoli — materiale, stile, sinonimi) anche per prodotti mai
+    # pubblicizzati: e' quello che permette a Claude, sotto COPY_CONTRACT, di
+    # valutare se aggiungere un termine come "sisal" o "di design" quando la
+    # foto/il brief lo confermano per questo prodotto.
+    competitor_seed_terms: List[str] = []
+    if st_meta.get("available") and st_meta.get("scope") in ("asin", "family"):
+        competitor_seed_terms += st_meta.get("top_terms", [])
+    if sqp_meta.get("available"):
+        competitor_seed_terms += sqp_meta.get("top_queries_by_volume", [])
+    seen_terms = set()
+    competitor_seed_terms = [
+        t for t in competitor_seed_terms
+        if t and not (t.lower() in seen_terms or seen_terms.add(t.lower()))
+    ]
+
     competitors, competitors_md = {}, ""
-    if not args.no_competitors and st_meta.get("available") and st_meta.get("scope") in ("asin", "family"):
-        competitors = fetch_competitors_for_terms(st_meta["top_terms"], marketplace_id, args.asin)
+    if not args.no_competitors and competitor_seed_terms:
+        competitors = fetch_competitors_for_terms(competitor_seed_terms, marketplace_id, args.asin)
         competitors_md = format_competitors_md(competitors)
         n_hits = sum(len(v) for v in competitors.values())
-        print(f"  [concorrenti] {n_hits} risultati su {len(competitors)}/{len(st_meta['top_terms'])} termini")
+        print(f"  [concorrenti] {n_hits} risultati su {len(competitors)}/{len(competitor_seed_terms)} termini")
 
     pack = {
         "asin": args.asin,
