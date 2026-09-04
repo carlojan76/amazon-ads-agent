@@ -1,0 +1,276 @@
+name: Apply Family Listing
+
+# Equivalente di apply-listing.yml ma per una FAMIGLIA di variazioni (colore/
+# taglia): prende il file gia' prodotto in listings/family/<ASIN_PARENT>_<MKT>.json
+# (da build-listing.yml con family=true, o scritto/editato a mano seguendo il
+# formato in listings/family/EXAMPLE_family.json) e aggiorna tutti i child via
+# update_family.py, che monta su update_listing.py (build_patches,
+# validate_lengths, get_max_lengths, VALIDATION_PREVIEW, apply — nessun
+# doppio standard tra i due workflow).
+#
+# Si lancia dalla UI di GitHub: tab Actions -> Apply Family Listing -> Run workflow.
+# ASIN = quello del PARENT (lo stesso passato a build-listing.yml con family=true).
+#
+# Sicurezza, stesso schema in due livelli di apply-listing.yml:
+#   1. Controllo qualita' (check_quality.py --family) offline, PRIMA di
+#      qualunque chiamata API: limiti caratteri (proxy dal parent), termini
+#      che convertono/da evitare, firma brand, sulla copy CONDIVISA. Un ERROR
+#      ferma tutto qui.
+#   2. update_family.py fa comunque una VALIDATION_PREVIEW per-child prima di
+#      scrivere quel child: un child con problemi (es. titolo renderizzato dal
+#      template troppo lungo per il SUO product_type) si ferma da solo SENZA
+#      bloccare gli altri child della famiglia — e' il comportamento gia'
+#      progettato in update_family.py (vedi il suo docstring), qui rispettato
+#      cosi' com'e'. Il workflow nel suo complesso fallisce (X rosso) se
+#      anche un solo child e' andato in errore, cosi' non passa inosservato.
+# In piu': o dry_run=true (controllo qualita' + diff + validazione reale via
+# SP-API, non scrive nulla, non serve digitare conferma), o confirm=APPLICA
+# per davvero — qualunque altra combinazione blocca il workflow al primo step.
+
+on:
+  workflow_dispatch:
+    inputs:
+      marketplace:
+        description: 'Marketplace'
+        type: choice
+        required: true
+        options: [IT, FR, DE, ES, UK]
+      asin:
+        description: 'ASIN del PARENT della famiglia (deve avere gia'' un file in listings/family/)'
+        required: true
+      confirm:
+        description: 'Per scrivere davvero su Amazon, digita APPLICA (case sensitive)'
+        required: true
+        default: 'NO'
+      dry_run:
+        description: 'Se true: solo controllo qualita'' + anteprima + validazione reale, non scrive nulla'
+        type: boolean
+        required: false
+        default: false
+      only:
+        description: 'SKU di un solo child da elaborare (vuoto = tutta la famiglia). Utile per testare.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: ✋ Verifica conferma
+        if: ${{ github.event.inputs.confirm != 'APPLICA' && github.event.inputs.dry_run != 'true' }}
+        run: |
+          echo "❌ Conferma non fornita o errata."
+          echo "   Per scrivere davvero su Amazon devi digitare esattamente: APPLICA"
+          echo "   Hai digitato: '${{ github.event.inputs.confirm }}'"
+          echo ""
+          echo "Se vuoi solo vedere controllo qualita', anteprima e validazione senza applicare,"
+          echo "spunta invece il flag dry_run."
+          exit 1
+
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Install dependencies
+        run: pip install requests
+
+      - name: 🔍 Verifica che il file famiglia esista
+        run: |
+          FAMILY="listings/family/${{ github.event.inputs.asin }}_${{ github.event.inputs.marketplace }}.json"
+          if [ ! -f "$FAMILY" ]; then
+            echo "::error::$FAMILY non esiste nel repo."
+            echo "Lancia prima 'Build Listing Copy' (build-listing.yml) con family=true per"
+            echo "l'ASIN del parent, oppure scrivilo a mano seguendo listings/family/EXAMPLE_family.json."
+            exit 1
+          fi
+          echo "FAMILY_PATH=$FAMILY" >> "$GITHUB_ENV"
+          echo "Trovato: $FAMILY"
+          EXTRA_ONLY=""
+          if [ -n "${{ github.event.inputs.only }}" ]; then
+            EXTRA_ONLY="--only ${{ github.event.inputs.only }}"
+          fi
+          echo "EXTRA_ONLY=$EXTRA_ONLY" >> "$GITHUB_ENV"
+
+      # Nessuna credenziale SP-API qui: check_quality.py --family e' offline,
+      # legge solo il file famiglia e il context pack del parent (se c'e').
+      # Controlla la copy CONDIVISA (bullet/descrizione): il titolo per-child
+      # dal template lo valida davvero update_family.py piu' sotto.
+      - name: ✅ Controllo qualita' (copy condivisa)
+        run: |
+          set -euo pipefail
+          python python/check_quality.py --family "$FAMILY_PATH" 2>&1 | tee quality.log
+
+      - name: 👀 Anteprima (diff testuale, per-child)
+        env:
+          LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
+          LWA_CLIENT_SECRET: ${{ secrets.LWA_CLIENT_SECRET }}
+          LWA_REFRESH_TOKEN: ${{ secrets.LWA_REFRESH_TOKEN }}
+          SP_API_SELLER_ID: ${{ secrets.SP_API_SELLER_ID }}
+          SPAPI_ENDPOINT: https://sellingpartnerapi-eu.amazon.com
+        run: |
+          set -euo pipefail
+          python python/update_family.py --family "$FAMILY_PATH" --diff $EXTRA_ONLY 2>&1 | tee diff.log
+
+      # Solo con dry_run: la VALIDATION_PREVIEW reale via SP-API (senza --diff
+      # niente' viene scritto, ma ogni child passa comunque dalla PATCH in
+      # modalita' anteprima) — cosi' un dry-run mostra anche gli errori che il
+      # solo diff testuale non vede (es. limiti carattere del product_type
+      # vero di quel child).
+      - name: 🔎 Validazione reale (solo dry-run, non scrive)
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        env:
+          LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
+          LWA_CLIENT_SECRET: ${{ secrets.LWA_CLIENT_SECRET }}
+          LWA_REFRESH_TOKEN: ${{ secrets.LWA_REFRESH_TOKEN }}
+          SP_API_SELLER_ID: ${{ secrets.SP_API_SELLER_ID }}
+          SPAPI_ENDPOINT: https://sellingpartnerapi-eu.amazon.com
+        run: |
+          set -euo pipefail
+          python python/update_family.py --family "$FAMILY_PATH" $EXTRA_ONLY 2>&1 | tee preview.log
+
+      - name: 🚀 Applica (VALIDATION_PREVIEW + scrittura, per-child)
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
+          LWA_CLIENT_SECRET: ${{ secrets.LWA_CLIENT_SECRET }}
+          LWA_REFRESH_TOKEN: ${{ secrets.LWA_REFRESH_TOKEN }}
+          SP_API_SELLER_ID: ${{ secrets.SP_API_SELLER_ID }}
+          SPAPI_ENDPOINT: https://sellingpartnerapi-eu.amazon.com
+        run: |
+          set -euo pipefail
+          python python/update_family.py --family "$FAMILY_PATH" --apply $EXTRA_ONLY 2>&1 | tee apply.log
+
+      # Registro leggibile da cui in futuro capire cosa e' stato applicato,
+      # per QUALE child, e quando (getRepoFileContents su listings/applied/family/),
+      # senza dover riscavare nei log dei run passati. Un errore su un child
+      # non ha bloccato gli altri (e' il comportamento di update_family.py):
+      # qui lo si registra per-child, cosi' resta visibile chi e' andato bene
+      # e chi no.
+      - name: 🧾 Registra l'esito
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          python - <<'PY'
+          import json, re, datetime, pathlib, os
+
+          family = json.loads(pathlib.Path(os.environ["FAMILY_PATH"]).read_text(encoding="utf-8"))
+          log = pathlib.Path("apply.log")
+          text = log.read_text(encoding="utf-8") if log.exists() else ""
+
+          # process_child() in update_family.py stampa ogni child come:
+          #   ----------------------------------------------------------------------
+          #   <sku>
+          #   ...
+          #   [APPLY: <status> submissionId=<id>]   <- solo se e' arrivato fin li'
+          blocks = re.split(r"\n-{70}\n", text)[1:]  # il primo blocco e' il preambolo
+          children = []
+          for block in blocks:
+              lines = block.strip("\n").splitlines()
+              if not lines:
+                  continue
+              sku = lines[0].strip()
+              m = re.search(r"^\s*APPLY:\s*(.+?)\s+submissionId=(\S+)\s*$", block, re.MULTILINE)
+              if m:
+                  status, submission_id = m.group(1).strip(), m.group(2).strip()
+              elif "copy troppo lunga" in block or "attributi non gestiti" in block or "dry-run con errori" in block:
+                  status, submission_id = "error", None
+              elif "niente da aggiornare" in block:
+                  status, submission_id = "skip", None
+              else:
+                  status, submission_id = None, None
+              children.append({"sku": sku, "status": status, "submissionId": submission_id})
+
+          tally_match = re.search(
+              r"Fatto:\s*(\d+)\s*ok,\s*(\d+)\s*diff,\s*(\d+)\s*saltati,\s*(\d+)\s*errori", text)
+          tally = None
+          if tally_match:
+              tally = {
+                  "ok": int(tally_match.group(1)), "diff": int(tally_match.group(2)),
+                  "skip": int(tally_match.group(3)), "error": int(tally_match.group(4)),
+              }
+
+          out = {
+              "parent_asin": family.get("parent_asin") or os.environ.get("PARENT_ASIN"),
+              "parent_sku": family.get("parent_sku"),
+              "marketplace": family.get("marketplace"),
+              "appliedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+              "tally": tally,
+              "children": children,
+              "runNumber": os.environ.get("GITHUB_RUN_NUMBER"),
+              "runUrl": (f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}"
+                        f"/actions/runs/{os.environ.get('GITHUB_RUN_ID')}"),
+          }
+          out_path = (pathlib.Path("listings/applied/family")
+                      / f"{os.environ.get('ASIN_INPUT')}_{family.get('marketplace')}.json")
+          out_path.parent.mkdir(parents=True, exist_ok=True)
+          out_path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(f"Scritto {out_path}")
+          PY
+        env:
+          ASIN_INPUT: ${{ github.event.inputs.asin }}
+          PARENT_ASIN: ${{ github.event.inputs.asin }}
+
+      - name: 📝 Commit registro applicazioni
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f listings/applied
+          git status --short
+          if git diff --staged --quiet; then
+            echo "Nessun registro da committare."
+          else
+            git commit -m "family applicata: ${{ github.event.inputs.marketplace }}/${{ github.event.inputs.asin }} [skip ci]"
+            git pull --rebase --autostash || true
+            git push
+          fi
+
+      - name: 📋 Riepilogo
+        if: always()
+        run: |
+          {
+            echo "## Controllo qualita' (copy condivisa)"
+            echo '```'
+            [ -f quality.log ] && cat quality.log || echo "(non eseguito)"
+            echo '```'
+            echo
+            echo "## Anteprima (diff testuale)"
+            echo '```'
+            [ -f diff.log ] && cat diff.log || echo "(non eseguito)"
+            echo '```'
+            if [ -f preview.log ]; then
+              echo
+              echo "## Validazione reale (dry-run)"
+              echo '```'
+              cat preview.log
+              echo '```'
+            fi
+            if [ -f apply.log ]; then
+              echo
+              echo "## Applicazione"
+              echo '```'
+              cat apply.log
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📦 Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apply-family-${{ github.event.inputs.marketplace }}-${{ github.event.inputs.asin }}-${{ github.run_number }}
+          path: |
+            quality.log
+            diff.log
+            preview.log
+            apply.log
+          retention-days: 90
+          if-no-files-found: ignore
