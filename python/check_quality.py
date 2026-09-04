@@ -32,6 +32,10 @@ e verifica il risultato:
      titolo (errore). Altrove nel testo e' un warning da rileggere a mano —
      puo' essere pertinente, lo dice anche il brief.
   5. Firma del brand ("Lupo & Felix") in chiusura di descrizione.
+  6. Query Search Query Performance con acquisti reali nel periodo
+     (sqp_meta.purchase_confirmed_terms) assenti dal testo: SEMPRE warning,
+     mai errore — segnale piu' debole dei termini che convertono di Ads (un
+     solo periodo, campione spesso piccolo, nessuna attribuzione ad group).
 
 Uso:
   python check_quality.py --content listings/content/B0G5JC2YZ2_IT.json
@@ -43,9 +47,28 @@ Se --context non e' passato, si cerca il file con lo stesso nome sotto
 listings/context/ (la stessa convenzione con cui build_context.py e
 update_listing.py si scambiano i file).
 
+--- modalita' FAMIGLIA (usata da apply-family.yml) ---
+
+  python check_quality.py --family listings/family/B0PARENT01_IT.json
+  python check_quality.py --family listings/family/B0PARENT01_IT.json \
+                          --context listings/context/B0PARENT01_IT.json
+
+Controlla la copy CONDIVISA di un file famiglia (shared.bullet_point,
+shared.product_description, ed eventualmente shared.item_name se non c'e'
+title_template): stessi controlli lunghezza/termini/firma di sopra, applicati
+al testo condiviso invece che a un singolo content JSON. Il titolo per-child
+generato dal template NON viene controllato qui (dipende da colore/taglia di
+ogni child, noti solo a runtime): quello lo valida per davvero
+update_family.py con la sua VALIDATION_PREVIEW per-child, PRIMA di ogni
+--apply. I limiti carattere usati qui sono quelli del parent (dal context
+pack, se c'e'): un proxy utile per bloccare subito un testo palesemente troppo
+lungo, non una garanzia sui limiti esatti di ogni child (che possono avere lo
+stesso product_type o no).
+
 Exit code: 1 se c'e' almeno un ERROR (utilizzabile come gate, es. in
-apply-listing.yml prima dell'--apply), 0 altrimenti. I WARNING non fanno
-fallire il comando: sono punti da rileggere a mano, non blocchi automatici.
+apply-listing.yml/apply-family.yml prima dell'--apply), 0 altrimenti. I
+WARNING non fanno fallire il comando: sono punti da rileggere a mano, non
+blocchi automatici.
 """
 
 from __future__ import annotations
@@ -161,6 +184,33 @@ def check_avoid_terms(attrs: Dict[str, Any], meta: Dict[str, Any]) -> List[str]:
     return problems
 
 
+def check_sqp_terms(attrs: Dict[str, Any], meta: Dict[str, Any]) -> List[str]:
+    """Query dal report Brand Analytics Search Query Performance
+    (sqp_meta.purchase_confirmed_terms nel context pack) su cui QUESTO ASIN
+    ha gia' generato almeno un acquisto reale nel periodo — la scala delle
+    quote e' confermata (0-100%, verificato su un report reale), ma il
+    segnale resta piu' debole dei "termini che convertono" di Ads: qui e' UN
+    solo periodo (di norma una settimana), campione spesso piccolo (anche un
+    solo acquisto), e senza l'attribuzione esplicita via ad group. Per questo
+    resta SEMPRE un WARNING, mai un ERROR, coerente con l'istruzione che il
+    COPY_CONTRACT da' gia' al modello: un'opportunita' da valutare, non un
+    obbligo di posizionamento."""
+    terms = meta.get("purchase_confirmed_terms") or []
+    if not terms:
+        return []
+    full = _full_text(attrs)
+    problems = []
+    for t in terms:
+        query = (t.get("query") or "").strip()
+        if not query or query.lower() in full:
+            continue
+        problems.append(
+            f"WARNING  query Search Query Performance con acquisti reali ma assente dal testo: "
+            f"'{query}' ({t.get('purchases')} acquisti, volume {t.get('volume')} nel periodo) "
+            f"— opportunita' da valutare, non un obbligo")
+    return problems
+
+
 def check_brand_signature(attrs: Dict[str, Any]) -> List[str]:
     desc = (attrs.get("product_description") or "").strip()
     if desc and "lupo & felix" not in desc[-120:].lower():
@@ -214,7 +264,173 @@ def check_one(content_path: str, context_path: Optional[str]) -> Tuple[int, int]
         problems.append(f"INFO     nessun dato search term nel context pack "
                         f"({meta.get('reason', 'motivo non specificato')})")
 
+    sqp_meta = context.get("sqp_meta") or {}
+    if sqp_meta.get("available"):
+        problems += check_sqp_terms(attrs, sqp_meta)
+    else:
+        problems.append(f"INFO     nessun dato Search Query Performance nel context pack "
+                        f"({sqp_meta.get('reason', 'motivo non specificato')})")
+
     problems += check_brand_signature(attrs)
+
+    real = [p for p in problems if not p.startswith("INFO")]
+    if not problems:
+        print("  OK — nessun problema rilevato")
+    else:
+        for p in problems:
+            print(f"  {p}")
+        if not real:
+            print("  (nessun ERROR/WARNING — solo informazioni)")
+
+    n_error = sum(1 for p in problems if p.startswith("ERROR"))
+    n_warning = sum(1 for p in problems if p.startswith("WARNING"))
+    return n_error, n_warning
+
+
+def check_family_supported_keys(shared: Dict[str, Any]) -> List[str]:
+    bad = set(shared) - set(ul.SUPPORTED_ATTRIBUTES)
+    if bad:
+        return [f"ERROR    chiavi non gestite in 'shared': {', '.join(sorted(bad))} "
+                f"(gestite: {', '.join(ul.SUPPORTED_ATTRIBUTES)})"]
+    return []
+
+
+def check_family_lengths(shared: Dict[str, Any], max_lengths: Dict[str, int],
+                         has_template: bool) -> List[str]:
+    # Se c'e' un title_template, il titolo VERO di ogni child e' quello
+    # renderizzato dal template (diverso per colore/taglia): shared.item_name,
+    # se presente, non e' il testo che finisce sul listing, quindi non ha
+    # senso controllarne la lunghezza qui.
+    checkable = {k: v for k, v in shared.items() if k != "item_name" or not has_template}
+    return [f"ERROR    limite caratteri (proxy dal parent): {p}"
+            for p in ul.validate_lengths(checkable, max_lengths or {})]
+
+
+def _family_full_text(shared: Dict[str, Any]) -> str:
+    """bullet_point + product_description condivisi, minuscolo. NIENTE titolo:
+    per la famiglia il titolo e' per-child (template), non un testo fisso da
+    controllare qui."""
+    bp = shared.get("bullet_point")
+    bullets = bp if isinstance(bp, list) else ([bp] if isinstance(bp, str) else [])
+    parts = list(bullets) + [shared.get("product_description", "")]
+    return " \n ".join(p for p in parts if isinstance(p, str)).lower()
+
+
+def check_family_converting_terms(shared: Dict[str, Any], meta: Dict[str, Any]) -> List[str]:
+    top_terms = meta.get("top_terms") or []
+    if not top_terms:
+        return []
+    scope = meta.get("scope")
+    full = _family_full_text(shared)
+    problems = []
+    for term in top_terms:
+        if term.lower() not in full:
+            sev = "ERROR" if scope == "asin" else "WARNING"
+            problems.append(
+                f"{sev:<8} termine convertitore assente dal testo condiviso: '{term}' "
+                f"non compare ne' nei bullet ne' in descrizione")
+    # Nessun controllo "primi due nel titolo": il titolo e' per-child, non condiviso.
+    return problems
+
+
+def check_family_avoid_terms(shared: Dict[str, Any], meta: Dict[str, Any]) -> List[str]:
+    avoid = meta.get("avoid_terms") or []
+    if not avoid:
+        return []
+    full = _family_full_text(shared)
+    for t in sorted((meta.get("top_terms") or []), key=len, reverse=True):
+        tl = t.lower()
+        full = full.replace(tl, " " * len(tl))
+    problems = []
+    for term in avoid:
+        if term.lower() in full:
+            problems.append(
+                f"WARNING  termine che NON converte presente nel testo condiviso: '{term}' "
+                f"— verifica che sia davvero pertinente per tutta la famiglia")
+    return problems
+
+
+def check_family_sqp_terms(shared: Dict[str, Any], meta: Dict[str, Any]) -> List[str]:
+    terms = meta.get("purchase_confirmed_terms") or []
+    if not terms:
+        return []
+    full = _family_full_text(shared)
+    problems = []
+    for t in terms:
+        query = (t.get("query") or "").strip()
+        if not query or query.lower() in full:
+            continue
+        problems.append(
+            f"WARNING  query Search Query Performance con acquisti reali ma assente dal testo "
+            f"condiviso: '{query}' ({t.get('purchases')} acquisti, volume {t.get('volume')} "
+            f"nel periodo) — opportunita' da valutare, non un obbligo")
+    return problems
+
+
+def check_family_brand_signature(shared: Dict[str, Any]) -> List[str]:
+    desc = (shared.get("product_description") or "").strip()
+    if desc and "lupo & felix" not in desc[-120:].lower():
+        return ["WARNING  la descrizione condivisa non chiude con la firma del brand (\"Lupo & Felix\")"]
+    return []
+
+
+def check_family_one(family_path: str, context_path: Optional[str]) -> Tuple[int, int]:
+    """Controlla la copy condivisa di un file famiglia. Stampa il report,
+    ritorna (n_error, n_warning). Specchio di check_one() per il formato
+    listings/family/ (vedi update_family.py)."""
+    try:
+        family = _load(family_path)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"\n[{family_path}]\n  ERROR    file non leggibile: {exc}")
+        return 1, 0
+
+    label = family.get("parent_sku") or family.get("parent_asin") or "?"
+    print(f"\n[famiglia {label}] {family_path}")
+
+    shared = family.get("shared")
+    if not isinstance(shared, dict):
+        shared = {}
+    has_template = bool(family.get("title_template"))
+    if not shared and not has_template and not family.get("overrides"):
+        print("  ERROR    niente da controllare: mancano 'shared', 'title_template' e 'overrides'")
+        return 1, 0
+
+    ctx_path = context_path
+    context: Dict[str, Any] = {}
+    if ctx_path and os.path.isfile(ctx_path):
+        try:
+            context = _load(ctx_path)
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"  ERROR    context pack non leggibile: {exc}")
+            return 1, 0
+    elif ctx_path:
+        print(f"  INFO     context pack non trovato: {ctx_path} (controllo solo lunghezze/attributi)")
+
+    max_lengths = context.get("max_lengths") or {}
+    meta = context.get("search_terms_meta") or {}
+
+    problems = check_family_supported_keys(shared) + check_family_lengths(shared, max_lengths, has_template)
+
+    if meta.get("available"):
+        problems += check_family_converting_terms(shared, meta)
+        if "avoid_terms" in meta:
+            problems += check_family_avoid_terms(shared, meta)
+    elif context:
+        problems.append(f"INFO     nessun dato search term nel context pack del parent "
+                        f"({meta.get('reason', 'motivo non specificato')})")
+
+    sqp_meta = context.get("sqp_meta") or {}
+    if sqp_meta.get("available"):
+        problems += check_family_sqp_terms(shared, sqp_meta)
+    elif context:
+        problems.append(f"INFO     nessun dato Search Query Performance nel context pack del parent "
+                        f"({sqp_meta.get('reason', 'motivo non specificato')})")
+
+    problems += check_family_brand_signature(shared)
+
+    if has_template:
+        problems.append("INFO     title_template presente: il titolo per-child NON e' controllato "
+                        "qui, lo valida update_family.py (VALIDATION_PREVIEW) prima di ogni --apply")
 
     real = [p for p in problems if not p.startswith("INFO")]
     if not problems:
@@ -234,13 +450,41 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description="Controllo offline sulla copy generata da build_context.py --generate "
                     "(limiti caratteri, termini che convertono, termini da evitare, firma brand).")
-    ap.add_argument("--content", required=True,
+    ap.add_argument("--content",
                     help="JSON della copy generata (listings/content/<ASIN>_<MKT>.json), "
                          "oppure una cartella: controlla tutti i .json dentro")
+    ap.add_argument("--family",
+                    help="JSON di una famiglia (listings/family/<ASIN>_<MKT>.json): controlla "
+                         "la copy condivisa invece di un content JSON singolo. Alternativo a --content.")
     ap.add_argument("--context",
-                    help="Context pack da usare (default: stesso nome sotto listings/context/). "
-                         "Non utilizzabile insieme a --content su una cartella.")
+                    help="Context pack da usare (default: stesso nome sotto listings/context/, "
+                         "sia per --content che per --family). Non utilizzabile insieme a "
+                         "--content su una cartella.")
     args = ap.parse_args()
+
+    if not args.content and not args.family:
+        print("ERRORE: serve --content oppure --family", file=sys.stderr)
+        return 2
+    if args.content and args.family:
+        print("ERRORE: --content e --family non si usano insieme", file=sys.stderr)
+        return 2
+
+    if args.family:
+        if not os.path.isfile(args.family):
+            print(f"ERRORE: {args.family} non esiste", file=sys.stderr)
+            return 2
+        # listings/family/<X>.json -> listings/context/<X>.json (stessa convenzione
+        # di _context_path_for, ma partendo dalla cartella "family" invece di "content").
+        d, name = os.path.split(args.family)
+        ctx_path = args.context or os.path.join(
+            os.path.join(os.path.dirname(d), "context") if os.path.basename(d) == "family" else d,
+            name)
+        total_error, total_warning = check_family_one(args.family, ctx_path)
+        print(f"\n{'=' * 70}")
+        print(f"1 file famiglia controllato — {total_error} error, {total_warning} warning")
+        if total_error:
+            print("Non procedere con update_family.py --apply finche' gli ERROR non sono risolti.")
+        return 1 if total_error else 0
 
     if os.path.isdir(args.content):
         if args.context:
