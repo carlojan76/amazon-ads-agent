@@ -1,3 +1,4 @@
+
 /**
  * Porting JS di python/check_quality.py, per mostrare l'esito del controllo
  * qualita' direttamente nella UI (ListingPanel) senza dover leggere i log del
@@ -8,13 +9,13 @@
  * stesso content JSON (listings/content/<ASIN>_<MKT>.json) che produce
  * build_context.py --generate.
  */
-
+ 
 export const SUPPORTED_ATTRIBUTES = ["item_name", "bullet_point", "product_description"];
-
+ 
 // Usati solo se il context pack non espone max_lengths per l'attributo
 // (stessi valori di FALLBACK_MAXLEN in update_listing.py).
 const FALLBACK_MAXLEN = { item_name: 200, bullet_point: 500, product_description: 2000 };
-
+ 
 function fullText(attrs) {
   const bp = Array.isArray(attrs.bullet_point)
     ? attrs.bullet_point
@@ -22,7 +23,7 @@ function fullText(attrs) {
   const parts = [attrs.item_name || "", ...bp, attrs.product_description || ""];
   return parts.filter((p) => typeof p === "string").join(" \n ").toLowerCase();
 }
-
+ 
 function checkSupportedAttrs(attrs) {
   const bad = Object.keys(attrs).filter((k) => !SUPPORTED_ATTRIBUTES.includes(k));
   if (bad.length) {
@@ -30,7 +31,7 @@ function checkSupportedAttrs(attrs) {
   }
   return [];
 }
-
+ 
 function checkLengths(attrs, maxLengths) {
   const problems = [];
   for (const [attr, value] of Object.entries(attrs)) {
@@ -47,7 +48,7 @@ function checkLengths(attrs, maxLengths) {
   }
   return problems;
 }
-
+ 
 function checkConvertingTerms(attrs, meta) {
   const topTerms = meta.top_terms || [];
   if (!topTerms.length) return [];
@@ -55,7 +56,7 @@ function checkConvertingTerms(attrs, meta) {
   const title = (attrs.item_name || "").toLowerCase();
   const full = fullText(attrs);
   const problems = [];
-
+ 
   for (const term of topTerms) {
     if (!full.includes(term.toLowerCase())) {
       problems.push({
@@ -74,13 +75,13 @@ function checkConvertingTerms(attrs, meta) {
   }
   return problems;
 }
-
+ 
 function checkAvoidTerms(attrs, meta) {
   const avoid = meta.avoid_terms || [];
   if (!avoid.length) return [];
   let title = (attrs.item_name || "").toLowerCase();
   let full = fullText(attrs);
-
+ 
   // Maschera i termini convertitori (piu' lunghi per primi) prima di cercare
   // gli avoid_terms, cosi' un avoid term che e' sottostringa di un termine
   // convertitore (es. "amaca gatto" dentro "amaca gatto esterno") non genera
@@ -92,7 +93,7 @@ function checkAvoidTerms(attrs, meta) {
     title = title.split(tl).join(" ".repeat(tl.length));
     full = full.split(tl).join(" ".repeat(tl.length));
   }
-
+ 
   const problems = [];
   for (const term of avoid) {
     const t = term.toLowerCase();
@@ -104,7 +105,7 @@ function checkAvoidTerms(attrs, meta) {
   }
   return problems;
 }
-
+ 
 function checkSqpTerms(attrs, meta) {
   const terms = meta.purchase_confirmed_terms || [];
   if (!terms.length) return [];
@@ -120,7 +121,7 @@ function checkSqpTerms(attrs, meta) {
   }
   return problems;
 }
-
+ 
 function checkBrandSignature(attrs) {
   const desc = (attrs.product_description || "").trim();
   if (desc && !desc.slice(-120).toLowerCase().includes("lupo & felix")) {
@@ -128,7 +129,7 @@ function checkBrandSignature(attrs) {
   }
   return [];
 }
-
+ 
 /**
  * Controlla il content JSON contro il context pack. Ritorna
  * { problems: [{severity, message}], nError, nWarning }.
@@ -138,13 +139,13 @@ export function checkContent(attrs, context) {
   if (!attrs || typeof attrs !== "object") {
     return { problems: [{ severity: "ERROR", message: "manca la chiave 'attributes' nel content JSON" }], nError: 1, nWarning: 0 };
   }
-
+ 
   const maxLengths = context?.max_lengths || {};
   const meta = context?.search_terms_meta || {};
   const sqpMeta = context?.sqp_meta || {};
-
+ 
   let problems = [...checkSupportedAttrs(attrs), ...checkLengths(attrs, maxLengths)];
-
+ 
   if (meta.available) {
     problems = problems.concat(checkConvertingTerms(attrs, meta));
     if ("avoid_terms" in meta) {
@@ -155,16 +156,17 @@ export function checkContent(attrs, context) {
   } else {
     problems.push({ severity: "INFO", message: `nessun dato search term nel context pack (${meta.reason || "motivo non specificato"})` });
   }
-
+ 
   if (sqpMeta.available) {
     problems = problems.concat(checkSqpTerms(attrs, sqpMeta));
   } else {
     problems.push({ severity: "INFO", message: `nessun dato Search Query Performance nel context pack (${sqpMeta.reason || "motivo non specificato"})` });
   }
-
+ 
   problems = problems.concat(checkBrandSignature(attrs));
-
+ 
   const nError = problems.filter((p) => p.severity === "ERROR").length;
   const nWarning = problems.filter((p) => p.severity === "WARNING").length;
   return { problems, nError, nWarning };
 }
+ 
