@@ -113,6 +113,41 @@ function QualityList({ problems }) {
 
 const textareaStyle = { ...input, width: "100%", minHeight: 96, resize: "vertical", lineHeight: 1.5, fontFamily: F.ui };
 
+function bulletsText(v) {
+  if (Array.isArray(v)) return v.filter(Boolean).join("\n");
+  return v || "";
+}
+
+// Stesso componente di ListingPanel: sinistra sola lettura (quello che c'e' ora
+// sul listing, da context.current_copy), destra modificabile — parte
+// precompilato con la copy generata, ma resta modificabile prima di anteprima/
+// applica. "modificato" confronta col prima (l'attuale), non con la copy
+// generata in origine.
+function EditableFieldDiff({ label, before, value, onChange, multiline }) {
+  const changed = (before || "") !== (value || "");
+  const fieldStyle = {
+    ...(multiline ? textareaStyle : input),
+    width: "100%", fontFamily: F.ui,
+    background: changed ? C.accentGlow : C.surface2,
+  };
+  return (
+    <div style={{ marginBottom: S.md }}>
+      <div style={{ fontSize: T.micro, color: C.textDim, fontWeight: 600, marginBottom: 4 }}>
+        {label} {changed && <span style={{ color: C.accent }}>· modificato rispetto al listing attuale</span>}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: S.sm }}>
+        <div style={{
+          fontSize: T.small, color: C.textMuted, whiteSpace: "pre-wrap", lineHeight: 1.5,
+          background: C.surface2, borderRadius: R.sm, padding: S.sm, minHeight: 28,
+        }}>{before || <em style={{ color: C.textDim }}>vuoto</em>}</div>
+        {multiline
+          ? <textarea value={value} onChange={onChange} style={fieldStyle} />
+          : <input value={value} onChange={onChange} style={fieldStyle} />}
+      </div>
+    </div>
+  );
+}
+
 export default function FamilyPanel({ marketplace = "" }) {
   // ---- connessione GitHub (condivisa con ActionsPanel/ListingPanel) ----
   const [ghRepo, setGhRepo] = useState(() => localStorage.getItem("gh_repo") || guessRepoFromUrl());
@@ -504,45 +539,50 @@ export default function FamilyPanel({ marketplace = "" }) {
         </div>
       )}
 
-      {family && (
-        <div style={{ ...card, padding: S.lg, marginBottom: S.md }}>
-          <div style={{ fontSize: T.lead, fontWeight: 700, color: C.text, marginBottom: S.sm }}>Copy condivisa (modificabile)</div>
-          <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.md, lineHeight: 1.6 }}>
-            Le modifiche qui sotto valgono per <strong>tutti i child</strong> della famiglia. Il titolo resta
-            per-child: usa <code style={{ fontFamily: F.mono }}>{"{color}"}</code> e/o{" "}
-            <code style={{ fontFamily: F.mono }}>{"{size}"}</code> (o il nome esatto dell'attributo del
-            variation theme, es. <code style={{ fontFamily: F.mono }}>{"{color_name}"}</code>) nel template: al
-            momento dell'applicazione ogni child riceve il proprio titolo (es. "Cuccia Squalo - Blu" invece di
-            "Cuccia Squalo - Grigio"). Queste modifiche NON riscrivono il file nel repo: valgono solo per
-            l'anteprima/applicazione che lanci da qui.
-          </div>
+      {family && (() => {
+        const cur = context?.current_copy || {};
+        return (
+          <div style={{ ...card, padding: S.lg, marginBottom: S.md }}>
+            <div style={{ fontSize: T.lead, fontWeight: 700, color: C.text, marginBottom: S.sm }}>Copy condivisa (modificabile)</div>
+            <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.md, lineHeight: 1.6 }}>
+              Le modifiche qui sotto valgono per <strong>tutti i child</strong> della famiglia. A sinistra vedi cosa
+              c'e' <strong>ora</strong> sul listing (dal parent, o dal primo child se il parent non ha bullet/descrizione
+              propri — <span style={{ fontFamily: F.mono }}>{cur.sku || "?"}</span>); a destra puoi modificare la copy
+              proposta. Il titolo resta per-child: usa <code style={{ fontFamily: F.mono }}>{"{color}"}</code> e/o{" "}
+              <code style={{ fontFamily: F.mono }}>{"{size}"}</code> (o il nome esatto dell'attributo del
+              variation theme, es. <code style={{ fontFamily: F.mono }}>{"{color_name}"}</code>) nel template: al
+              momento dell'applicazione ogni child riceve il proprio titolo (es. "Cuccia Squalo - Blu" invece di
+              "Cuccia Squalo - Grigio"). Queste modifiche NON riscrivono il file nel repo: valgono solo per
+              l'anteprima/applicazione che lanci da qui.
+            </div>
 
-          <div style={{ marginBottom: S.md }}>
-            <div style={{ fontSize: T.micro, color: C.textDim, fontWeight: 600, marginBottom: 4 }}>Template titolo</div>
-            <input value={titleTemplate} onChange={(e) => setTitleTemplate(e.target.value)}
-              placeholder="es. Cuccia Squalo - {color}"
-              style={{ ...input, width: "100%", fontFamily: F.mono, borderColor: !titleTemplate.trim() ? C.yellow : C.borderStrong }} />
-            {!titleTemplate.trim() && (
-              <div style={{ fontSize: T.micro, color: C.yellow, marginTop: 4, lineHeight: 1.5 }}>
-                ⚠ Nessun template caricato: senza, "{familyWorkflow}" NON tocca il titolo dei child su Amazon
-                (lo lascia com'e' ora). Se il file era stato generato senza "Genera" (scheletro), o e' un
-                file vecchio salvato prima che il titolo diventasse obbligatorio, scrivine uno qui a mano
-                (es. "Cuccia Squalo - {"{color}"}") o rilancia "Genera brief + copy famiglia con Claude".
+            <div style={{ marginBottom: S.md }}>
+              <div style={{ fontSize: T.micro, color: C.textDim, fontWeight: 600, marginBottom: 4 }}>
+                Template titolo <span style={{ fontWeight: 400 }}>
+                  (titolo attuale, per riferimento: <em style={{ color: C.textMuted }}>{cur.item_name || "vuoto"}</em>)
+                </span>
               </div>
-            )}
-          </div>
+              <input value={titleTemplate} onChange={(e) => setTitleTemplate(e.target.value)}
+                placeholder="es. Cuccia Squalo - {color}"
+                style={{ ...input, width: "100%", fontFamily: F.mono, borderColor: !titleTemplate.trim() ? C.yellow : C.borderStrong }} />
+              {!titleTemplate.trim() && (
+                <div style={{ fontSize: T.micro, color: C.yellow, marginTop: 4, lineHeight: 1.5 }}>
+                  ⚠ Nessun template caricato: senza, "{familyWorkflow}" NON tocca il titolo dei child su Amazon
+                  (lo lascia com'e' ora). Se il file era stato generato senza "Genera" (scheletro), o e' un
+                  file vecchio salvato prima che il titolo diventasse obbligatorio, scrivine uno qui a mano
+                  (es. "Cuccia Squalo - {"{color}"}") o rilancia "Genera brief + copy famiglia con Claude".
+                </div>
+              )}
+            </div>
 
-          <div style={{ marginBottom: S.md }}>
-            <div style={{ fontSize: T.micro, color: C.textDim, fontWeight: 600, marginBottom: 4 }}>Bullet point (uno per riga)</div>
-            <textarea value={bulletText} onChange={(e) => setBulletText(e.target.value)} style={textareaStyle} />
-          </div>
+            <EditableFieldDiff label="Bullet point (uno per riga)" before={bulletsText(cur.bullet_point)} value={bulletText}
+              onChange={(e) => setBulletText(e.target.value)} multiline />
 
-          <div>
-            <div style={{ fontSize: T.micro, color: C.textDim, fontWeight: 600, marginBottom: 4 }}>Descrizione</div>
-            <textarea value={descriptionText} onChange={(e) => setDescriptionText(e.target.value)} style={{ ...textareaStyle, minHeight: 140 }} />
+            <EditableFieldDiff label="Descrizione" before={cur.product_description} value={descriptionText}
+              onChange={(e) => setDescriptionText(e.target.value)} multiline />
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {family && (
         <div style={{ ...card, padding: S.lg, marginBottom: S.md }}>
