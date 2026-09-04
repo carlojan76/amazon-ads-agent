@@ -1,0 +1,606 @@
+{
+  "asin": "B0GX7P144B",
+  "sku": "G6-WYV5-HT3S",
+  "marketplace": "IT",
+  "current_copy": {
+    "product_type": "PET_SUPPLIES",
+    "item_name": "Spazzola in Gomma per Rimozione Peli di Cani e Animali Domestici, per Interni Auto e Mobili",
+    "bullet_point": [
+      "🐾 RIMOZIONE EFFICACE E PROFONDA: Libera finalmente la tua casa e la tua auto dai peli fastidiosi! Questa spazzola cattura e rimuove con estrema facilità il pelo di cani e gatti da qualsiasi superficie in tessuto, come sedili dell'automobile, divani, tappeti e lettini, garantendo un ambiente sempre pulito.",
+      "⚙️ DESIGN INTELLIGENTE A 3 LATI: Dotata di tre diverse densità di dentini per ogni esigenza. Usa il lato a \"densità massima\" per radunare velocemente i peli su grandi aree, il lato \"medio\" per una pulizia secondaria, e il lato a \"densità minima\" per raschiare in profondità i peli più ostinati e incastrati.",
+      "🌿 SICURA E FACILE DA LAVARE: Una formula totalmente inodore e sicura, ideale per ambienti con animali domestici e perfetta per chi ha la pelle sensibile. Inoltre, il design è super igienico: dopo l'uso, basta risciacquarla sotto l'acqua corrente per pulirla in un attimo. Dotata anche di un pratico foro per appenderla.",
+      "🎨 COLORATA E VERSATILE: Un accessorio essenziale e dal design pratico per tutti gli amanti degli animali."
+    ],
+    "product_description": "Dì addio ai peli ostinati su divani, tappeti e sedili dell'auto!\nSei stanco di trovare i peli del tuo cane o gatto ovunque in casa e in macchina? La nostra Spazzola Rimuovi Peli è lo strumento definitivo che ogni proprietario di animali domestici dovrebbe avere. Grazie al suo innovativo design triangolare, questa spazzola offre un sistema di pulizia a 3 fasi: dentini distanziati per raccogliere velocemente il grosso dei peli su ampie superfici, dentini medi per una pulizia di precisione, e dentini fitti per estrarre anche i peli più corti e incastrati in profondità nei tessuti.\n\nRealizzata con un'anima solida in ABS e bordi in morbido silicone resistente all'usura, garantisce una rimozione impeccabile senza graffiare o rovinare i tuoi mobili. È un accessorio totalmente inodore, sicuro per la pelle e incredibilmente facile da mantenere: ti basterà un rapido risciacquo sotto l'acqua corrente per farla tornare come nuova. Mantieni i tuoi spazi freschi e puliti con il minimo sforzo!",
+    "issues": []
+  },
+  "max_lengths": {
+    "item_name": 200,
+    "bullet_point": 700
+  },
+  "catalog": {
+    "brand": "Lupo & Felix",
+    "item_name": "Lupo & Felix Spazzola in Gomma per Rimozione Peli di Cani e Animali Domestici, per Interni Auto e Mobili",
+    "color": "Rosso",
+    "size": "",
+    "images": [
+      "MAIN: https://m.media-amazon.com/images/I/31XhpqnXeSL.jpg",
+      "MAIN: https://m.media-amazon.com/images/I/31XhpqnXeSL._SL75_.jpg",
+      "MAIN: https://m.media-amazon.com/images/I/6124CkbNbVL.jpg",
+      "PT01: https://m.media-amazon.com/images/I/41dLhQCwFKL.jpg",
+      "PT01: https://m.media-amazon.com/images/I/41dLhQCwFKL._SL75_.jpg",
+      "PT01: https://m.media-amazon.com/images/I/61mTa68lJWL.jpg",
+      "PT02: https://m.media-amazon.com/images/I/51B44dIw3CL.jpg",
+      "PT02: https://m.media-amazon.com/images/I/51B44dIw3CL._SL75_.jpg",
+      "PT02: https://m.media-amazon.com/images/I/61X6ALUkpFL.jpg",
+      "PT03: https://m.media-amazon.com/images/I/51i0ZudDMkL.jpg",
+      "PT03: https://m.media-amazon.com/images/I/51i0ZudDMkL._SL75_.jpg",
+      "PT03: https://m.media-amazon.com/images/I/71s0JnpkOQL.jpg",
+      "PT04: https://m.media-amazon.com/images/I/51HTNYojCuL.jpg",
+      "PT04: https://m.media-amazon.com/images/I/51HTNYojCuL._SL75_.jpg",
+      "PT04: https://m.media-amazon.com/images/I/61Dm+8l7kaL.jpg",
+      "PT05: https://m.media-amazon.com/images/I/41DSnvAw0WL.jpg",
+      "PT05: https://m.media-amazon.com/images/I/41DSnvAw0WL._SL75_.jpg",
+      "PT05: https://m.media-amazon.com/images/I/617KLZZwoUL.jpg",
+      "PT06: https://m.media-amazon.com/images/I/41O4XXFR-IL.jpg",
+      "PT06: https://m.media-amazon.com/images/I/41O4XXFR-IL._SL75_.jpg",
+      "PT06: https://m.media-amazon.com/images/I/615gwVmoN5L.jpg",
+      "PT07: https://m.media-amazon.com/images/I/41R3zUbAmEL.jpg",
+      "PT07: https://m.media-amazon.com/images/I/41R3zUbAmEL._SL75_.jpg",
+      "PT07: https://m.media-amazon.com/images/I/51RUKt6+biL.jpg"
+    ],
+    "image_candidates": [
+      {
+        "variant": "MAIN",
+        "link": "https://m.media-amazon.com/images/I/31XhpqnXeSL.jpg",
+        "width": 500,
+        "height": 280
+      },
+      {
+        "variant": "MAIN",
+        "link": "https://m.media-amazon.com/images/I/31XhpqnXeSL._SL75_.jpg",
+        "width": 75,
+        "height": 42
+      },
+      {
+        "variant": "MAIN",
+        "link": "https://m.media-amazon.com/images/I/6124CkbNbVL.jpg",
+        "width": 2560,
+        "height": 1432
+      },
+      {
+        "variant": "PT01",
+        "link": "https://m.media-amazon.com/images/I/41dLhQCwFKL.jpg",
+        "width": 472,
+        "height": 500
+      },
+      {
+        "variant": "PT01",
+        "link": "https://m.media-amazon.com/images/I/41dLhQCwFKL._SL75_.jpg",
+        "width": 71,
+        "height": 75
+      },
+      {
+        "variant": "PT01",
+        "link": "https://m.media-amazon.com/images/I/61mTa68lJWL.jpg",
+        "width": 1000,
+        "height": 1060
+      },
+      {
+        "variant": "PT02",
+        "link": "https://m.media-amazon.com/images/I/51B44dIw3CL.jpg",
+        "width": 490,
+        "height": 500
+      },
+      {
+        "variant": "PT02",
+        "link": "https://m.media-amazon.com/images/I/51B44dIw3CL._SL75_.jpg",
+        "width": 74,
+        "height": 75
+      },
+      {
+        "variant": "PT02",
+        "link": "https://m.media-amazon.com/images/I/61X6ALUkpFL.jpg",
+        "width": 979,
+        "height": 1000
+      },
+      {
+        "variant": "PT03",
+        "link": "https://m.media-amazon.com/images/I/51i0ZudDMkL.jpg",
+        "width": 500,
+        "height": 441
+      },
+      {
+        "variant": "PT03",
+        "link": "https://m.media-amazon.com/images/I/51i0ZudDMkL._SL75_.jpg",
+        "width": 75,
+        "height": 66
+      },
+      {
+        "variant": "PT03",
+        "link": "https://m.media-amazon.com/images/I/71s0JnpkOQL.jpg",
+        "width": 1133,
+        "height": 1000
+      },
+      {
+        "variant": "PT04",
+        "link": "https://m.media-amazon.com/images/I/51HTNYojCuL.jpg",
+        "width": 464,
+        "height": 500
+      },
+      {
+        "variant": "PT04",
+        "link": "https://m.media-amazon.com/images/I/51HTNYojCuL._SL75_.jpg",
+        "width": 70,
+        "height": 75
+      },
+      {
+        "variant": "PT04",
+        "link": "https://m.media-amazon.com/images/I/61Dm+8l7kaL.jpg",
+        "width": 928,
+        "height": 1000
+      },
+      {
+        "variant": "PT05",
+        "link": "https://m.media-amazon.com/images/I/41DSnvAw0WL.jpg",
+        "width": 500,
+        "height": 493
+      },
+      {
+        "variant": "PT05",
+        "link": "https://m.media-amazon.com/images/I/41DSnvAw0WL._SL75_.jpg",
+        "width": 75,
+        "height": 74
+      },
+      {
+        "variant": "PT05",
+        "link": "https://m.media-amazon.com/images/I/617KLZZwoUL.jpg",
+        "width": 1014,
+        "height": 1000
+      },
+      {
+        "variant": "PT06",
+        "link": "https://m.media-amazon.com/images/I/41O4XXFR-IL.jpg",
+        "width": 495,
+        "height": 500
+      },
+      {
+        "variant": "PT06",
+        "link": "https://m.media-amazon.com/images/I/41O4XXFR-IL._SL75_.jpg",
+        "width": 74,
+        "height": 75
+      },
+      {
+        "variant": "PT06",
+        "link": "https://m.media-amazon.com/images/I/615gwVmoN5L.jpg",
+        "width": 1000,
+        "height": 1011
+      },
+      {
+        "variant": "PT07",
+        "link": "https://m.media-amazon.com/images/I/41R3zUbAmEL.jpg",
+        "width": 500,
+        "height": 452
+      },
+      {
+        "variant": "PT07",
+        "link": "https://m.media-amazon.com/images/I/41R3zUbAmEL._SL75_.jpg",
+        "width": 75,
+        "height": 68
+      },
+      {
+        "variant": "PT07",
+        "link": "https://m.media-amazon.com/images/I/51RUKt6+biL.jpg",
+        "width": 1106,
+        "height": 1000
+      }
+    ],
+    "sales_ranks": [
+      "#29802 in Prodotti per animali domestici"
+    ]
+  },
+  "aplus": null,
+  "reviews": {
+    "date_range": {
+      "endDate": "2026-08-28T00:00:00.000Z",
+      "startDate": "2026-02-28T00:00:00.000Z"
+    },
+    "positive": [
+      {
+        "topic": "Depilazione",
+        "mentions": 3,
+        "occurrence_pct": 37.5,
+        "star_impact": null,
+        "snippets": [
+          "Forse funziona meglio su altri tipi di pelo o su superfici diverse (tappetini, cucce, sedili auto),",
+          "Questa particolare spazzola per rimuovere i peli degli animali è una vera chicca, la spazzola è in gomma semi rigida e ha 3 lati con diverse dentature a seconda della superficie dove vogliamo togliere i peli, ad esempio la dentatura grande e per togliere i peli in grandi superfici come divani, lettino del cane ecc.",
+          "Molto efficace per peli ostinati e tessuti"
+        ],
+        "subtopics": []
+      },
+      {
+        "topic": "Facilità di pulizia",
+        "mentions": 2,
+        "occurrence_pct": 25,
+        "star_impact": 2,
+        "snippets": [
+          "Pulizia facile",
+          "La spazzola inoltre mi è piaciuta perché non è rigida"
+        ],
+        "subtopics": []
+      },
+      {
+        "topic": "Design generale",
+        "mentions": 1,
+        "occurrence_pct": 12.5,
+        "star_impact": 0.91,
+        "snippets": [
+          "bella e funzionale, al di sopra delle aspettative"
+        ],
+        "subtopics": []
+      },
+      {
+        "topic": "Qualità del materiale",
+        "mentions": 1,
+        "occurrence_pct": 12.5,
+        "star_impact": 2,
+        "snippets": [
+          "Perfetto per il tessuto del baule della macchina"
+        ],
+        "subtopics": []
+      },
+      {
+        "topic": "Impugnatura",
+        "mentions": 1,
+        "occurrence_pct": 12.5,
+        "star_impact": null,
+        "snippets": [
+          "Trovo anche molto comoda l'impugnatura"
+        ],
+        "subtopics": []
+      }
+    ],
+    "negative": []
+  },
+  "search_terms_md": "\n## Termini che convertono (report search term Amazon Ads)\n\nTermini di ricerca reali su cui **questo ASIN** (B0GX7P144B) e' stato pubblicizzato su IT.\n\n_Dati al 2026-09-03._\n\n**Hanno generato acquisti — devono comparire nel titolo o nei primi bullet:**\n\n| Termine | Click | Acquisti | CVR | CPC | ACoS |\n|---|---:|---:|---:|---:|---:|\n| spazzola peli cane auto | 3 | 1 | 33% | 0.25 € | 7% |\n| spazzola per peli cane auto | 1 | 1 | 100% | 0.32 € | 3% |\n| rimuovi peli animali auto | 1 | 1 | 100% | 0.39 € | 3% |\n| spazzola gomma per cani pelo corto | 1 | 1 | 100% | 0.30 € | 3% |\n| togli peli macchina | 1 | 1 | 100% | 0.38 € | 3% |\n\n**Traffico che NON converte — la copy non risponde a questa intenzione, o il prodotto non e' pertinente:**\n\n- togli peli animali — 2 click, 0.79 € spesi, 0 acquisti\n- spazzola peli cane — 1 click, 0.40 € spesi, 0 acquisti\n- spazzola togli peli animali — 1 click, 0.40 € spesi, 0 acquisti\n- spazzola per gatti — 1 click, 0.40 € spesi, 0 acquisti\n- pettine cane pelo corto — 1 click, 0.39 € spesi, 0 acquisti\n- leva peli animali dai vestiti — 1 click, 0.39 € spesi, 0 acquisti\n- pettine cane per sottopelo — 1 click, 0.39 € spesi, 0 acquisti\n- raccogli peli gatto — 1 click, 0.39 € spesi, 0 acquisti\n- spazzola peli cane divano — 1 click, 0.39 € spesi, 0 acquisti\n- spazzola togli peli — 1 click, 0.39 € spesi, 0 acquisti\n- accessori per il cane macchina — 1 click, 0.38 € spesi, 0 acquisti\n- spazzola pelo corto — 1 click, 0.36 € spesi, 0 acquisti\n- spazzola per peli cani divano — 1 click, 0.36 € spesi, 0 acquisti\n- togliere peli cane auto — 1 click, 0.35 € spesi, 0 acquisti\n- togli peli animali auto — 1 click, 0.33 € spesi, 0 acquisti\n- spazzola cane in silicone — 1 click, 0.32 € spesi, 0 acquisti\n- spazzola peli cane per auto — 1 click, 0.31 € spesi, 0 acquisti\n- togli peli dalla macchina — 1 click, 0.31 € spesi, 0 acquisti\n- togliere peli cane moquette auto — 1 click, 0.31 € spesi, 0 acquisti\n- leva peli animali — 1 click, 0.30 € spesi, 0 acquisti\n\nUsa i termini della prima lista con le parole esatte dei clienti. Per la seconda: se l'intenzione e' pertinente al prodotto, chiariscila nella copy; se non lo e', non forzarla nel testo.\n",
+  "search_terms_meta": {
+    "available": true,
+    "scope": "asin",
+    "terms_total": 46,
+    "terms_converting": 5,
+    "top_terms": [
+      "spazzola peli cane auto",
+      "spazzola per peli cane auto",
+      "rimuovi peli animali auto",
+      "spazzola gomma per cani pelo corto",
+      "togli peli macchina"
+    ],
+    "avoid_terms": [
+      "togli peli animali",
+      "spazzola peli cane",
+      "spazzola togli peli animali",
+      "spazzola per gatti",
+      "pettine cane pelo corto",
+      "leva peli animali dai vestiti",
+      "pettine cane per sottopelo",
+      "raccogli peli gatto",
+      "spazzola peli cane divano",
+      "spazzola togli peli",
+      "accessori per il cane macchina",
+      "spazzola pelo corto",
+      "spazzola per peli cani divano",
+      "togliere peli cane auto",
+      "togli peli animali auto",
+      "spazzola cane in silicone",
+      "spazzola peli cane per auto",
+      "togli peli dalla macchina",
+      "togliere peli cane moquette auto",
+      "leva peli animali"
+    ]
+  },
+  "sqp_md": "\n## Volume di ricerca reale (Search Query Performance, non stima)\n\nQuanto i clienti cercano davvero ogni query su IT e la quota che QUESTO ASIN ne cattura (impression/click/carrello/acquisti), periodo 2026-08-16 -> 2026-08-22. A differenza dei 'Termini che convertono' sopra (solo dati delle TUE campagne ads), qui il volume e' di mercato: mostra anche query che i clienti cercano ma su cui non hai mai fatto pubblicita'. Rank 1 = query piu' rilevante per il TUO catalogo brand secondo Amazon.\n\n| Query | Volume ricerca | Rank | Quota impression | Quota click | Quota acquisti |\n|---|---:|---:|---:|---:|---:|\n| pet hair remover | 171 | 4 | 0.12% | 1.37% | 0.00% |\n| spazzola per sottopelo cane | 127 | 9 | 0.23% | 1.59% | 0.00% |\n| spazzola peli cane auto | 58 | 3 | 3.99% | 11.43% | 0.00% |\n| rimuovi peli cane auto | 57 | 6 | 4.12% | 3.33% | 0.00% |\n| togliere peli cane auto | 49 | 24 | 3.42% | 0.00% | 0.00% |\n| rimuovi peli auto | 35 | 7 | 2.97% | 7.69% | - |\n| togli peli cane auto | 23 | 8 | 4.54% | 6.67% | 0.00% |\n| spazzola per togliere pelo morto dai cani | 12 | 14 | 1.57% | 12.50% | - |\n| rimuovi peli macchina | 12 | 10 | 2.33% | 25.00% | - |\n| spazzola per pulire i divani dai peli dei gatti | 12 | 12 | 2.44% | 14.29% | - |\n| spazzola rimuovi peli animali corti | 11 | 23 | 0.42% | 20.00% | - |\n| spazzola cani spatole in gomma | 8 | 11 | 3.57% | 10.00% | - |\n| spazzola attira peli cani dalla tapezzeria | 7 | 15 | 2.00% | 50.00% | - |\n| spazzola cambio pelliccia cane | 7 | 22 | 0.67% | 33.33% | 0.00% |\n| spugna leva peli cane | 6 | 17 | 2.42% | 100.00% | - |\n\nQueste query NON sono confermate come acquirenti di QUESTO prodotto (a differenza di 'Termini che convertono'): usale per capire cosa cerca il mercato, non come sostituto dei termini con acquisti reali gia' verificati.\n\n",
+  "sqp_meta": {
+    "available": true,
+    "queries_total": 24,
+    "period": "WEEK",
+    "start": "2026-08-16",
+    "end": "2026-08-22",
+    "top_queries_by_volume": [
+      "pet hair remover",
+      "spazzola per sottopelo cane",
+      "spazzola peli cane auto",
+      "rimuovi peli cane auto",
+      "togliere peli cane auto",
+      "rimuovi peli auto",
+      "togli peli cane auto",
+      "spazzola per togliere pelo morto dai cani",
+      "rimuovi peli macchina",
+      "spazzola per pulire i divani dai peli dei gatti",
+      "spazzola rimuovi peli animali corti",
+      "spazzola cani spatole in gomma",
+      "spazzola attira peli cani dalla tapezzeria",
+      "spazzola cambio pelliccia cane",
+      "spugna leva peli cane"
+    ],
+    "purchase_confirmed_terms": [
+      {
+        "query": "paletta raschia peli macchina",
+        "purchases": 1,
+        "volume": 4
+      },
+      {
+        "query": "spazzola leva peli auto",
+        "purchases": 1,
+        "volume": 3
+      }
+    ]
+  },
+  "competitors": {
+    "spazzola peli cane auto": [
+      {
+        "asin": "B0CM3YDLQN",
+        "brand": "SONAX",
+        "item_name": "SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000"
+      },
+      {
+        "asin": "B07X9M1XC6",
+        "brand": "Glart",
+        "item_name": "Glart 44THB Spazzola in Silicone per peli di Cani e Gatti"
+      },
+      {
+        "asin": "B0D9YG16Y7",
+        "brand": "EAVUYIS",
+        "item_name": "EAVUYIS 2 Pezzi Spazzola per la rimozione dei peli di Animali Domestici per Moquette, Divano, Auto, Pettine per la rimozione dei peli di Cani, Spazzola in Gomma per peli di Animali Domestici"
+      },
+      {
+        "asin": "B0819XVK92",
+        "brand": "ACE2ACE",
+        "item_name": "ACE2ACE Spazzola Togli Peli Animali, Spazzola Leva Peli Cane Gatto Animali"
+      },
+      {
+        "asin": "B0DXZXCRYT",
+        "brand": "Mmyzao",
+        "item_name": "Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto"
+      }
+    ],
+    "spazzola per peli cane auto": [
+      {
+        "asin": "B0CM3YDLQN",
+        "brand": "SONAX",
+        "item_name": "SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000"
+      },
+      {
+        "asin": "B07X9M1XC6",
+        "brand": "Glart",
+        "item_name": "Glart 44THB Spazzola in Silicone per peli di Cani e Gatti"
+      },
+      {
+        "asin": "B0DFSVMB85",
+        "brand": "Vintree",
+        "item_name": "Vintree 2 in 1 Togli Pelucchi a Doppia Faccia Togli peli Animali Spazzola Peli Gatto e Cane Portatile per Moquette Tappetino per Auto Divano Letto per Animali Domestici Mobili-Verde"
+      },
+      {
+        "asin": "B0D9YG16Y7",
+        "brand": "EAVUYIS",
+        "item_name": "EAVUYIS 2 Pezzi Spazzola per la rimozione dei peli di Animali Domestici per Moquette, Divano, Auto, Pettine per la rimozione dei peli di Cani, Spazzola in Gomma per peli di Animali Domestici"
+      },
+      {
+        "asin": "B0DXZXCRYT",
+        "brand": "Mmyzao",
+        "item_name": "Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto"
+      }
+    ],
+    "rimuovi peli animali auto": [
+      {
+        "asin": "B0CM3YDLQN",
+        "brand": "SONAX",
+        "item_name": "SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000"
+      },
+      {
+        "asin": "B0CXVCMCJK",
+        "brand": "FURCOBRA",
+        "item_name": "FURCOBRA PRO Pet Hair Remover – Raschietto Facile da impugnare, Strumento per la rimozione dei peli di Animali Domestici, Strumento di rimozione dei peli di Gatti e Cani per Divano, Auto, Divano,"
+      },
+      {
+        "asin": "B07X9M1XC6",
+        "brand": "Glart",
+        "item_name": "Glart 44THB Spazzola in Silicone per peli di Cani e Gatti"
+      },
+      {
+        "asin": "B0DXZXCRYT",
+        "brand": "Mmyzao",
+        "item_name": "Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto"
+      },
+      {
+        "asin": "B0GD1TRLVC",
+        "brand": "SKELUOZIEU",
+        "item_name": "2 Guanti magnetici in Pelliccia per Cani e Gatti per Animali Domestici con Forte Forza elettrostatica, per la rimozione dei peli di Animali Domestici, per la Pulizia dei tappeti e dei divani"
+      }
+    ],
+    "spazzola gomma per cani pelo corto": [
+      {
+        "asin": "B001N02IDS",
+        "brand": "Ferplast",
+        "item_name": "Ferplast Spazzola Guanto per Cani e Gatti - Pelo Corto - in Gomma Morbida - Ideale Durante o Dopo il Bagno - Impugnatura Ergonomica Morbida - Nero"
+      },
+      {
+        "asin": "B08SVWYKL7",
+        "brand": "BluePet",
+        "item_name": "BluePet Spazzola Curry Gomma, Cani Gatti Pelo Corto, Spazzola Bagno Morbido"
+      },
+      {
+        "asin": "B086WKQPC6",
+        "brand": "Animalon",
+        "item_name": "Animalon CareFlex Pettine per Cani a Pelo Corto | Aiuto per il Cambio del Pelo | Spazzola Innovativa per Cura Delicata (Piccolo, Blu)"
+      },
+      {
+        "asin": "B000WFJM4S",
+        "brand": "TRIXIE",
+        "item_name": "Trixie Massaggio Gomma Massaggio, 9 x 13 cm"
+      }
+    ],
+    "togli peli macchina": [
+      {
+        "asin": "B0CM3YDLQN",
+        "brand": "SONAX",
+        "item_name": "SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000"
+      },
+      {
+        "asin": "B0D9YG16Y7",
+        "brand": "EAVUYIS",
+        "item_name": "EAVUYIS 2 Pezzi Spazzola per la rimozione dei peli di Animali Domestici per Moquette, Divano, Auto, Pettine per la rimozione dei peli di Cani, Spazzola in Gomma per peli di Animali Domestici"
+      },
+      {
+        "asin": "B0DXZXCRYT",
+        "brand": "Mmyzao",
+        "item_name": "Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto"
+      },
+      {
+        "asin": "B0CXVCMCJK",
+        "brand": "FURCOBRA",
+        "item_name": "FURCOBRA PRO Pet Hair Remover – Raschietto Facile da impugnare, Strumento per la rimozione dei peli di Animali Domestici, Strumento di rimozione dei peli di Gatti e Cani per Divano, Auto, Divano,"
+      },
+      {
+        "asin": "B0B5TFZRR2",
+        "brand": "LINTPLUS",
+        "item_name": "LINTPLUS spazzola togli peli animali, spazzola peli gatto e spazzola peli cane per Tappeti, Lettini per cani e Alberi tiragraffi per gatti, facile da pulire"
+      }
+    ],
+    "pet hair remover": [
+      {
+        "asin": "B0819XVK92",
+        "brand": "ACE2ACE",
+        "item_name": "ACE2ACE Spazzola Togli Peli Animali, Spazzola Leva Peli Cane Gatto Animali"
+      },
+      {
+        "asin": "B0GD1TRLVC",
+        "brand": "SKELUOZIEU",
+        "item_name": "2 Guanti magnetici in Pelliccia per Cani e Gatti per Animali Domestici con Forte Forza elettrostatica, per la rimozione dei peli di Animali Domestici, per la Pulizia dei tappeti e dei divani"
+      },
+      {
+        "asin": "B0B5TFZRR2",
+        "brand": "LINTPLUS",
+        "item_name": "LINTPLUS spazzola togli peli animali, spazzola peli gatto e spazzola peli cane per Tappeti, Lettini per cani e Alberi tiragraffi per gatti, facile da pulire"
+      },
+      {
+        "asin": "B0F6C272TF",
+        "brand": "Kunoli",
+        "item_name": "2 Guanto Peli Gatto, Guanto Peli Cane, Spazzola Gatto per Tappeti Divani"
+      },
+      {
+        "asin": "B0FN84W2SJ",
+        "brand": "ZenithyrEn",
+        "item_name": "2 Guanti Peli Gatto e Cane, Guanto Leva Peli Animali con Effetto Elettrostatico, Lavabile e Riutilizzabile, per Vestiti, Divano, Coperte, Cucce e Tessuti"
+      }
+    ],
+    "spazzola per sottopelo cane": [
+      {
+        "asin": "B01M3XECYX",
+        "brand": "BluePet",
+        "item_name": "BluePet Spazzola per Cani & Gatto, Pettine Pelo Lungo, Cardatore Sottopelo"
+      },
+      {
+        "asin": "B08JHTC1LY",
+        "brand": "CANDURE",
+        "item_name": "Candure Spazzola per Cani, Pettine Gatti per Pelo Acciaio Inossidabile 17+9 Doppia Faccia Strumento di Deshedding Animali per Cane Pelo Lungo, Medio e Corto (Blu)"
+      },
+      {
+        "asin": "B0GDDQVHFV",
+        "brand": "soodyoow",
+        "item_name": "Soodyoow Spazzola per Cani e Gatti, Pettine Doppia Faccia 17+9 in Acciaio Inossidabile, Strumento per Rimuovere Peli Morti e Nodi per Animali a Pelo Lungo Medio Corto"
+      },
+      {
+        "asin": "B0C8NRBZ14",
+        "brand": "Mesybveo",
+        "item_name": "Mesybveo Spazzola Per Cani e Gatto Pelo Lungo, Spazzola Nodi Cani 17+9 Doppia Faccia, Pettine Rastrello per Cani Rimuove Sottopelo, Manico Antiscivolo con Foro per Appendere, per Gatti, Cani"
+      },
+      {
+        "asin": "B0DYZ4D53F",
+        "brand": "PetPog",
+        "item_name": "PetPog Slanatore per Gatti e Cani, Pelo Corto e Medio, Nero"
+      }
+    ],
+    "rimuovi peli cane auto": [
+      {
+        "asin": "B0CM3YDLQN",
+        "brand": "SONAX",
+        "item_name": "SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000"
+      },
+      {
+        "asin": "B0819XVK92",
+        "brand": "ACE2ACE",
+        "item_name": "ACE2ACE Spazzola Togli Peli Animali, Spazzola Leva Peli Cane Gatto Animali"
+      },
+      {
+        "asin": "B0GD1TRLVC",
+        "brand": "SKELUOZIEU",
+        "item_name": "2 Guanti magnetici in Pelliccia per Cani e Gatti per Animali Domestici con Forte Forza elettrostatica, per la rimozione dei peli di Animali Domestici, per la Pulizia dei tappeti e dei divani"
+      },
+      {
+        "asin": "B0CXVCMCJK",
+        "brand": "FURCOBRA",
+        "item_name": "FURCOBRA PRO Pet Hair Remover – Raschietto Facile da impugnare, Strumento per la rimozione dei peli di Animali Domestici, Strumento di rimozione dei peli di Gatti e Cani per Divano, Auto, Divano,"
+      },
+      {
+        "asin": "B07X9M1XC6",
+        "brand": "Glart",
+        "item_name": "Glart 44THB Spazzola in Silicone per peli di Cani e Gatti"
+      }
+    ],
+    "togliere peli cane auto": [
+      {
+        "asin": "B0CM3YDLQN",
+        "brand": "SONAX",
+        "item_name": "SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000"
+      },
+      {
+        "asin": "B0GD1TRLVC",
+        "brand": "SKELUOZIEU",
+        "item_name": "2 Guanti magnetici in Pelliccia per Cani e Gatti per Animali Domestici con Forte Forza elettrostatica, per la rimozione dei peli di Animali Domestici, per la Pulizia dei tappeti e dei divani"
+      },
+      {
+        "asin": "B0DXZXCRYT",
+        "brand": "Mmyzao",
+        "item_name": "Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto"
+      },
+      {
+        "asin": "B07X9M1XC6",
+        "brand": "Glart",
+        "item_name": "Glart 44THB Spazzola in Silicone per peli di Cani e Gatti"
+      },
+      {
+        "asin": "B0819XVK92",
+        "brand": "ACE2ACE",
+        "item_name": "ACE2ACE Spazzola Togli Peli Animali, Spazzola Leva Peli Cane Gatto Animali"
+      }
+    ],
+    "rimuovi peli auto": [
+      {
+        "asin": "B0CM3YDLQN",
+        "brand": "SONAX",
+        "item_name": "SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000"
+      },
+      {
+        "asin": "B0DFSVMB85",
+        "brand": "Vintree",
+        "item_name": "Vintree 2 in 1 Togli Pelucchi a Doppia Faccia Togli peli Animali Spazzola Peli Gatto e Cane Portatile per Moquette Tappetino per Auto Divano Letto per Animali Domestici Mobili-Verde"
+      },
+      {
+        "asin": "B0CXVCMCJK",
+        "brand": "FURCOBRA",
+        "item_name": "FURCOBRA PRO Pet Hair Remover – Raschietto Facile da impugnare, Strumento per la rimozione dei peli di Animali Domestici, Strumento di rimozione dei peli di Gatti e Cani per Divano, Auto, Divano,"
+      },
+      {
+        "asin": "B07X9M1XC6",
+        "brand": "Glart",
+        "item_name": "Glart 44THB Spazzola in Silicone per peli di Cani e Gatti"
+      },
+      {
+        "asin": "B0DXZXCRYT",
+        "brand": "Mmyzao",
+        "item_name": "Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto"
+      }
+    ]
+  },
+  "competitors_md": "\n## Concorrenti sui termini reali di questo prodotto (Amazon Catalog, ricerca per keyword)\n\nCome chiamano il prodotto gli altri venditori che compaiono cercando questi termini reali di QUESTO ASIN/famiglia (acquisti confermati e/o query di mercato ad alto volume — mai termini generici dell'intero account). Usali per due cose: capire il linguaggio in uso nella categoria, e individuare termini descrittivi (materiale, stile, sinonimi) che i concorrenti usano nei loro titoli e che potrebbero valere anche per questo prodotto. Aggiungili SOLO se la foto e il brief di QUESTO prodotto li confermano davvero: non promettere mai una caratteristica vista solo nel titolo di un concorrente.\n\n**\"spazzola peli cane auto\":**\n- SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000 — SONAX\n- Glart 44THB Spazzola in Silicone per peli di Cani e Gatti — Glart\n- EAVUYIS 2 Pezzi Spazzola per la rimozione dei peli di Animali Domestici per Moquette, Divano, Auto, Pettine per la rimozione dei peli di Cani, Spazzola in Gomma per peli di Animali Domestici — EAVUYIS\n- ACE2ACE Spazzola Togli Peli Animali, Spazzola Leva Peli Cane Gatto Animali — ACE2ACE\n- Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto — Mmyzao\n\n**\"spazzola per peli cane auto\":**\n- SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000 — SONAX\n- Glart 44THB Spazzola in Silicone per peli di Cani e Gatti — Glart\n- Vintree 2 in 1 Togli Pelucchi a Doppia Faccia Togli peli Animali Spazzola Peli Gatto e Cane Portatile per Moquette Tappetino per Auto Divano Letto per Animali Domestici Mobili-Verde — Vintree\n- EAVUYIS 2 Pezzi Spazzola per la rimozione dei peli di Animali Domestici per Moquette, Divano, Auto, Pettine per la rimozione dei peli di Cani, Spazzola in Gomma per peli di Animali Domestici — EAVUYIS\n- Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto — Mmyzao\n\n**\"rimuovi peli animali auto\":**\n- SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000 — SONAX\n- FURCOBRA PRO Pet Hair Remover – Raschietto Facile da impugnare, Strumento per la rimozione dei peli di Animali Domestici, Strumento di rimozione dei peli di Gatti e Cani per Divano, Auto, Divano, — FURCOBRA\n- Glart 44THB Spazzola in Silicone per peli di Cani e Gatti — Glart\n- Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto — Mmyzao\n- 2 Guanti magnetici in Pelliccia per Cani e Gatti per Animali Domestici con Forte Forza elettrostatica, per la rimozione dei peli di Animali Domestici, per la Pulizia dei tappeti e dei divani — SKELUOZIEU\n\n**\"spazzola gomma per cani pelo corto\":**\n- Ferplast Spazzola Guanto per Cani e Gatti - Pelo Corto - in Gomma Morbida - Ideale Durante o Dopo il Bagno - Impugnatura Ergonomica Morbida - Nero — Ferplast\n- BluePet Spazzola Curry Gomma, Cani Gatti Pelo Corto, Spazzola Bagno Morbido — BluePet\n- Animalon CareFlex Pettine per Cani a Pelo Corto | Aiuto per il Cambio del Pelo | Spazzola Innovativa per Cura Delicata (Piccolo, Blu) — Animalon\n- Trixie Massaggio Gomma Massaggio, 9 x 13 cm — TRIXIE\n\n**\"togli peli macchina\":**\n- SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000 — SONAX\n- EAVUYIS 2 Pezzi Spazzola per la rimozione dei peli di Animali Domestici per Moquette, Divano, Auto, Pettine per la rimozione dei peli di Cani, Spazzola in Gomma per peli di Animali Domestici — EAVUYIS\n- Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto — Mmyzao\n- FURCOBRA PRO Pet Hair Remover – Raschietto Facile da impugnare, Strumento per la rimozione dei peli di Animali Domestici, Strumento di rimozione dei peli di Gatti e Cani per Divano, Auto, Divano, — FURCOBRA\n- LINTPLUS spazzola togli peli animali, spazzola peli gatto e spazzola peli cane per Tappeti, Lettini per cani e Alberi tiragraffi per gatti, facile da pulire — LINTPLUS\n\n**\"pet hair remover\":**\n- ACE2ACE Spazzola Togli Peli Animali, Spazzola Leva Peli Cane Gatto Animali — ACE2ACE\n- 2 Guanti magnetici in Pelliccia per Cani e Gatti per Animali Domestici con Forte Forza elettrostatica, per la rimozione dei peli di Animali Domestici, per la Pulizia dei tappeti e dei divani — SKELUOZIEU\n- LINTPLUS spazzola togli peli animali, spazzola peli gatto e spazzola peli cane per Tappeti, Lettini per cani e Alberi tiragraffi per gatti, facile da pulire — LINTPLUS\n- 2 Guanto Peli Gatto, Guanto Peli Cane, Spazzola Gatto per Tappeti Divani — Kunoli\n- 2 Guanti Peli Gatto e Cane, Guanto Leva Peli Animali con Effetto Elettrostatico, Lavabile e Riutilizzabile, per Vestiti, Divano, Coperte, Cucce e Tessuti — ZenithyrEn\n\n**\"spazzola per sottopelo cane\":**\n- BluePet Spazzola per Cani & Gatto, Pettine Pelo Lungo, Cardatore Sottopelo — BluePet\n- Candure Spazzola per Cani, Pettine Gatti per Pelo Acciaio Inossidabile 17+9 Doppia Faccia Strumento di Deshedding Animali per Cane Pelo Lungo, Medio e Corto (Blu) — CANDURE\n- Soodyoow Spazzola per Cani e Gatti, Pettine Doppia Faccia 17+9 in Acciaio Inossidabile, Strumento per Rimuovere Peli Morti e Nodi per Animali a Pelo Lungo Medio Corto — soodyoow\n- Mesybveo Spazzola Per Cani e Gatto Pelo Lungo, Spazzola Nodi Cani 17+9 Doppia Faccia, Pettine Rastrello per Cani Rimuove Sottopelo, Manico Antiscivolo con Foro per Appendere, per Gatti, Cani — Mesybveo\n- PetPog Slanatore per Gatti e Cani, Pelo Corto e Medio, Nero — PetPog\n\n**\"rimuovi peli cane auto\":**\n- SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000 — SONAX\n- ACE2ACE Spazzola Togli Peli Animali, Spazzola Leva Peli Cane Gatto Animali — ACE2ACE\n- 2 Guanti magnetici in Pelliccia per Cani e Gatti per Animali Domestici con Forte Forza elettrostatica, per la rimozione dei peli di Animali Domestici, per la Pulizia dei tappeti e dei divani — SKELUOZIEU\n- FURCOBRA PRO Pet Hair Remover – Raschietto Facile da impugnare, Strumento per la rimozione dei peli di Animali Domestici, Strumento di rimozione dei peli di Gatti e Cani per Divano, Auto, Divano, — FURCOBRA\n- Glart 44THB Spazzola in Silicone per peli di Cani e Gatti — Glart\n\n**\"togliere peli cane auto\":**\n- SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000 — SONAX\n- 2 Guanti magnetici in Pelliccia per Cani e Gatti per Animali Domestici con Forte Forza elettrostatica, per la rimozione dei peli di Animali Domestici, per la Pulizia dei tappeti e dei divani — SKELUOZIEU\n- Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto — Mmyzao\n- Glart 44THB Spazzola in Silicone per peli di Cani e Gatti — Glart\n- ACE2ACE Spazzola Togli Peli Animali, Spazzola Leva Peli Cane Gatto Animali — ACE2ACE\n\n**\"rimuovi peli auto\":**\n- SONAX Spazzola ergonomica rimozione peli animali (1 pezzo) elimina peli facilmente da sedili tappezzeria e tappeti | Art. N. 04978000 — SONAX\n- Vintree 2 in 1 Togli Pelucchi a Doppia Faccia Togli peli Animali Spazzola Peli Gatto e Cane Portatile per Moquette Tappetino per Auto Divano Letto per Animali Domestici Mobili-Verde — Vintree\n- FURCOBRA PRO Pet Hair Remover – Raschietto Facile da impugnare, Strumento per la rimozione dei peli di Animali Domestici, Strumento di rimozione dei peli di Gatti e Cani per Divano, Auto, Divano, — FURCOBRA\n- Glart 44THB Spazzola in Silicone per peli di Cani e Gatti — Glart\n- Mmyzao Togli Peli Animali,Levapelucchi Manuale,3 pezzi Spazzola per Gatti Cani,Leva Peli Gatto,Rimuovi Peli Cani,per Vestiti,Divano,Auto,Letto,Tappeto — Mmyzao\n\n"
+}
