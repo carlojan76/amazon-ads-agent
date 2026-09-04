@@ -44,7 +44,7 @@ Lupo & Felix — selezionato e testato dai nostri gatti prima che arrivi dal tuo
 
 - Brand: Lupo & Felix
 - Variante: colore=Legno chiaro, taglia=54 cm x 44 cm x 28 cm
-- Rank: #6698 in Prodotti per animali domestici
+- Rank: #6840 in Prodotti per animali domestici
 - Immagini (21):
     - MAIN: https://m.media-amazon.com/images/I/41IsTJiijSL.jpg
     - MAIN: https://m.media-amazon.com/images/I/41IsTJiijSL._SL75_.jpg
@@ -125,6 +125,32 @@ _Dati al 2026-09-03._
 Usa i termini della prima lista con le parole esatte dei clienti. Per la seconda: se l'intenzione e' pertinente al prodotto, chiariscila nella copy; se non lo e', non forzarla nel testo.
 
 
+## Volume di ricerca reale (Search Query Performance, non stima)
+
+Quanto i clienti cercano davvero ogni query su IT e la quota che QUESTO ASIN ne cattura (impression/click/carrello/acquisti), periodo 2026-08-16 -> 2026-08-22. A differenza dei 'Termini che convertono' sopra (solo dati delle TUE campagne ads), qui il volume e' di mercato: mostra anche query che i clienti cercano ma su cui non hai mai fatto pubblicita'. Rank 1 = query piu' rilevante per il TUO catalogo brand secondo Amazon.
+
+| Query | Volume ricerca | Rank | Quota impression | Quota click | Quota acquisti |
+|---|---:|---:|---:|---:|---:|
+| tiragraffi per gatti adulti | 8069 | 2 | 0.12% | 0.30% | 0.00% |
+| cuccia gatto | 6701 | 58 | 0.04% | 0.00% | 0.00% |
+| gatto | 3539 | 85 | 0.01% | 0.13% | 0.00% |
+| cuccia per gatti | 2129 | 56 | 0.12% | 0.00% | 0.00% |
+| tiragraffi gatto | 1686 | 68 | 0.12% | 0.00% | 0.00% |
+| amaca per gatti | 1158 | 1 | 2.51% | 3.85% | 0.00% |
+| gatti accessori | 1105 | 4 | 0.57% | 0.93% | 8.33% |
+| amaca gatto | 702 | 3 | 2.42% | 4.23% | 0.00% |
+| tiragraffi legno | 562 | 22 | 0.09% | 0.45% | 0.00% |
+| letto per gatti | 540 | 53 | 0.60% | 0.00% | 0.00% |
+| accessori gatti | 526 | 37 | 1.29% | 0.82% | 0.00% |
+| accessori per gatti | 419 | 39 | 0.66% | 3.51% | 0.00% |
+| lettino per gatti | 336 | 18 | 1.99% | 3.25% | 0.00% |
+| lettino gatto | 304 | 7 | 2.60% | 8.13% | 0.00% |
+| tiragraffi per gatti legno | 284 | 42 | 0.21% | 2.38% | 0.00% |
+
+Queste query NON sono confermate come acquirenti di QUESTO prodotto (a differenza di 'Termini che convertono'): usale per capire cosa cerca il mercato, non come sostituto dei termini con acquisti reali gia' verificati.
+
+
+
 ## Concorrenti sui termini che convertono (Amazon Catalog, ricerca per keyword)
 
 Come chiamano il prodotto gli altri venditori che compaiono cercando QUESTI termini reali (quelli su cui questo ASIN ha gia' generato acquisti). Serve solo a capire il linguaggio in uso nella categoria, non da copiare: non promettere caratteristiche che la foto e la scheda di QUESTO prodotto non confermano.
@@ -142,30 +168,30 @@ Come chiamano il prodotto gli altri venditori che compaiono cercando QUESTI term
 - Dranng Sedia Sdraio Per Gatti,Sedia A Dondolo Per Gatto,sdraio tiragraffi per gatti Sedia Amaca Per Gatto Da Sedia Poltrona Lounge Cat Sisal Rimovibile Per gatti di piccola e media taglia Indoor — Dranng
 
 **"sedia per gatti":**
+- Gimars Tiragraffi per Gatti a Forma di Sedia, Gratta-Gatto in Cartone, Tappetino e Tavola Interattiva con Palline e Tunnel, Protezione Mobili per Gatti da Interno, 42.5 × 29.5 × 63 cm — Gimars
 - Kerbl Pet sdraio Sundowner, marrone, 52x37x37 cm, cuccia per gatti, sdraio per gatti, legno, gatti — Kerbl Pet
-- Gimars Tiragraffi per Gatti a Forma di Sedia, Gratta-Gatto in Cartone, Tappetino e Tavola Interattiva con Palline e Tunnel, Protezione Mobili per Gatti da Interno, 42.5 × 29.5 × 63 cm — Gimars
-- Gimars Tiragraffi per Gatti a Forma di Sedia, Gratta-Gatto in Cartone, Tappetino e Tavola Interattiva con Palline e Tunnel, Protezione Mobili per Gatti da Interno, 42.5 × 29.5 × 63 cm — Gimars
 - Tiragraffi per Gatti S/M - Supporto Compatto, Alta Durabilità, Design Elegante, Facile da Montare, Ideale per Gatti di Taglia Piccola e Media — IRYBÙ
-- DEPAR Amaca per finestre per gatti fino a 25 kg, amaca interna per gatti di grandi dimensioni, sedile rinforzato vicino alla finestra con forte ventosa, 54 × 30 cm, sedia a sdraio sul davanzale della — DEPAR
+- Gimars Tiragraffi per Gatti a Forma di Sedia, Gratta-Gatto in Cartone, Tappetino e Tavola Interattiva con Palline e Tunnel, Protezione Mobili per Gatti da Interno, 42.5 × 29.5 × 63 cm — Gimars
+- Sedia Sdraio Per Gatti In Sisal, Sedia Da Salotto Tiragraffi Per Gatti, A Dondolo Per Gatto, Divano Graffiante Per Gatto, Amaca Per In Sisal, Letto A Graffio Per Gattini — Befeixue
 
 **"tiragraffi":**
 - VOUNOT® Tiragraffi per Gatti, Albero Tiragraffi Gatto di Naturali Sisal con Cuccia Graffiatoio, 112cm, Beige — VOUNOT
 - lionto Tiragraffi con Grotta e Colonne, 4 Livelli, 112 cm, Grigio — lionto
-- VOUNOT® Tiragraffi per Gatti, Albero Tiragraffi Gatto di Naturali Sisal con Cuccia Graffiatoio, 112cm, Grigio — VOUNOT
 - Amazon Basics Tiragraffi per gatti da interno, standard, con giocattolo pendente, 80 cm, grigio — Amazon Basics
+- Beltom® TIRAGRAFFI PER GATTO ALTO 112 CM PARCO GIOCO GIOCHI GRAFFIATOIO SISAL CUCCIA ALBERO GATTI TIRA GRAFFI PALESTRA - Grigio — Beltom
 - Tiragraffi per Gatti,145cm Alberi tiragraffi gatto stabile multilivello — HOMIDEC
 
 **"amaca gatto esterno":**
 - Cuccia Rialzata per Gatti, Amaca per Portatile, Cuccia per Gatto e Cucciolo da Interno e Esterno, Accessorio d'Arredo, Lettino per Gatti per Giardino, Patio, Terrazza — Generico
 - Eventerde Cuccia a dondolo per gatti, amaca boho macramè, altalena per gatti con ganci e rimovibile per giardino, terrazza, balcone, soggiorno — Eventerde
-- Cuccia Rialzata per Gatti, Amaca per Portatile, Cuccia per Gatto e Cucciolo da Interno e Esterno, Accessorio d'Arredo, Lettino per Gatti per Giardino, Patio, Terrazza — Generico
 - Kerbl Pet Amaca Siesta 2.0, Cuccia per gatti, Tappetino per gatti, marrone, 61x37x29cm, Legno, Lino, Gatti, Con impugnature antiscivolo — Kerbl Pet
+- Cuccia Rialzata per Gatti, Amaca per Portatile, Cuccia per Gatto e Cucciolo da Interno e Esterno, Accessorio d'Arredo, Lettino per Gatti per Giardino, Patio, Terrazza — Generico
 
 **"amaca gatto pavimento":**
 - GUUSII HOME Amaca Per Gatti Lettino Gatto Elevato Cuccia Rialzata per Gatti e Cani di Piccola Taglia Animali Pavimento Amaca Gatto Sdraio per Interni Esterni Divanetto Patti 64X40X19cm(Grigio) — GUUSII HOME
 - GUUSII HOME Amaca Per Gatti Lettino Gatto Elevato Cuccia Rialzata per Gatti e Cani di Piccola Taglia Animali Pavimento Amaca Gatto Sdraio per Interni Esterni Divanetto Patti 64X40X19 cm(Bianco) — GUUSII HOME
 - Amaca per gatti dal pavimento al soffitto — TQEW
 - Albero per gatti da pavimento a soffitto, altezza (127-305 cm) regolabile, torre per gatti a 5 livelli con tiragraffi in canapa, albero per gatti alto e robusto, albero attività per interni ed esterni — TQEW
-- FUKUMARU Torre Tiragraffi per Gatti da Parete, Altezza Regolabile (205-270cm),Tiragraffi da Arrampicata al Soffitto a 4 Livelli, Albero con Colonna Tiragraffi di Sisal, Mensola e Amaca per Gatti — FUKUMARU
+- Pecute 2-in-1 Amaca per Gatti, Mensola a muro per gatti in Sisal Resistente — Pecute
 
 
