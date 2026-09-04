@@ -1,4 +1,3 @@
-
 /**
  * Porting JS di python/check_quality.py, per mostrare l'esito del controllo
  * qualita' direttamente nella UI (ListingPanel) senza dover leggere i log del
@@ -170,3 +169,149 @@ export function checkContent(attrs, context) {
   return { problems, nError, nWarning };
 }
  
+// ------------------------------------------------------------- modalita' famiglia
+// Specchio di check_family_*()/check_quality.py --family: controlla la copy
+// CONDIVISA di una famiglia (shared.bullet_point, shared.product_description),
+// non un content JSON singolo. Il titolo per-child (dal title_template) NON si
+// controlla qui: dipende da colore/taglia di ogni child, noti solo a runtime —
+// lo valida per davvero update_family.py (VALIDATION_PREVIEW) prima di ogni
+// --apply, lato server.
+ 
+function familyFullText(shared) {
+  const bp = Array.isArray(shared.bullet_point)
+    ? shared.bullet_point
+    : (typeof shared.bullet_point === "string" ? [shared.bullet_point] : []);
+  const parts = [...bp, shared.product_description || ""];
+  return parts.filter((p) => typeof p === "string").join(" \n ").toLowerCase();
+}
+ 
+function checkFamilySupportedKeys(shared) {
+  const bad = Object.keys(shared).filter((k) => !SUPPORTED_ATTRIBUTES.includes(k));
+  if (bad.length) {
+    return [{ severity: "ERROR", message: `chiavi non gestite in 'shared': ${bad.join(", ")} (gestite: ${SUPPORTED_ATTRIBUTES.join(", ")})` }];
+  }
+  return [];
+}
+ 
+function checkFamilyLengths(shared, maxLengths, hasTemplate) {
+  // Se c'e' un title_template, shared.item_name (se presente) non e' il testo
+  // che finisce sul listing (il titolo vero e' quello renderizzato dal
+  // template): non ha senso controllarne la lunghezza qui.
+  const checkable = {};
+  for (const [k, v] of Object.entries(shared)) {
+    if (k === "item_name" && hasTemplate) continue;
+    checkable[k] = v;
+  }
+  return checkLengths(checkable, maxLengths).map((p) => ({
+    ...p, message: p.message.replace("limite caratteri:", "limite caratteri (proxy dal parent):"),
+  }));
+}
+ 
+function checkFamilyConvertingTerms(shared, meta) {
+  const topTerms = meta.top_terms || [];
+  if (!topTerms.length) return [];
+  const scope = meta.scope;
+  const full = familyFullText(shared);
+  const problems = [];
+  for (const term of topTerms) {
+    if (!full.includes(term.toLowerCase())) {
+      problems.push({
+        severity: scope === "asin" ? "ERROR" : "WARNING",
+        message: `termine convertitore assente dal testo condiviso: '${term}' non compare ne' nei bullet ne' in descrizione`,
+      });
+    }
+  }
+  // Nessun controllo "primi due nel titolo": il titolo e' per-child, non condiviso.
+  return problems;
+}
+ 
+function checkFamilyAvoidTerms(shared, meta) {
+  const avoid = meta.avoid_terms || [];
+  if (!avoid.length) return [];
+  let full = familyFullText(shared);
+  const topTerms = [...(meta.top_terms || [])].sort((a, b) => b.length - a.length);
+  for (const t of topTerms) {
+    const tl = t.toLowerCase();
+    if (!tl) continue;
+    full = full.split(tl).join(" ".repeat(tl.length));
+  }
+  const problems = [];
+  for (const term of avoid) {
+    if (full.includes(term.toLowerCase())) {
+      problems.push({ severity: "WARNING", message: `termine che NON converte presente nel testo condiviso: '${term}' — verifica che sia davvero pertinente per tutta la famiglia` });
+    }
+  }
+  return problems;
+}
+ 
+function checkFamilySqpTerms(shared, meta) {
+  const terms = meta.purchase_confirmed_terms || [];
+  if (!terms.length) return [];
+  const full = familyFullText(shared);
+  const problems = [];
+  for (const t of terms) {
+    const query = (t.query || "").trim();
+    if (!query || full.includes(query.toLowerCase())) continue;
+    problems.push({
+      severity: "WARNING",
+      message: `query Search Query Performance con acquisti reali ma assente dal testo condiviso: '${query}' (${t.purchases} acquisti, volume ${t.volume} nel periodo) — opportunita' da valutare, non un obbligo`,
+    });
+  }
+  return problems;
+}
+ 
+function checkFamilyBrandSignature(shared) {
+  const desc = (shared.product_description || "").trim();
+  if (desc && !desc.slice(-120).toLowerCase().includes("lupo & felix")) {
+    return [{ severity: "WARNING", message: 'la descrizione condivisa non chiude con la firma del brand ("Lupo & Felix")' }];
+  }
+  return [];
+}
+ 
+/**
+ * Controlla la copy condivisa di una famiglia (shared + title_template)
+ * contro il context pack del parent. Ritorna { problems, nError, nWarning }.
+ * Specchio di check_family_one()/check_quality.py --family.
+ */
+export function checkFamily(family, context) {
+  const shared = (family && typeof family.shared === "object" && family.shared) || {};
+  const hasTemplate = !!family?.title_template;
+ 
+  if (!Object.keys(shared).length && !hasTemplate && !family?.overrides) {
+    return {
+      problems: [{ severity: "ERROR", message: "niente da controllare: mancano 'shared', 'title_template' e 'overrides'" }],
+      nError: 1, nWarning: 0,
+    };
+  }
+ 
+  const maxLengths = context?.max_lengths || {};
+  const meta = context?.search_terms_meta || {};
+  const sqpMeta = context?.sqp_meta || {};
+ 
+  let problems = [...checkFamilySupportedKeys(shared), ...checkFamilyLengths(shared, maxLengths, hasTemplate)];
+ 
+  if (meta.available) {
+    problems = problems.concat(checkFamilyConvertingTerms(shared, meta));
+    if ("avoid_terms" in meta) {
+      problems = problems.concat(checkFamilyAvoidTerms(shared, meta));
+    }
+  } else if (context) {
+    problems.push({ severity: "INFO", message: `nessun dato search term nel context pack del parent (${meta.reason || "motivo non specificato"})` });
+  }
+ 
+  if (sqpMeta.available) {
+    problems = problems.concat(checkFamilySqpTerms(shared, sqpMeta));
+  } else if (context) {
+    problems.push({ severity: "INFO", message: `nessun dato Search Query Performance nel context pack del parent (${sqpMeta.reason || "motivo non specificato"})` });
+  }
+ 
+  problems = problems.concat(checkFamilyBrandSignature(shared));
+ 
+  if (hasTemplate) {
+    problems.push({ severity: "INFO", message: "title_template presente: il titolo per-child NON e' controllato qui, lo valida update_family.py (VALIDATION_PREVIEW) prima di ogni --apply" });
+  }
+ 
+  const nError = problems.filter((p) => p.severity === "ERROR").length;
+  const nWarning = problems.filter((p) => p.severity === "WARNING").length;
+  return { problems, nError, nWarning };
+}
