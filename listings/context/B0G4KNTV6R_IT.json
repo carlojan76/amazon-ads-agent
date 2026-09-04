@@ -178,67 +178,328 @@
       }
     ],
     "sales_ranks": [
-      "#12964 in Prodotti per animali domestici"
+      "#12969 in Prodotti per animali domestici"
     ]
   },
-  "aplus": null,
+  "aplus": {
+    "name": "",
+    "locale": "it_IT",
+    "texts": []
+  },
   "reviews": null,
-  "search_terms_md": "\n## Termini che convertono (report search term Amazon Ads)\n\n⚠️ Questo ASIN non ha ancora dati ads propri: i termini sotto sono dell'intero account su IT e valgono solo come contesto di brand, NON come performance di questo prodotto.\n\n_Dati al 2026-09-03._\n\n**Hanno generato acquisti — devono comparire nel titolo o nei primi bullet:**\n\n| Termine | Click | Acquisti | CVR | CPC | ACoS |\n|---|---:|---:|---:|---:|---:|\n| tiragraffi divano | 47 | 4 | 9% | 0.39 € | 37% |\n| tappetino tiragraffi per gatti | 10 | 3 | 30% | 0.42 € | 12% |\n| protezione divano graffi gatto | 30 | 2 | 7% | 0.37 € | 49% |\n| sdraietta per gatti | 18 | 2 | 11% | 0.34 € | 16% |\n| tiragraffi per divano | 22 | 1 | 5% | 0.39 € | 105% |\n| tiragraffi adesivo | 19 | 1 | 5% | 0.37 € | 62% |\n| tappeto tiragraffi per gatti adesivo | 18 | 1 | 6% | 0.39 € | 85% |\n| sdraio gatto | 18 | 1 | 6% | 0.33 € | 23% |\n| tappeto tiragraffi per gatti | 16 | 1 | 6% | 0.35 € | 69% |\n| antigraffio gatto divano | 12 | 1 | 8% | 0.39 € | 44% |\n| sedia per gatti | 9 | 1 | 11% | 0.34 € | 12% |\n| tappeto tiragraffi | 7 | 1 | 14% | 0.39 € | 33% |\n| tiragraffi | 5 | 1 | 20% | 0.40 € | 8% |\n| spazzola peli cane auto | 3 | 1 | 33% | 0.25 € | 7% |\n| anti graffio gatti divano | 2 | 1 | 50% | 0.40 € | 2% |\n| antigraffio gatto | 2 | 1 | 50% | 0.33 € | 8% |\n| spazzola per peli cane auto | 1 | 1 | 100% | 0.32 € | 3% |\n| rimuovi peli animali auto | 1 | 1 | 100% | 0.39 € | 3% |\n| amaca gatto esterno | 1 | 1 | 100% | 0.35 € | 1% |\n| amaca gatto pavimento | 1 | 1 | 100% | 0.22 € | 1% |\n\n**Traffico che NON converte — la copy non risponde a questa intenzione, o il prodotto non e' pertinente:**\n\n- tiragraffi adesivo per divano — 18 click, 7.17 € spesi, 0 acquisti\n- tiragraffi per gatti — 21 click, 6.85 € spesi, 0 acquisti\n- amaca per gatti — 20 click, 6.56 € spesi, 0 acquisti\n- b0dg2xt2fr — 11 click, 4.35 € spesi, 0 acquisti\n- divano gatto — 12 click, 4.33 € spesi, 0 acquisti\n- divano per gatti — 13 click, 4.25 € spesi, 0 acquisti\n- tiragraffi gatto con amaca — 8 click, 2.78 € spesi, 0 acquisti\n- poltrona per gatti — 10 click, 2.73 € spesi, 0 acquisti\n- tiragraffi divano per gatti — 7 click, 2.67 € spesi, 0 acquisti\n- cuccia sospesa per gatti — 5 click, 2.39 € spesi, 0 acquisti\n- tiragraffi per gatti adulti — 5 click, 2.16 € spesi, 0 acquisti\n- letto per gatti — 6 click, 1.95 € spesi, 0 acquisti\n- tiragraffi per divano per gatti — 5 click, 1.88 € spesi, 0 acquisti\n- amaca gatto finestra — 5 click, 1.56 € spesi, 0 acquisti\n- amaca gatto — 5 click, 1.55 € spesi, 0 acquisti\n- amaca da muro per gatti — 3 click, 1.52 € spesi, 0 acquisti\n- proteggi divano gatti graffi — 4 click, 1.35 € spesi, 0 acquisti\n- amaca da parete per gatti — 3 click, 1.09 € spesi, 0 acquisti\n- sdraio per gatti — 4 click, 1.08 € spesi, 0 acquisti\n- tiragraffi proteggi divano — 3 click, 1.08 € spesi, 0 acquisti\n\nUsa i termini della prima lista con le parole esatte dei clienti. Per la seconda: se l'intenzione e' pertinente al prodotto, chiariscila nella copy; se non lo e', non forzarla nel testo.\n",
+  "search_terms_md": "",
   "search_terms_meta": {
+    "available": false,
+    "reason": "il parent non ha una campagna propria: i termini dell'intero account mescolerebbero prodotti di categorie diverse, quindi non sono stati inclusi (si prova l'aggregato dai child sotto)"
+  },
+  "sqp_md": "\n## Volume di ricerca reale (Search Query Performance, aggregato sui child)\n\nCome sopra, ma sommato su tutti i child della famiglia con dati propri (B0G4KMGDJ9, B0G4KKC9QF): il parent quasi mai ha righe sue. Periodo 2026-08-16 -> 2026-08-22.\n\n| Query | Volume ricerca | Acquisti famiglia (periodo) |\n|---|---:|---:|\n| cuccia cane interno | 10238 | 0 |\n| cuccia gatto | 6701 | 0 |\n| cuccia per gatti | 2129 | 0 |\n| cuccia gatto interno | 957 | 0 |\n| casetta per gatti | 912 | 0 |\n| cuccia gatti | 573 | 0 |\n| letto per gatti | 540 | 0 |\n| cuccetta per gatti | 429 | 0 |\n| cuccia gatto harry potter | 332 | 0 |\n| cuccia gatto chiusa | 330 | 0 |\n| cuccia cane chiusa | 237 | 0 |\n| cuccia igloo cane | 205 | 0 |\n| cuccia chiusa cane interno | 204 | 0 |\n| casa gatto | 115 | 0 |\n| cucce chiuse per gatti | 96 | 0 |\n\nAcquisti sommati sui child: un acquisto su UN child, sulla stessa query, conta come segnale per l'intera famiglia (bullet/descrizione sono condivisi).\n\n",
+  "sqp_meta": {
     "available": true,
-    "scope": "marketplace",
-    "terms_total": 184,
-    "terms_converting": 23,
-    "top_terms": [
-      "tiragraffi divano",
-      "tappetino tiragraffi per gatti",
-      "protezione divano graffi gatto",
-      "sdraietta per gatti",
-      "tiragraffi per divano",
-      "tiragraffi adesivo",
-      "tappeto tiragraffi per gatti adesivo",
-      "sdraio gatto",
-      "tappeto tiragraffi per gatti",
-      "antigraffio gatto divano",
-      "sedia per gatti",
-      "tappeto tiragraffi",
-      "tiragraffi",
-      "spazzola peli cane auto",
-      "anti graffio gatti divano",
-      "antigraffio gatto",
-      "spazzola per peli cane auto",
-      "rimuovi peli animali auto",
-      "amaca gatto esterno",
-      "amaca gatto pavimento"
+    "scope": "family",
+    "contributing_asins": [
+      "B0G4KMGDJ9",
+      "B0G4KKC9QF"
     ],
-    "avoid_terms": [
-      "tiragraffi adesivo per divano",
-      "tiragraffi per gatti",
-      "amaca per gatti",
-      "b0dg2xt2fr",
-      "divano gatto",
-      "divano per gatti",
-      "tiragraffi gatto con amaca",
-      "poltrona per gatti",
-      "tiragraffi divano per gatti",
-      "cuccia sospesa per gatti",
-      "tiragraffi per gatti adulti",
+    "period": "WEEK",
+    "start": "2026-08-16",
+    "end": "2026-08-22",
+    "queries_total": 78,
+    "top_queries_by_volume": [
+      "cuccia cane interno",
+      "cuccia gatto",
+      "cuccia per gatti",
+      "cuccia gatto interno",
+      "casetta per gatti",
+      "cuccia gatti",
       "letto per gatti",
-      "tiragraffi per divano per gatti",
-      "amaca gatto finestra",
-      "amaca gatto",
-      "amaca da muro per gatti",
-      "proteggi divano gatti graffi",
-      "amaca da parete per gatti",
-      "sdraio per gatti",
-      "tiragraffi proteggi divano"
+      "cuccetta per gatti",
+      "cuccia gatto harry potter",
+      "cuccia gatto chiusa",
+      "cuccia cane chiusa",
+      "cuccia igloo cane",
+      "cuccia chiusa cane interno",
+      "casa gatto",
+      "cucce chiuse per gatti"
+    ],
+    "purchase_confirmed_terms": [
+      {
+        "query": "cuccia gatto chiusa lavabile",
+        "purchases": 1,
+        "volume": 19
+      }
     ]
   },
-  "sqp_md": "",
-  "sqp_meta": {
-    "available": false,
-    "reason": "nessuna riga Search Query Performance per questo ASIN (nessun dato Amazon per il periodo, o ASIN non incluso nel fetch)"
+  "competitors": {
+    "cuccia cane interno": [
+      {
+        "asin": "B0DPZZ831Q",
+        "brand": "EHEYCIGA",
+        "item_name": "EHEYCIGA Cuccia Cane Interno Taglia Grande, 106.5x76x18.5cm, Grigio Scuro"
+      },
+      {
+        "asin": "B0C3CNRNQD",
+        "brand": "Nobleza",
+        "item_name": "Nobleza Cuccia Cane Interno, 77x67cm Letto per Cani, Cuscino Morbida per Animali, Lavabile, Cuscino Cane Traspirante Grande/Media/Piccola"
+      },
+      {
+        "asin": "B0DCJKCTT7",
+        "brand": "WAVVE",
+        "item_name": "WAVVE Cuccia Cane Grande Ortopedica 112x81x7.6 cm, Cuscino per Cani interno indistruttibile XL, Letto per Cani Sfoderabile Lavabile Impermeabile, Materassino per Cani in Uovo Foam, Grigio"
+      },
+      {
+        "asin": "B0DPZWCJH1",
+        "brand": "EHEYCIGA",
+        "item_name": "EHEYCIGA Cuccia Cane Interno Taglia Grande, 91x68x17.5cm, Grigio Scuro"
+      },
+      {
+        "asin": "B0CF91VG8G",
+        "brand": "KSIIA",
+        "item_name": "KSIIA Cuccia Cane Interno Taglia Grande Media, Cuscino Cane, 88x55cm Grigio"
+      }
+    ],
+    "cuccia gatto": [
+      {
+        "asin": "B0FX9LLR7M",
+        "brand": "Solinorex",
+        "item_name": "Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero)"
+      },
+      {
+        "asin": "B0BF5DPMSY",
+        "brand": "Kerbl Pet",
+        "item_name": "Kerbl Pet casa per gatti Paola Eco, grigio-verde/marrone, 60x51x41 cm, cuccia per gatti, 100% plastica riciclata, cani, gatti"
+      },
+      {
+        "asin": "B099DY94SQ",
+        "brand": "Yaheetech",
+        "item_name": "Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro"
+      },
+      {
+        "asin": "B0DLW2RL4K",
+        "brand": "VOUNOT",
+        "item_name": "VOUNOT® Casetta per Gatti in Legno con Porta Design Orecchie di Gatto, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57 x 45 x 43 cm, Grigio"
+      },
+      {
+        "asin": "B07233P1W2",
+        "brand": "Amazon Basics",
+        "item_name": "Amazon Basics Cuscino Rotondo per Cani o Gatti con Bordo Rialzato e Superficie in Flanella, 50 x 50,8 x 15,2 cm, Marrone e Avorio"
+      }
+    ],
+    "cuccia per gatti": [
+      {
+        "asin": "B0FX9LLR7M",
+        "brand": "Solinorex",
+        "item_name": "Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero)"
+      },
+      {
+        "asin": "B0BF5DPMSY",
+        "brand": "Kerbl Pet",
+        "item_name": "Kerbl Pet casa per gatti Paola Eco, grigio-verde/marrone, 60x51x41 cm, cuccia per gatti, 100% plastica riciclata, cani, gatti"
+      },
+      {
+        "asin": "B0BX3PP118",
+        "brand": "VOUNOT",
+        "item_name": "VOUNOT® Casetta per Gatti in Legno con Finestra in Plexiglas, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57x45x43cm"
+      },
+      {
+        "asin": "B0FQT47BG7",
+        "brand": "Feandrea",
+        "item_name": "Feandrea Albero per Gatti Piccolo, Torre Tiragraffi per Gatti con Casetta, Rampa Graffiatoio Grande, Cuccia Superiore, Grotta, Alto 44,6 cm, Grigio Tortora PCT010GD01"
+      },
+      {
+        "asin": "B018IZA274",
+        "brand": "Ferplast",
+        "item_name": "Ferplast Cuccia per cani e gatti molto piccoli Cuscino per cani di piccole dimensioni - Materassino per cuccioli Tappetino per cucce e auto Relax, 43 x 30 CM, Marrone e Bianco"
+      }
+    ],
+    "cuccia gatto interno": [
+      {
+        "asin": "B0FX9LLR7M",
+        "brand": "Solinorex",
+        "item_name": "Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero)"
+      },
+      {
+        "asin": "B09VPHJP86",
+        "brand": "Bedsure",
+        "item_name": "Bedsure Letto per Cani Piccoli Lavabile - Letti Grandi per Gatti da Interno e Cuccioli, Letto Rotondo per Cani di Media Taglia con Fondo Antiscivolo, grigio, 51 x 48 x 15cm"
+      },
+      {
+        "asin": "B099DY94SQ",
+        "brand": "Yaheetech",
+        "item_name": "Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro"
+      },
+      {
+        "asin": "B0CR422G8S",
+        "brand": "Mobiclinic",
+        "item_name": "Mobiclinic® pets, Letto per gatti, Cova nido, Hellocatty, Morbido, Lavabile in lavatrice, Facile da piegare e riporre, Antiscivolo, Cuscino confortevole rimovibile, Spugna 25d, Design moderno"
+      },
+      {
+        "asin": "B0D5YWH1SX",
+        "brand": "Ferplast",
+        "item_name": "Ferplast Cuccia Cane Relax, Cuscino per cani di piccole dimensioni, Cuccia Gatto, Tappetino per cucce e auto -Lavabile - in Cotone con Soffice Imbottitura, 55 x 36 cm. Azzurro"
+      }
+    ],
+    "casetta per gatti": [
+      {
+        "asin": "B0BF5DPMSY",
+        "brand": "Kerbl Pet",
+        "item_name": "Kerbl Pet casa per gatti Paola Eco, grigio-verde/marrone, 60x51x41 cm, cuccia per gatti, 100% plastica riciclata, cani, gatti"
+      },
+      {
+        "asin": "B0BX3PP118",
+        "brand": "VOUNOT",
+        "item_name": "VOUNOT® Casetta per Gatti in Legno con Finestra in Plexiglas, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57x45x43cm"
+      },
+      {
+        "asin": "B0DLW2RL4K",
+        "brand": "VOUNOT",
+        "item_name": "VOUNOT® Casetta per Gatti in Legno con Porta Design Orecchie di Gatto, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57 x 45 x 43 cm, Grigio"
+      },
+      {
+        "asin": "B07F6DJR2S",
+        "brand": "Yaheetech",
+        "item_name": "Yaheetech Albero Tiragraffi per Gatti Adulti Alto 139 cm Grigio Scuro"
+      },
+      {
+        "asin": "B0FXVGCVCB",
+        "brand": "ARSBORUI",
+        "item_name": "Casetta per Gatti per Esterni, Cuccia Gatto Esterno Sollevata, Tend-a per Gatti da Esterni Impermeabile & Resistente al freddo,Cuccia per Animali Domestici Esterno In Autunno Inverno (Gray 43x36x36cm)"
+      }
+    ],
+    "cuccia gatti": [
+      {
+        "asin": "B0FX9LLR7M",
+        "brand": "Solinorex",
+        "item_name": "Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero)"
+      },
+      {
+        "asin": "B0DLW2RL4K",
+        "brand": "VOUNOT",
+        "item_name": "VOUNOT® Casetta per Gatti in Legno con Porta Design Orecchie di Gatto, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57 x 45 x 43 cm, Grigio"
+      },
+      {
+        "asin": "B0BF5DPMSY",
+        "brand": "Kerbl Pet",
+        "item_name": "Kerbl Pet casa per gatti Paola Eco, grigio-verde/marrone, 60x51x41 cm, cuccia per gatti, 100% plastica riciclata, cani, gatti"
+      },
+      {
+        "asin": "B099DY94SQ",
+        "brand": "Yaheetech",
+        "item_name": "Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro"
+      },
+      {
+        "asin": "B0BX3PP118",
+        "brand": "VOUNOT",
+        "item_name": "VOUNOT® Casetta per Gatti in Legno con Finestra in Plexiglas, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57x45x43cm"
+      }
+    ],
+    "letto per gatti": [
+      {
+        "asin": "B0FX9LLR7M",
+        "brand": "Solinorex",
+        "item_name": "Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero)"
+      },
+      {
+        "asin": "B0FQTR37WR",
+        "brand": "Feandrea",
+        "item_name": "Feandrea Albero per Gatti con 2 Letti Grandi, Tiragraffi con Pali e Rampa Graffiatoio, Alto 85,8 cm, Grigio Tortora PCT013GD01"
+      },
+      {
+        "asin": "B099DY94SQ",
+        "brand": "Yaheetech",
+        "item_name": "Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro"
+      },
+      {
+        "asin": "B09VPHJP86",
+        "brand": "Bedsure",
+        "item_name": "Bedsure Letto per Cani Piccoli Lavabile - Letti Grandi per Gatti da Interno e Cuccioli, Letto Rotondo per Cani di Media Taglia con Fondo Antiscivolo, grigio, 51 x 48 x 15cm"
+      },
+      {
+        "asin": "B07233P1W2",
+        "brand": "Amazon Basics",
+        "item_name": "Amazon Basics Cuscino Rotondo per Cani o Gatti con Bordo Rialzato e Superficie in Flanella, 50 x 50,8 x 15,2 cm, Marrone e Avorio"
+      }
+    ],
+    "cuccetta per gatti": [
+      {
+        "asin": "B0FX9LLR7M",
+        "brand": "Solinorex",
+        "item_name": "Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero)"
+      },
+      {
+        "asin": "B07233P1W2",
+        "brand": "Amazon Basics",
+        "item_name": "Amazon Basics Cuscino Rotondo per Cani o Gatti con Bordo Rialzato e Superficie in Flanella, 50 x 50,8 x 15,2 cm, Marrone e Avorio"
+      },
+      {
+        "asin": "B0D4VN51SZ",
+        "brand": "Xeihuul",
+        "item_name": "Xeihuul Cuccia per gatti – Letti per gatti per interni, cuccia semichiusa per animali domestici con giocattolo appeso e batuffolo di cotone, casa lavabile per animali di piccola taglia"
+      },
+      {
+        "asin": "B099DY94SQ",
+        "brand": "Yaheetech",
+        "item_name": "Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro"
+      },
+      {
+        "asin": "B0CR422G8S",
+        "brand": "Mobiclinic",
+        "item_name": "Mobiclinic® pets, Letto per gatti, Cova nido, Hellocatty, Morbido, Lavabile in lavatrice, Facile da piegare e riporre, Antiscivolo, Cuscino confortevole rimovibile, Spugna 25d, Design moderno"
+      }
+    ],
+    "cuccia gatto harry potter": [
+      {
+        "asin": "B0BMFJQ98G",
+        "brand": "Dilireba",
+        "item_name": "CucciaGatto, Cuscino per gatti, interna e chiusa, per gatti di piccola taglia e cani (marrone)"
+      },
+      {
+        "asin": "B0DQ7WKHGX",
+        "brand": "Amazon Basics",
+        "item_name": "Amazon Basics - Casetta per Gatti, Cuccia a Forma di Squalo per Gatti da Interno, Tenda per Gatti con Cuscino Imbottito Lavabile, Lettino per Gattini Vivaci, 43,2cm x 40,6cm x 35,6cm, Grigio"
+      },
+      {
+        "asin": "B0B9726CDG",
+        "brand": "Galatée",
+        "item_name": "Galatée Letto Grotta Per Gatti, Igloo In Peluche Caldo e Accogliente, Letto Per Cani Lavabile Con Cuscino Rimovibile, Migliora Il Sonno, Casetta Pieghevole (M, Grigio)"
+      },
+      {
+        "asin": "B0DD4GC8VS",
+        "brand": "CERDÁ LIFE'S LITTLE MOMENTS",
+        "item_name": "CERDÁ LIFE'S LITTLE MOMENTS Set per animali domestici Benvenuto Harry Potter 21.0 X 21.0 X 8.8 Cm, Colore non applicato (2800001632)"
+      },
+      {
+        "asin": "B0BN1K2Y2Q",
+        "brand": "Galatée",
+        "item_name": "Galatée Letto Rotondo Per Gatti e Cuccioli, Per Animali Domestici Caldo e Confortevole, Cuccia Rimovibile e Lavabile, Divano Da Esterno e Da Interno(Marrone)"
+      }
+    ],
+    "cuccia gatto chiusa": [
+      {
+        "asin": "B08QCYXPKV",
+        "brand": "WINDRACING",
+        "item_name": "Cuccia da interni per gatti, lettino a cupola stile tenda, con cuscino imbottito rimovibile e lavabile, autoriscaldante"
+      },
+      {
+        "asin": "B0CR422G8S",
+        "brand": "Mobiclinic",
+        "item_name": "Mobiclinic® pets, Letto per gatti, Cova nido, Hellocatty, Morbido, Lavabile in lavatrice, Facile da piegare e riporre, Antiscivolo, Cuscino confortevole rimovibile, Spugna 25d, Design moderno"
+      },
+      {
+        "asin": "B0CKX9CKD3",
+        "brand": "Voarge",
+        "item_name": "Voarge Letti per gatti morbidi e caldi, in morbido peluche, con cuscino interno rimovibile e lavabile, grigio, piccolo"
+      },
+      {
+        "asin": "B0D4YH6C2W",
+        "brand": "Whiwhi",
+        "item_name": "Whiwhi Cuccia per Gatti Interno Casa per Gatti con Cuscino Peluche 2 in 1 Letto per Gatti Grotta Casetta per Gatti Semichiusa 33x33x35cm"
+      },
+      {
+        "asin": "B0DQ81PV2G",
+        "brand": "Amazon Basics",
+        "item_name": "Amazon Basics - Casetta per Gatti a 2 Piani, Grotta per Gatti con Tappetino Tiragraffi e Pallina Morbida, Cucce Modulari a Cubo Pieghevoli per Gatti, 43,2cm x 35,6cm x 57,2cm, Grigio"
+      }
+    ]
   },
-  "competitors": {},
-  "competitors_md": ""
+  "competitors_md": "\n## Concorrenti sui termini reali di questo prodotto (Amazon Catalog, ricerca per keyword)\n\nCome chiamano il prodotto gli altri venditori che compaiono cercando questi termini reali di QUESTO ASIN/famiglia (acquisti confermati e/o query di mercato ad alto volume — mai termini generici dell'intero account). Usali per due cose: capire il linguaggio in uso nella categoria, e individuare termini descrittivi (materiale, stile, sinonimi) che i concorrenti usano nei loro titoli e che potrebbero valere anche per questo prodotto. Aggiungili SOLO se la foto e il brief di QUESTO prodotto li confermano davvero: non promettere mai una caratteristica vista solo nel titolo di un concorrente.\n\n**\"cuccia cane interno\":**\n- EHEYCIGA Cuccia Cane Interno Taglia Grande, 106.5x76x18.5cm, Grigio Scuro — EHEYCIGA\n- Nobleza Cuccia Cane Interno, 77x67cm Letto per Cani, Cuscino Morbida per Animali, Lavabile, Cuscino Cane Traspirante Grande/Media/Piccola — Nobleza\n- WAVVE Cuccia Cane Grande Ortopedica 112x81x7.6 cm, Cuscino per Cani interno indistruttibile XL, Letto per Cani Sfoderabile Lavabile Impermeabile, Materassino per Cani in Uovo Foam, Grigio — WAVVE\n- EHEYCIGA Cuccia Cane Interno Taglia Grande, 91x68x17.5cm, Grigio Scuro — EHEYCIGA\n- KSIIA Cuccia Cane Interno Taglia Grande Media, Cuscino Cane, 88x55cm Grigio — KSIIA\n\n**\"cuccia gatto\":**\n- Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero) — Solinorex\n- Kerbl Pet casa per gatti Paola Eco, grigio-verde/marrone, 60x51x41 cm, cuccia per gatti, 100% plastica riciclata, cani, gatti — Kerbl Pet\n- Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro — Yaheetech\n- VOUNOT® Casetta per Gatti in Legno con Porta Design Orecchie di Gatto, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57 x 45 x 43 cm, Grigio — VOUNOT\n- Amazon Basics Cuscino Rotondo per Cani o Gatti con Bordo Rialzato e Superficie in Flanella, 50 x 50,8 x 15,2 cm, Marrone e Avorio — Amazon Basics\n\n**\"cuccia per gatti\":**\n- Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero) — Solinorex\n- Kerbl Pet casa per gatti Paola Eco, grigio-verde/marrone, 60x51x41 cm, cuccia per gatti, 100% plastica riciclata, cani, gatti — Kerbl Pet\n- VOUNOT® Casetta per Gatti in Legno con Finestra in Plexiglas, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57x45x43cm — VOUNOT\n- Feandrea Albero per Gatti Piccolo, Torre Tiragraffi per Gatti con Casetta, Rampa Graffiatoio Grande, Cuccia Superiore, Grotta, Alto 44,6 cm, Grigio Tortora PCT010GD01 — Feandrea\n- Ferplast Cuccia per cani e gatti molto piccoli Cuscino per cani di piccole dimensioni - Materassino per cuccioli Tappetino per cucce e auto Relax, 43 x 30 CM, Marrone e Bianco — Ferplast\n\n**\"cuccia gatto interno\":**\n- Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero) — Solinorex\n- Bedsure Letto per Cani Piccoli Lavabile - Letti Grandi per Gatti da Interno e Cuccioli, Letto Rotondo per Cani di Media Taglia con Fondo Antiscivolo, grigio, 51 x 48 x 15cm — Bedsure\n- Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro — Yaheetech\n- Mobiclinic® pets, Letto per gatti, Cova nido, Hellocatty, Morbido, Lavabile in lavatrice, Facile da piegare e riporre, Antiscivolo, Cuscino confortevole rimovibile, Spugna 25d, Design moderno — Mobiclinic\n- Ferplast Cuccia Cane Relax, Cuscino per cani di piccole dimensioni, Cuccia Gatto, Tappetino per cucce e auto -Lavabile - in Cotone con Soffice Imbottitura, 55 x 36 cm. Azzurro — Ferplast\n\n**\"casetta per gatti\":**\n- Kerbl Pet casa per gatti Paola Eco, grigio-verde/marrone, 60x51x41 cm, cuccia per gatti, 100% plastica riciclata, cani, gatti — Kerbl Pet\n- VOUNOT® Casetta per Gatti in Legno con Finestra in Plexiglas, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57x45x43cm — VOUNOT\n- VOUNOT® Casetta per Gatti in Legno con Porta Design Orecchie di Gatto, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57 x 45 x 43 cm, Grigio — VOUNOT\n- Yaheetech Albero Tiragraffi per Gatti Adulti Alto 139 cm Grigio Scuro — Yaheetech\n- Casetta per Gatti per Esterni, Cuccia Gatto Esterno Sollevata, Tend-a per Gatti da Esterni Impermeabile & Resistente al freddo,Cuccia per Animali Domestici Esterno In Autunno Inverno (Gray 43x36x36cm) — ARSBORUI\n\n**\"cuccia gatti\":**\n- Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero) — Solinorex\n- VOUNOT® Casetta per Gatti in Legno con Porta Design Orecchie di Gatto, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57 x 45 x 43 cm, Grigio — VOUNOT\n- Kerbl Pet casa per gatti Paola Eco, grigio-verde/marrone, 60x51x41 cm, cuccia per gatti, 100% plastica riciclata, cani, gatti — Kerbl Pet\n- Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro — Yaheetech\n- VOUNOT® Casetta per Gatti in Legno con Finestra in Plexiglas, Cuccia da Esterno Casa per Gatti con Porta e Tetto 57x45x43cm — VOUNOT\n\n**\"letto per gatti\":**\n- Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero) — Solinorex\n- Feandrea Albero per Gatti con 2 Letti Grandi, Tiragraffi con Pali e Rampa Graffiatoio, Alto 85,8 cm, Grigio Tortora PCT013GD01 — Feandrea\n- Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro — Yaheetech\n- Bedsure Letto per Cani Piccoli Lavabile - Letti Grandi per Gatti da Interno e Cuccioli, Letto Rotondo per Cani di Media Taglia con Fondo Antiscivolo, grigio, 51 x 48 x 15cm — Bedsure\n- Amazon Basics Cuscino Rotondo per Cani o Gatti con Bordo Rialzato e Superficie in Flanella, 50 x 50,8 x 15,2 cm, Marrone e Avorio — Amazon Basics\n\n**\"cuccetta per gatti\":**\n- Solinorex Cuccia per Gatti Interno 2 in 1 Morbido Cuscino per Gatti - Cuccetta per Gatto Lavabile, 60 x 50 cm Letto Gatto丨 Cuccia Cane Piccolo per Piccoli Animali Domestici (Grigio, Modello Leggero) — Solinorex\n- Amazon Basics Cuscino Rotondo per Cani o Gatti con Bordo Rialzato e Superficie in Flanella, 50 x 50,8 x 15,2 cm, Marrone e Avorio — Amazon Basics\n- Xeihuul Cuccia per gatti – Letti per gatti per interni, cuccia semichiusa per animali domestici con giocattolo appeso e batuffolo di cotone, casa lavabile per animali di piccola taglia — Xeihuul\n- Yaheetech Tiragraffi Albero per Gatti con Posatoio Grande Graffiatoio per Gatti 40,5 x 40,5 x 59 cm Grigio Scuro — Yaheetech\n- Mobiclinic® pets, Letto per gatti, Cova nido, Hellocatty, Morbido, Lavabile in lavatrice, Facile da piegare e riporre, Antiscivolo, Cuscino confortevole rimovibile, Spugna 25d, Design moderno — Mobiclinic\n\n**\"cuccia gatto harry potter\":**\n- CucciaGatto, Cuscino per gatti, interna e chiusa, per gatti di piccola taglia e cani (marrone) — Dilireba\n- Amazon Basics - Casetta per Gatti, Cuccia a Forma di Squalo per Gatti da Interno, Tenda per Gatti con Cuscino Imbottito Lavabile, Lettino per Gattini Vivaci, 43,2cm x 40,6cm x 35,6cm, Grigio — Amazon Basics\n- Galatée Letto Grotta Per Gatti, Igloo In Peluche Caldo e Accogliente, Letto Per Cani Lavabile Con Cuscino Rimovibile, Migliora Il Sonno, Casetta Pieghevole (M, Grigio) — Galatée\n- CERDÁ LIFE'S LITTLE MOMENTS Set per animali domestici Benvenuto Harry Potter 21.0 X 21.0 X 8.8 Cm, Colore non applicato (2800001632) — CERDÁ LIFE'S LITTLE MOMENTS\n- Galatée Letto Rotondo Per Gatti e Cuccioli, Per Animali Domestici Caldo e Confortevole, Cuccia Rimovibile e Lavabile, Divano Da Esterno e Da Interno(Marrone) — Galatée\n\n**\"cuccia gatto chiusa\":**\n- Cuccia da interni per gatti, lettino a cupola stile tenda, con cuscino imbottito rimovibile e lavabile, autoriscaldante — WINDRACING\n- Mobiclinic® pets, Letto per gatti, Cova nido, Hellocatty, Morbido, Lavabile in lavatrice, Facile da piegare e riporre, Antiscivolo, Cuscino confortevole rimovibile, Spugna 25d, Design moderno — Mobiclinic\n- Voarge Letti per gatti morbidi e caldi, in morbido peluche, con cuscino interno rimovibile e lavabile, grigio, piccolo — Voarge\n- Whiwhi Cuccia per Gatti Interno Casa per Gatti con Cuscino Peluche 2 in 1 Letto per Gatti Grotta Casetta per Gatti Semichiusa 33x33x35cm — Whiwhi\n- Amazon Basics - Casetta per Gatti a 2 Piani, Grotta per Gatti con Tappetino Tiragraffi e Pallina Morbida, Cucce Modulari a Cubo Pieghevoli per Gatti, 43,2cm x 35,6cm x 57,2cm, Grigio — Amazon Basics\n\n"
 }
