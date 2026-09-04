@@ -345,7 +345,7 @@ def call_claude(prompt):
     resp = requests.post(
         "https://api.anthropic.com/v1/messages",
         headers={"Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01"},
-        json={"model": ANTHROPIC_MODEL, "max_tokens": 8000, "messages": [{"role": "user", "content": prompt}]},
+        json={"model": ANTHROPIC_MODEL, "max_tokens": int(os.environ.get("MAX_OUTPUT_TOKENS", "16000")), "messages": [{"role": "user", "content": prompt}]},
         timeout=120,
     )
     if resp.status_code != 200:

@@ -1,0 +1,102 @@
+name: Check Data Kiosk Access
+
+# SOLO una verifica di accesso al dataset Data Kiosk Search Query Performance
+# (python/check_data_kiosk_access.py) — non scrive nulla, non e' la pipeline
+# completa (punto 2 del roadmap keyword). Serve a sapere se questo account puo'
+# leggere il dataset PRIMA di scrivere query + polling + download + parsing.
+#
+# Si lancia dalla UI di GitHub: tab Actions -> Check Data Kiosk Access -> Run
+# workflow. Usa gli stessi secrets SP-API gia' configurati per gli altri
+# workflow di listing: nessun setup nuovo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      marketplace:
+        description: 'Marketplace'
+        type: choice
+        required: true
+        options: [IT, FR, DE, ES, UK]
+        default: IT
+      start:
+        description: 'Data inizio YYYY-MM-DD (default: 28 giorni fa)'
+        required: false
+        default: ''
+      end:
+        description: 'Data fine YYYY-MM-DD (default: oggi)'
+        required: false
+        default: ''
+      query_graphql:
+        description: >-
+          Query GraphQL alternativa, se quella di default nello script (nome
+          dataset presunto) risulta scaduta. Lascia vuoto per usare il default.
+        required: false
+        default: ''
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Install dependencies
+        run: pip install requests
+
+      - name: 🔎 Probe
+        env:
+          LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
+          LWA_CLIENT_SECRET: ${{ secrets.LWA_CLIENT_SECRET }}
+          LWA_REFRESH_TOKEN: ${{ secrets.LWA_REFRESH_TOKEN }}
+          SPAPI_ENDPOINT: https://sellingpartnerapi-eu.amazon.com
+          QUERY_GRAPHQL: ${{ github.event.inputs.query_graphql }}
+        run: |
+          set -euo pipefail
+          EXTRA=""
+          [ -n "${{ github.event.inputs.start }}" ] && EXTRA="$EXTRA --start ${{ github.event.inputs.start }}"
+          [ -n "${{ github.event.inputs.end }}" ] && EXTRA="$EXTRA --end ${{ github.event.inputs.end }}"
+          if [ -n "$QUERY_GRAPHQL" ]; then
+            printf '%s' "$QUERY_GRAPHQL" > query_input.graphql
+            EXTRA="$EXTRA --query-file query_input.graphql"
+          fi
+          # L'exit code (0 = accesso confermato, 1 = negato o incerto, 2 = errore
+          # di input) e' la risposta che ci interessa: non far fallire lo step
+          # e' quello che permette al Riepilogo qui sotto di girare comunque e
+          # mostrare la diagnosi anche quando l'accesso e' negato.
+          set +e
+          python python/check_data_kiosk_access.py \
+            --marketplace "${{ github.event.inputs.marketplace }}" $EXTRA 2>&1 | tee probe.log
+          echo "PROBE_EXIT=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+
+      - name: 📋 Riepilogo
+        if: always()
+        run: |
+          {
+            if [ "${PROBE_EXIT:-2}" = "0" ]; then
+              echo "## ✅ Accesso confermato al dataset Data Kiosk"
+            else
+              echo "## ⚠️ Accesso non confermato (vedi diagnosi sotto)"
+            fi
+            echo
+            echo '```'
+            cat probe.log 2>/dev/null || echo "(nessun output)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📦 Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-kiosk-probe-${{ github.event.inputs.marketplace }}-${{ github.run_number }}
+          path: |
+            probe.log
+            query_input.graphql
+          retention-days: 30
+          if-no-files-found: ignore

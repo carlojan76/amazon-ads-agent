@@ -18,6 +18,9 @@ export const GUARDRAILS = {
 };
 
 export const KW_MATCH = ["EXACT", "PHRASE", "BROAD"];
+
+// Un ASIN (B0 + 8 caratteri) non e' una parola di ricerca.
+export const ASIN_RE = /^b0[a-z0-9]{8}$/i;
 export const NEG_MATCH = ["NEGATIVE_EXACT", "NEGATIVE_PHRASE"];
 
 // Alias che i modelli inventano regolarmente -> enum reali dell'API v3.
@@ -148,6 +151,16 @@ export function validateAction(a) {
       needId("campaignId", "l'ID della campagna");
       if (!a.keywordText) errors.push("Manca il testo da escludere");
       if (!NEG_MATCH.includes(a.matchType)) errors.push("Match type non valido");
+      // Nelle campagne Auto i termini di ricerca possono essere ASIN. Escluderli
+      // come negative KEYWORD non ha effetto: servirebbe un negative product
+      // target. L'API accetta l'azione, ma non blocca nulla.
+      if (ASIN_RE.test((a.keywordText || "").trim())) {
+        warnings.push(
+          `"${a.keywordText}" è un ASIN, non una parola di ricerca. Come negative keyword `
+          + `non blocca niente: per escludere un prodotto serve un negative product target, `
+          + `da impostare a mano in Seller Central.`
+        );
+      }
       break;
     case "update_budget":
       needId("campaignId", "l'ID della campagna");
@@ -234,6 +247,32 @@ export function estimatedSaving(a) {
     return a.wasted_spend;
   }
   return null;
+}
+
+/**
+ * Identita' di un'azione: due azioni con la stessa firma agiscono sulla stessa
+ * cosa e vanno considerate una sola. Serve per il deduplico, perche' analisi
+ * successive del Consulente ripropongono spesso gli stessi interventi con una
+ * motivazione scritta in modo diverso.
+ */
+export function actionSignature(a) {
+  return [
+    a.type, a.keywordId || "", a.campaignId || "", a.adGroupId || "",
+    (a.keywordText || "").trim().toLowerCase(), a.matchType || "",
+  ].join("|");
+}
+
+/** Toglie i doppioni mantenendo la prima occorrenza. */
+export function dedupeActions(actions) {
+  const seen = new Set();
+  const out = [];
+  for (const a of actions) {
+    const sig = actionSignature(a);
+    if (seen.has(sig)) continue;
+    seen.add(sig);
+    out.push(a);
+  }
+  return out;
 }
 
 export function toPayload(actions) {

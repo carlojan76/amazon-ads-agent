@@ -77,6 +77,7 @@ Note:
 import argparse
 import json
 import sys
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 
@@ -96,7 +97,7 @@ VND = {
 VALID_TYPES = {
     "update_bid", "pause_keyword", "enable_keyword", "add_keyword",
     "add_negative", "update_budget", "pause_campaign", "enable_campaign",
-    "create_campaign",
+    "create_campaign", "pause_negative", "enable_negative",
 }
 
 AUTO_EXPRESSION_TYPES = {
@@ -170,26 +171,86 @@ def _post(api, path, payload, vnd):
     return requests.post(f"{api.base_url}{path}", headers=headers, json=payload)
 
 
-def _result_summary(resp, key):
-    """Estrae ok/errori dalla risposta multi-status v3."""
+def _parse_batch(resp, key):
+    """Spacchetta la risposta multi-status v3.
+
+    Ritorna (success, error, http_ok, raw): success/error sono None se il corpo
+    non e' JSON, e in quel caso raw contiene il testo grezzo.
+    """
     try:
         body = resp.json()
     except Exception:
-        return resp.status_code < 300, resp.text[:300]
-    ok = body.get(key, {}).get("success", [])
-    ko_all = body.get(key, {}).get("error", [])
+        return None, None, resp.status_code < 300, resp.text[:300]
+    blk = body.get(key, {}) or {}
+    return blk.get("success", []), blk.get("error", []), resp.status_code < 300, ""
 
-    def _is_dup(e):
-        return "duplicate" in str(e).lower()
+
+def _error_messages(e):
+    """Estrae i messaggi leggibili da una voce di errore v3.
+
+    Il messaggio utile e' annidato in errorValue.<tipo>.message e la forma
+    cambia a seconda del tipo di errore: qui si scende in ogni variante nota
+    invece di stringificare il dict e tagliarlo, perche' era proprio il
+    troncamento a lunghezza fissa a mangiarsi la parte diagnostica.
+    """
+    items = e.get("errors") if isinstance(e, dict) else None
+    if not isinstance(items, list):
+        items = [e]
+    msgs = []
+    for it in items:
+        if not isinstance(it, dict):
+            msgs.append(str(it))
+            continue
+        ev = it.get("errorValue") or {}
+        inner = {}
+        if isinstance(ev, dict):
+            for v in ev.values():
+                if isinstance(v, dict) and v.get("message"):
+                    inner = v
+                    break
+        msgs.append(str(inner.get("message") or it.get("message")
+                        or it.get("errorType") or it))
+    return msgs
+
+
+def _format_errors(errs, labels=None):
+    """Raggruppa gli errori per messaggio, senza troncare il testo di Amazon.
+
+    labels e' la lista degli elementi inviati (stessa lunghezza del payload):
+    serve a dire QUALE keyword ha fallito, non solo quante.
+    """
+    grouped = {}
+    for e in errs:
+        idx = e.get("index") if isinstance(e, dict) else None
+        etichetta = ""
+        if labels and isinstance(idx, int) and idx < len(labels):
+            etichetta = str(labels[idx])
+        for m in _error_messages(e):
+            grouped.setdefault(m, []).append(etichetta or f"#{idx}")
+    parti = []
+    for msg, chi in grouped.items():
+        nomi = ", ".join(f"'{c}'" for c in chi if c)
+        parti.append(f"{nomi} -> {msg}" if nomi else msg)
+    return " | ".join(parti)
+
+
+def _is_dup(e):
+    return "duplicate" in str(e).lower()
+
+
+def _result_summary(resp, key, labels=None):
+    """Estrae ok/errori dalla risposta multi-status v3."""
+    ok, ko_all, http_ok, raw = _parse_batch(resp, key)
+    if ok is None:
+        return http_ok, raw
 
     dup = [e for e in ko_all if _is_dup(e)]
     ko = [e for e in ko_all if not _is_dup(e)]
     parts = [f"{len(ok)} ok"]
     if dup:
-        parts.append(f"{len(dup)} gia' presenti (skip)")
+        parts.append(f"{len(dup)} gia' presenti (skip): " + _format_errors(dup, labels))
     if ko:
-        msgs = "; ".join(str(e.get("errors", e))[:150] for e in ko)
-        parts.append(f"{len(ko)} errori: {msgs}")
+        parts.append(f"{len(ko)} errori: " + _format_errors(ko, labels))
         return False, ", ".join(parts)
     return True, ", ".join(parts)
 
@@ -219,6 +280,32 @@ def _extract_ids(resp, key, id_field):
     return True, id_by_index, f"{len(succ)} ok"
 
 
+# ---------------------------------------------------------------- confronto testi
+def _norm_kw(text):
+    """Normalizza un testo keyword per il confronto.
+
+    Accenti e spazi multipli non distinguono una query dall'altra lato Amazon,
+    ma creano entita' diverse via API: 'canape chat' e 'canape' accentato
+    convivono nello stesso ad group spezzando le statistiche. Qui vengono
+    considerati lo stesso termine.
+    """
+    t = " ".join(str(text or "").split()).casefold()
+    return "".join(c for c in unicodedata.normalize("NFD", t)
+                   if unicodedata.category(c) != "Mn")
+
+
+def _phrase_contains(testo_kw, frase):
+    """True se la keyword contiene la frase come sequenza di parole.
+
+    Serve a capire se una NEGATIVE_PHRASE spegnerebbe una keyword esistente.
+    """
+    tk = _norm_kw(testo_kw).split()
+    tf = _norm_kw(frase).split()
+    if not tf or len(tf) > len(tk):
+        return False
+    return any(tk[i:i + len(tf)] == tf for i in range(len(tk) - len(tf) + 1))
+
+
 # ---------------------------------------------------------------- preview
 def describe(a):
     t = a["type"]
@@ -231,6 +318,10 @@ def describe(a):
     if t == "add_keyword":
         return ("AGGIUNGI keyword '" + str(a.get("keywordText")) + "' [" + str(a.get("matchType", "EXACT")) +
                 "] bid " + str(a.get("bid", "?")) + " (adGroup " + str(a.get("adGroupId")) + ")")
+    if t == "pause_negative":
+        return f"PAUSA   negativa '{a.get('keyword', a.get('keywordId'))}'"
+    if t == "enable_negative":
+        return f"RIATTIVA negativa '{a.get('keyword', a.get('keywordId'))}'"
     if t == "add_negative":
         lvl = "ad group" if a.get("adGroupId") else "campagna"
         return f"NEGATIVA '{a['keywordText']}' [{a.get('matchType', 'NEGATIVE_EXACT')}] a livello {lvl} (camp {a.get('campaign', a['campaignId'])})"
@@ -329,6 +420,8 @@ def validate(actions):
         if t not in VALID_TYPES:
             errors.append(f"azione {i}: type '{t}' sconosciuto")
             continue
+        if t in ("pause_negative", "enable_negative") and not a.get("keywordId"):
+            errors.append(f"azione {i} ({t}): manca keywordId della negativa")
         if t in ("update_bid", "pause_keyword", "enable_keyword") and not a.get("keywordId"):
             errors.append(f"azione {i} ({t}): manca keywordId")
         if t == "update_bid" and not isinstance(a.get("new_bid"), (int, float)):
@@ -395,16 +488,47 @@ def _list_v3(api, path, vnd, key, payload):
         return []
 
 
+def _list_v3_paged(api, path, vnd, key, payload, max_pages=20):
+    """Come _list_v3 ma segue nextToken: un ad group puo' avere centinaia di keyword."""
+    out, token, pages = [], None, 0
+    while pages < max_pages:
+        body = dict(payload)
+        if token:
+            body["nextToken"] = token
+        headers = api._base_headers()
+        headers["Content-Type"] = vnd
+        headers["Accept"] = vnd
+        try:
+            resp = requests.post(f"{api.base_url}{path}", headers=headers, json=body, timeout=60)
+        except Exception as e:
+            print(f"   preflight: errore di rete su {path}: {e}")
+            return out
+        if resp.status_code >= 400:
+            print(f"   preflight: HTTP {resp.status_code} su {path}: {resp.text[:200]}")
+            return out
+        try:
+            data = resp.json()
+        except Exception:
+            return out
+        out.extend(data.get(key, []))
+        token = data.get("nextToken")
+        pages += 1
+        if not token:
+            break
+    return out
+
+
 def fetch_current_state(api, actions):
     """Legge lo stato ATTUALE di keyword e campagne toccate dalle azioni.
 
-    Serve a tre cose: mostrare un'anteprima con i valori veri (non quelli
-    dichiarati dal modello), applicare i limiti sulle variazioni, e costruire
-    il file di rollback.
+    Serve a quattro cose: mostrare un'anteprima con i valori veri (non quelli
+    dichiarati dal modello), applicare i limiti sulle variazioni, costruire il
+    file di rollback, e sapere COM'E' FATTA la destinazione delle aggiunte
+    (targeting della campagna e keyword gia' presenti nell'ad group).
     """
     kw_ids = sorted({str(a["keywordId"]) for a in actions if a.get("keywordId")})
     camp_ids = sorted({str(a["campaignId"]) for a in actions if a.get("campaignId")})
-    state = {"keywords": {}, "campaigns": {}}
+    state = {"keywords": {}, "campaigns": {}, "kw_by_adgroup": {}, "camps_fetched": set()}
 
     for i in range(0, len(kw_ids), 100):
         for k in _list_v3(api, "/sp/keywords/list", VND["keyword"], "keywords",
@@ -414,6 +538,20 @@ def fetch_current_state(api, actions):
         for c in _list_v3(api, "/sp/campaigns/list", VND["campaign"], "campaigns",
                           {"campaignIdFilter": {"include": camp_ids[i:i + 100]}, "maxResults": 100}):
             state["campaigns"][str(c.get("campaignId"))] = c
+
+    # Keyword gia' presenti nelle campagne dove stiamo per aggiungere qualcosa:
+    # servono a intercettare duplicati e negative che spegnerebbero una keyword
+    # attiva dello stesso ad group.
+    add_camps = sorted({str(a["campaignId"]) for a in actions
+                        if a.get("type") in ("add_keyword", "add_negative") and a.get("campaignId")})
+    for i in range(0, len(add_camps), 10):
+        blocco = add_camps[i:i + 10]
+        for k in _list_v3_paged(api, "/sp/keywords/list", VND["keyword"], "keywords",
+                                {"campaignIdFilter": {"include": blocco},
+                                 "stateFilter": {"include": ["ENABLED", "PAUSED"]},
+                                 "maxResults": 500}):
+            state["kw_by_adgroup"].setdefault(str(k.get("adGroupId")), []).append(k)
+        state["camps_fetched"].update(blocco)
     return state
 
 
@@ -430,8 +568,11 @@ def enrich_with_current_state(actions, state):
     Ritorna (notes, skip_indexes): le no-op vengono escluse dall'invio, cosi'
     l'anteprima mostra solo cio' che cambia davvero.
     """
-    notes, skip = [], set()
+    notes, skip = _detect_pause_add_conflicts(actions, state)
+    notes = list(notes)
     for i, a in enumerate(actions):
+        if i in skip:
+            continue
         t = a.get("type")
         if t in ("update_bid", "pause_keyword", "enable_keyword"):
             k = state["keywords"].get(str(a.get("keywordId", "")))
@@ -469,6 +610,101 @@ def enrich_with_current_state(actions, state):
             elif t == "enable_campaign" and cur_state == "ENABLED":
                 notes.append(f"azione {i}: campagna gia' attiva, nulla da fare")
                 skip.add(i)
+
+        elif t == "add_keyword":
+            c = state["campaigns"].get(str(a.get("campaignId", "")))
+            if c is None:
+                notes.append(f"azione {i}: campaignId {a.get('campaignId')} non trovata sull'account")
+                continue
+            a.setdefault("campaign", c.get("name", ""))
+            # Una campagna AUTO accetta solo negative: le keyword positive
+            # vengono rifiutate dall'API ("Only negative keywords and negative
+            # product targets are allowed in auto targeting campaigns").
+            if str(c.get("targetingType", "")).upper() == "AUTO":
+                notes.append(
+                    f"azione {i}: '{a.get('keywordText')}' non aggiungibile alla campagna "
+                    f"'{c.get('name', a.get('campaignId'))}' perche' e' AUTO (accetta solo negative)")
+                skip.add(i)
+                continue
+            esistenti = state.get("kw_by_adgroup", {}).get(str(a.get("adGroupId", "")), [])
+            testo, match = _norm_kw(a.get("keywordText")), str(a.get("matchType", "EXACT")).upper()
+            gemella = next((k for k in esistenti
+                            if _norm_kw(k.get("keywordText")) == testo
+                            and str(k.get("matchType", "")).upper() == match), None)
+            if gemella is not None:
+                uguale = str(gemella.get("keywordText", "")) == str(a.get("keywordText", ""))
+                notes.append(
+                    f"azione {i}: '{a.get('keywordText')}' [{match}] gia' presente nell'ad group "
+                    f"{a.get('adGroupId')} come '{gemella.get('keywordText')}' "
+                    f"(stato {gemella.get('state')})" + ("" if uguale else " — differisce solo per accenti/spazi"))
+                if uguale:
+                    skip.add(i)  # l'API la rifiuterebbe come duplicato
+
+        elif t == "add_negative":
+            testo = a.get("keywordText")
+            match = str(a.get("matchType", "NEGATIVE_EXACT")).upper()
+            agid = str(a.get("adGroupId", "") or "")
+            if agid:
+                candidate = state.get("kw_by_adgroup", {}).get(agid, [])
+                dove = f"ad group {agid}"
+            else:
+                cid = str(a.get("campaignId", ""))
+                candidate = [k for lst in state.get("kw_by_adgroup", {}).values() for k in lst
+                             if str(k.get("campaignId", "")) == cid]
+                dove = f"campagna {a.get('campaign') or cid}"
+            colpite = []
+            for k in candidate:
+                if str(k.get("state", "")).upper() != "ENABLED":
+                    continue
+                kt, km = k.get("keywordText", ""), str(k.get("matchType", "")).upper()
+                if match == "NEGATIVE_EXACT" and km == "EXACT" and _norm_kw(kt) == _norm_kw(testo):
+                    colpite.append(kt)
+                elif match == "NEGATIVE_PHRASE" and _phrase_contains(kt, testo):
+                    colpite.append(kt)
+            if colpite:
+                notes.append(
+                    f"azione {i}: la negativa '{testo}' [{match}] spegnerebbe nella stessa {dove} "
+                    f"keyword attive ({', '.join(repr(x) for x in colpite[:4])}) — azione rimossa")
+                skip.add(i)
+
+    return notes, skip
+
+
+def _detect_pause_add_conflicts(actions, state, gia_skip=frozenset()):
+    """Intercetta pausa e riaggiunta della stessa keyword nello stesso run.
+
+    Il modello puo' vedere lo stesso termine due volte (male come keyword,
+    bene come search term) e proporre due azioni opposte: l'API accetta la
+    pausa e rifiuta l'aggiunta come duplicato, quindi l'effetto netto e' che
+    la keyword resta spenta senza che nessuno se ne accorga.
+    """
+    notes, skip = [], set()
+    in_pausa = {}
+    for i, a in enumerate(actions):
+        if a.get("type") != "pause_keyword" or i in gia_skip:
+            continue
+        k = state["keywords"].get(str(a.get("keywordId", "")))
+        if not k:
+            continue
+        chiave = (_norm_kw(k.get("keywordText")), str(k.get("matchType", "")).upper())
+        in_pausa[chiave] = (str(k.get("adGroupId", "")), k.get("keywordText", ""))
+
+    for i, a in enumerate(actions):
+        if a.get("type") != "add_keyword" or i in gia_skip:
+            continue
+        chiave = (_norm_kw(a.get("keywordText")), str(a.get("matchType", "EXACT")).upper())
+        if chiave not in in_pausa:
+            continue
+        ag_pausa, testo = in_pausa[chiave]
+        if ag_pausa and ag_pausa == str(a.get("adGroupId", "")):
+            notes.append(
+                f"azione {i}: '{a.get('keywordText')}' viene messa in pausa e riaggiunta "
+                f"nello stesso ad group {ag_pausa} — aggiunta rimossa, resta la pausa")
+            skip.add(i)
+        else:
+            notes.append(
+                f"azione {i}: '{a.get('keywordText')}' e' in pausa su {ag_pausa or 'altro ad group'} "
+                f"e viene aggiunta su {a.get('adGroupId')} — verificare che sia voluto")
     return notes, skip
 
 
@@ -518,15 +754,20 @@ def check_guardrails(actions, g=None):
     return bad
 
 
-def build_rollback(actions, state, created):
-    """Costruisce un actions.json che ANNULLA quanto applicato.
+def build_rollback(outcomes, state, created):
+    """Costruisce un actions.json che ANNULLA quanto e' stato applicato DAVVERO.
 
-    Le negative e le keyword aggiunte non hanno un'azione inversa via API
-    (servirebbe l'ID generato), quindi vengono elencate a parte come promemoria.
+    outcomes = le azioni confermate dall'API (con l'ID generato dove esiste),
+    non quelle pianificate: una keyword rifiutata non deve comparire nelle
+    istruzioni di undo. Grazie all'ID restituito dalle POST, keyword e negative
+    aggiunte ora si annullano da sole; resta manuale solo cio' che l'API non ha
+    identificato.
     Le campagne create si annullano mettendole in pausa.
     """
     undo, manual = [], []
-    for a in actions:
+    for e in outcomes:
+        a = e["action"] if isinstance(e, dict) and "action" in e else e
+        nuovo_id = e.get("id") if isinstance(e, dict) else None
         t = a.get("type")
         if t == "update_bid":
             k = state["keywords"].get(str(a.get("keywordId", "")))
@@ -553,9 +794,20 @@ def build_rollback(actions, state, created):
                 undo.append({"type": "pause_campaign" if prev == "PAUSED" else "enable_campaign",
                              "campaignId": a["campaignId"], "campaign": a.get("campaign", "")})
         elif t == "add_negative":
-            manual.append(f"rimuovere a mano la negativa '{a.get('keywordText')}' dalla campagna {a.get('campaign') or a.get('campaignId')}")
+            if nuovo_id:
+                undo.append({"type": "pause_negative", "keywordId": nuovo_id,
+                             "keyword": f"{a.get('keywordText')} [{a.get('matchType', 'NEGATIVE_EXACT')}]"})
+            else:
+                manual.append(f"rimuovere a mano la negativa '{a.get('keywordText')}' dalla campagna {a.get('campaign') or a.get('campaignId')}")
         elif t == "add_keyword":
-            manual.append(f"mettere in pausa a mano la keyword '{a.get('keywordText')}' aggiunta all'ad group {a.get('adGroupId')}")
+            if nuovo_id:
+                undo.append({"type": "pause_keyword", "keywordId": nuovo_id,
+                             "keyword": f"{a.get('keywordText')} [{a.get('matchType', 'EXACT')}]"})
+            else:
+                manual.append(f"mettere in pausa a mano la keyword '{a.get('keywordText')}' aggiunta all'ad group {a.get('adGroupId')}")
+        elif t == "pause_negative":
+            undo.append({"type": "enable_negative", "keywordId": a.get("keywordId"),
+                         "keyword": a.get("keyword", "")})
     for c in created:
         undo.append({"type": "pause_campaign", "campaignId": c["campaignId"],
                      "campaign": "(campagna creata da questo run)"})
@@ -563,11 +815,34 @@ def build_rollback(actions, state, created):
 
 
 # ---------------------------------------------------------------- apply: edit
-def apply_edit_actions(api, actions):
-    """Applica le azioni di ottimizzazione (non-create). Ritorna lista (nome, ok, dettaglio)."""
-    results = []
+def _collect_outcomes(resp, key, sources, id_field="keywordId"):
+    """Associa ogni azione inviata al suo esito reale.
 
-    kw_updates = []
+    Le risposte v3 portano l'indice dell'elemento nell'array inviato: e' l'unico
+    modo per sapere QUALI azioni sono passate. Senza questo passaggio il
+    rollback veniva costruito sul piano, e finiva per elencare keyword mai
+    create davvero.
+    """
+    succ, errs, _http_ok, _raw = _parse_batch(resp, key)
+    esiti = []
+    if succ is None:  # risposta non JSON: nessuna certezza, meglio non dedurre
+        return esiti
+    for s in succ:
+        idx = s.get("index")
+        if isinstance(idx, int) and idx < len(sources):
+            esiti.append({"action": sources[idx], "id": str(s.get(id_field) or "") or None})
+    return esiti
+
+
+def apply_edit_actions(api, actions):
+    """Applica le azioni di ottimizzazione (non-create).
+
+    Ritorna (results, outcomes): results per il log a schermo, outcomes = le
+    sole azioni confermate dall'API, con l'ID generato dove esiste.
+    """
+    results, outcomes = [], []
+
+    kw_updates, kw_src = [], []
     for a in actions:
         if a["type"] == "update_bid":
             kw_updates.append({"keywordId": a["keywordId"], "bid": float(a["new_bid"])})
@@ -575,12 +850,32 @@ def apply_edit_actions(api, actions):
             kw_updates.append({"keywordId": a["keywordId"], "state": "PAUSED"})
         elif a["type"] == "enable_keyword":
             kw_updates.append({"keywordId": a["keywordId"], "state": "ENABLED"})
+        elif a["type"] in ("pause_negative", "enable_negative"):
+            continue
+        else:
+            continue
+        kw_src.append(a)
     if kw_updates:
         resp = _put(api, "/sp/keywords", {"keywords": kw_updates}, VND["keyword"])
-        ok, detail = _result_summary(resp, "keywords")
+        etichette = [a.get("keyword") or a.get("keywordId") for a in kw_src]
+        ok, detail = _result_summary(resp, "keywords", etichette)
         results.append((f"PUT /sp/keywords ({len(kw_updates)} modifiche)", ok, detail))
+        outcomes.extend(_collect_outcomes(resp, "keywords", kw_src))
 
-    negatives = []
+    neg_updates, neg_upd_src = [], []
+    for a in actions:
+        if a["type"] in ("pause_negative", "enable_negative"):
+            stato = "PAUSED" if a["type"] == "pause_negative" else "ENABLED"
+            neg_updates.append({"keywordId": a["keywordId"], "state": stato})
+            neg_upd_src.append(a)
+    if neg_updates:
+        resp = _put(api, "/sp/negativeKeywords", {"negativeKeywords": neg_updates}, VND["negative"])
+        etichette = [a.get("keyword") or a.get("keywordId") for a in neg_upd_src]
+        ok, detail = _result_summary(resp, "negativeKeywords", etichette)
+        results.append((f"PUT /sp/negativeKeywords ({len(neg_updates)} stati)", ok, detail))
+        outcomes.extend(_collect_outcomes(resp, "negativeKeywords", neg_upd_src))
+
+    negatives, neg_src = [], []
     for a in actions:
         if a["type"] == "add_negative":
             item = {
@@ -592,12 +887,14 @@ def apply_edit_actions(api, actions):
             if a.get("adGroupId"):
                 item["adGroupId"] = a["adGroupId"]
             negatives.append(item)
+            neg_src.append(a)
     if negatives:
         resp = _post(api, "/sp/negativeKeywords", {"negativeKeywords": negatives}, VND["negative"])
-        ok, detail = _result_summary(resp, "negativeKeywords")
+        ok, detail = _result_summary(resp, "negativeKeywords", [a["keywordText"] for a in neg_src])
         results.append((f"POST /sp/negativeKeywords ({len(negatives)} negative)", ok, detail))
+        outcomes.extend(_collect_outcomes(resp, "negativeKeywords", neg_src))
 
-    new_keywords = []
+    new_keywords, new_src = [], []
     for a in actions:
         if a["type"] == "add_keyword":
             new_keywords.append({
@@ -608,12 +905,14 @@ def apply_edit_actions(api, actions):
                 "state": "ENABLED",
                 "bid": float(a["bid"]),
             })
+            new_src.append(a)
     if new_keywords:
         resp = _post(api, "/sp/keywords", {"keywords": new_keywords}, VND["keyword"])
-        ok, detail = _result_summary(resp, "keywords")
+        ok, detail = _result_summary(resp, "keywords", [a["keywordText"] for a in new_src])
         results.append((f"POST /sp/keywords ({len(new_keywords)} nuove keyword)", ok, detail))
+        outcomes.extend(_collect_outcomes(resp, "keywords", new_src))
 
-    camp_updates = {}
+    camp_updates, camp_src = {}, {}
     for a in actions:
         if a["type"] == "update_budget":
             camp_updates.setdefault(a["campaignId"], {"campaignId": a["campaignId"]})[
@@ -622,13 +921,22 @@ def apply_edit_actions(api, actions):
             camp_updates.setdefault(a["campaignId"], {"campaignId": a["campaignId"]})["state"] = "PAUSED"
         elif a["type"] == "enable_campaign":
             camp_updates.setdefault(a["campaignId"], {"campaignId": a["campaignId"]})["state"] = "ENABLED"
+        else:
+            continue
+        camp_src.setdefault(a["campaignId"], []).append(a)
     if camp_updates:
-        payload = {"campaigns": list(camp_updates.values())}
+        ordine = list(camp_updates.keys())
+        payload = {"campaigns": [camp_updates[c] for c in ordine]}
         resp = _put(api, "/sp/campaigns", payload, VND["campaign"])
-        ok, detail = _result_summary(resp, "campaigns")
+        etichette = [camp_src[c][0].get("campaign") or c for c in ordine]
+        ok, detail = _result_summary(resp, "campaigns", etichette)
         results.append((f"PUT /sp/campaigns ({len(camp_updates)} campagne)", ok, detail))
+        # una sola voce per campagna puo' coprire piu' azioni (budget + stato)
+        for e in _collect_outcomes(resp, "campaigns", ordine, "campaignId"):
+            for a in camp_src.get(e["action"], []):
+                outcomes.append({"action": a, "id": e["action"]})
 
-    return results
+    return results, outcomes
 
 
 # ---------------------------------------------------------------- apply: create
@@ -741,9 +1049,14 @@ def create_campaign_blueprint(api, action):
 
 
 def apply_actions(api, actions):
-    """Esegue prima i create_campaign (cascata) e poi le modifiche. Ritorna (results, created_list)."""
+    """Esegue prima i create_campaign (cascata) e poi le modifiche.
+
+    Ritorna (results, created_list, outcomes), dove outcomes elenca le sole
+    azioni confermate dall'API: e' la base del file di rollback.
+    """
     results = []
     created_list = []
+    outcomes = []
 
     creates = [a for a in actions if a["type"] == "create_campaign"]
     edits = [a for a in actions if a["type"] != "create_campaign"]
@@ -755,9 +1068,11 @@ def apply_actions(api, actions):
             created_list.append(created)
 
     if edits:
-        results.extend(apply_edit_actions(api, edits))
+        res, out = apply_edit_actions(api, edits)
+        results.extend(res)
+        outcomes.extend(out)
 
-    return results, created_list
+    return results, created_list, outcomes
 
 
 # ---------------------------------------------------------------- main
@@ -869,7 +1184,7 @@ def main():
         api.select_profile(args.marketplace)
 
     print("\nApplicazione in corso...")
-    results, created = apply_actions(api, actions)
+    results, created, outcomes = apply_actions(api, actions)
     report["applied"] = True
 
     print("\nRISULTATI:")
@@ -893,6 +1208,7 @@ def main():
         "timestamp": datetime.now().isoformat(),
         "marketplace": args.marketplace,
         "actions": actions,
+        "confirmed": [{"action": e["action"], "id": e.get("id")} for e in outcomes],
         "results": report["results"],
         "created": created,
     }
@@ -901,7 +1217,10 @@ def main():
     print(f"\nLog salvato: {log_name}")
 
     # --- Rollback: come tornare indietro -----------------------------------
-    rollback = build_rollback(actions, state, created)
+    rollback = build_rollback(outcomes, state, created)
+    n_inviate = sum(1 for a in actions if a["type"] != "create_campaign")
+    if len(outcomes) < n_inviate:
+        print(f"   nota: {n_inviate - len(outcomes)} azioni non confermate dall'API, escluse dal rollback")
     if rollback["actions"] or rollback["_manual_undo"]:
         rb_name = f"rollback_{args.marketplace}_{ts}.json"
         Path(rb_name).write_text(json.dumps(rollback, indent=2, ensure_ascii=False), encoding="utf-8")

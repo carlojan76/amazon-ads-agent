@@ -1,0 +1,111 @@
+name: Check Search Query Performance Access
+
+# SOLO una verifica di accesso al report Brand Analytics Search Query
+# Performance (python/check_search_query_performance_access.py) — non scrive
+# nulla, non e' la pipeline completa (punto 2 del roadmap keyword). Serve a
+# sapere se questo account puo' generare questo report PRIMA di scrivere
+# report + polling + download + parsing.
+#
+# Sostituisce, per questo obiettivo specifico, "Check Data Kiosk Access":
+# quel probe interrogava l'API sbagliata (Data Kiosk/GraphQL non ospita
+# questo dataset). Search Query Performance e' un report della Reports API
+# classica, confermato da HTTP 400 "Query ... is not supported" ricevuto dal
+# probe precedente su Data Kiosk. Questo workflow rimane utile in futuro solo
+# se serve verificare l'accesso a dataset Data Kiosk reali (Sales and
+# Traffic, Economics, Vendor Analytics).
+#
+# Si lancia dalla UI di GitHub: tab Actions -> Check Search Query Performance
+# Access -> Run workflow. Usa gli stessi secrets SP-API gia' configurati per
+# gli altri workflow di listing: nessun setup nuovo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      marketplace:
+        description: 'Marketplace'
+        type: choice
+        required: true
+        options: [IT, FR, DE, ES, UK]
+        default: IT
+      asin:
+        description: 'ASIN da testare'
+        required: true
+      period:
+        description: 'Periodo del report'
+        type: choice
+        required: true
+        options: [WEEK, MONTH, QUARTER]
+        default: WEEK
+      start:
+        description: >-
+          Data inizio YYYY-MM-DD (default: settimana civile completa piu'
+          recente, solo per period=WEEK). Deve essere una domenica se WEEK.
+        required: false
+        default: ''
+      end:
+        description: 'Data fine YYYY-MM-DD (sabato successivo a start se WEEK)'
+        required: false
+        default: ''
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Install dependencies
+        run: pip install requests
+
+      - name: 🔎 Probe
+        env:
+          LWA_CLIENT_ID: ${{ secrets.LWA_CLIENT_ID }}
+          LWA_CLIENT_SECRET: ${{ secrets.LWA_CLIENT_SECRET }}
+          LWA_REFRESH_TOKEN: ${{ secrets.LWA_REFRESH_TOKEN }}
+          SPAPI_ENDPOINT: https://sellingpartnerapi-eu.amazon.com
+        run: |
+          set -euo pipefail
+          EXTRA=""
+          [ -n "${{ github.event.inputs.start }}" ] && EXTRA="$EXTRA --start ${{ github.event.inputs.start }}"
+          [ -n "${{ github.event.inputs.end }}" ] && EXTRA="$EXTRA --end ${{ github.event.inputs.end }}"
+          # L'exit code (0 = accesso confermato, 1 = negato o incerto, 2 =
+          # errore di input) e' la risposta che ci interessa: non far fallire
+          # lo step permette al Riepilogo qui sotto di girare comunque e
+          # mostrare la diagnosi anche quando l'accesso e' negato.
+          set +e
+          python python/check_search_query_performance_access.py \
+            --marketplace "${{ github.event.inputs.marketplace }}" \
+            --asin "${{ github.event.inputs.asin }}" \
+            --period "${{ github.event.inputs.period }}" $EXTRA 2>&1 | tee probe.log
+          echo "PROBE_EXIT=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+
+      - name: 📋 Riepilogo
+        if: always()
+        run: |
+          {
+            if [ "${PROBE_EXIT:-2}" = "0" ]; then
+              echo "## ✅ Accesso confermato al report Search Query Performance"
+            else
+              echo "## ⚠️ Accesso non confermato (vedi diagnosi sotto)"
+            fi
+            echo
+            echo '```'
+            cat probe.log 2>/dev/null || echo "(nessun output)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📦 Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sqp-probe-${{ github.event.inputs.marketplace }}-${{ github.event.inputs.asin }}-${{ github.run_number }}
+          path: probe.log
+          retention-days: 30
+          if-no-files-found: ignore

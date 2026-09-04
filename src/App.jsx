@@ -1,13 +1,22 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { C, F, T, S, R, button, input, card, GLOBAL_CSS } from "./theme";
 import ActionsPanel from "./ActionsPanel";
+import ListingPanel from "./ListingPanel";
+import FamilyPanel from "./FamilyPanel";
 import CampaignPlanner from "./CampaignPlanner";
-import { ACTIONS_PROMPT, extractActionsFromText, validateAgainstData } from "./actions";
+import { ACTIONS_PROMPT, extractActionsFromText, validateAgainstData, actionSignature, dedupeActions } from "./actions";
 import { parseCSV, processJSON, processCSV } from "./parse";
 
 const ENV_KEY = typeof import.meta !== "undefined" ? import.meta.env?.VITE_ANTHROPIC_API_KEY : "";
 const BASE_URL = typeof import.meta !== "undefined" ? import.meta.env.BASE_URL : "/";
 const MODEL = "claude-sonnet-5";
+
+// I modelli recenti ragionano prima di rispondere, e i token del ragionamento
+// contano DENTRO max_tokens. Con un tetto basso (4000) il budget si esauriva
+// nel ragionamento e la risposta arrivava senza testo, con stop_reason
+// "max_tokens". Il tetto va quindi tenuto largo abbastanza da coprire
+// ragionamento + report + blocco azioni.
+const MAX_TOKENS = 16000;
 
 // ---------------------------------------------------------------- UI comuni
 
@@ -143,13 +152,47 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
           "anthropic-dangerous-direct-browser-access": "true",
         },
         body: JSON.stringify({
-          model: MODEL, max_tokens: 4000, system: sys,
+          model: MODEL, max_tokens: MAX_TOKENS, system: sys,
           messages: [...history, { role: "user", content: msg }],
         }),
       });
-      const data = await resp.json();
-      if (data.error) throw new Error(data.error.message);
-      const text = data.content?.map((b) => b.text || "").join("\n") || "Nessuna risposta";
+
+      let data;
+      try {
+        data = await resp.json();
+      } catch {
+        throw new Error(`Risposta non leggibile dall'API (HTTP ${resp.status}). `
+          + `Se sei dietro una VPN o un proxy aziendale, potrebbe stare bloccando la chiamata.`);
+      }
+
+      // Prima l'errore veniva cercato solo in data.error, e qualsiasi altro
+      // caso finiva in un generico "Nessuna risposta" che non diceva nulla.
+      if (!resp.ok || data.type === "error" || data.error) {
+        const e = data.error || {};
+        const hint = resp.status === 401
+          ? " La chiave API non è valida o è stata revocata."
+          : resp.status === 400 && /credit|balance/i.test(e.message || "")
+            ? " Il piano non ha credito residuo: controlla la fatturazione su console.anthropic.com."
+            : resp.status === 429
+              ? " Hai superato il limite di richieste: riprova tra qualche minuto."
+              : "";
+        throw new Error(`API Anthropic — HTTP ${resp.status}${e.type ? ` (${e.type})` : ""}: `
+          + `${e.message || "errore non specificato"}.${hint}`);
+      }
+
+      const blocks = Array.isArray(data.content) ? data.content : [];
+      const text = blocks.map((b) => b.text || "").join("\n").trim();
+      if (!text) {
+        // Console: utile per capire cosa è arrivato davvero.
+        console.warn("Risposta senza testo dall'API Anthropic:", data);
+        const kinds = blocks.map((b) => b.type).filter(Boolean).join(", ") || "nessuno";
+        const why = data.stop_reason === "max_tokens"
+          ? ` Il budget di ${MAX_TOKENS} token si è esaurito nel ragionamento, prima della risposta: `
+            + `fai una domanda più circoscritta, oppure alza MAX_TOKENS in App.jsx.`
+          : "";
+        throw new Error(`Il modello ha risposto senza testo (blocchi ricevuti: ${kinds}; `
+          + `motivo di arresto: ${data.stop_reason || "ignoto"}).${why}`);
+      }
 
       const { actions, cleanText, warnings } = extractActionsFromText(text);
       const { kept, rejected } = validateAgainstData(actions, metrics);
@@ -210,8 +253,8 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
           {metrics.meta?.reports_failed?.length
             ? ` Amazon ha rifiutato i report: ${metrics.meta.reports_failed.join(", ")}.`
             : ""}
-          {metrics.meta?.days > 31
-            ? " L'intervallo richiesto supera i 31 giorni consentiti dall'API: rilancia il fetch con --days 31 o meno."
+          {metrics.meta?.days > 31 && !(metrics.meta?.report_windows?.length > 1)
+            ? " L'intervallo supera i 31 giorni ed e' stato chiesto in una sola richiesta: aggiorna amazon_ads_api.py, che ora spezza il periodo in finestre."
             : " Rilancia il fetch e controlla l'output con check_data.py."}
         </div>
       ) : !metrics.hasIds ? (
@@ -334,14 +377,17 @@ export default function App() {
   }, []);
 
   const addAiActions = useCallback((actions) => {
+    // Deduplico sulla FIRMA, non sull'oggetto intero: due analisi successive
+    // propongono spesso lo stesso intervento con una motivazione diversa, e
+    // confrontando l'oggetto per intero finivano entrambe nell'elenco.
     setAiActions((prev) => {
-      const seen = new Set(prev.map((a) => JSON.stringify(a)));
-      return [...prev, ...actions.filter((a) => !seen.has(JSON.stringify(a)))];
+      const seen = new Set(prev.map(actionSignature));
+      return [...prev, ...actions.filter((a) => !seen.has(actionSignature(a)))];
     });
   }, []);
 
   const allProposed = useMemo(
-    () => [...(metrics?.proposedActions || []), ...aiActions],
+    () => dedupeActions([...(metrics?.proposedActions || []), ...aiActions]),
     [metrics?.proposedActions, aiActions]
   );
 
@@ -452,6 +498,8 @@ export default function App() {
     ...(metrics.searchTerms?.length ? [{ id: "searchterms", label: "Search term" }] : []),
     { id: "ai", label: "Consulente" },
     { id: "actions", label: "Azioni", badge: pendingActions || null },
+    { id: "listing", label: "Scheda prodotto" },
+    { id: "family", label: "Famiglia" },
   ];
 
   return (
@@ -675,6 +723,13 @@ export default function App() {
                 </div>
               </details>
             )}
+            {!metrics.weeklyAnalysis && !metrics.proposedActions?.length && (
+              <Banner tone="blue">
+                Questo file è un export grezzo dell'API: contiene i dati, non le proposte.
+                Le azioni arrivano dal <strong>Consulente</strong> in questa scheda, oppure dalla
+                weekly analysis, che aggiunge la sua analisi al file pubblicato.
+              </Banner>
+            )}
             <ActionsPanel
               key={fileName}
               initialActions={allProposed}
@@ -682,6 +737,16 @@ export default function App() {
               onSelectionChange={setSelectedCount}
             />
           </div>
+        )}
+
+        {/* Scheda prodotto (listing copy) */}
+        {tab === "listing" && (
+          <ListingPanel marketplace={metrics.meta?.marketplace || ""} />
+        )}
+
+        {/* Famiglia di variazioni */}
+        {tab === "family" && (
+          <FamilyPanel marketplace={metrics.meta?.marketplace || ""} />
         )}
       </div>
     </div>

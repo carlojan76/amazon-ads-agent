@@ -3,20 +3,37 @@ import { C, F, T, S, R, button, input, card } from "./theme";
 import {
   ACTION_TYPES, GROUP_ORDER, KW_MATCH, NEG_MATCH, GUARDRAILS,
   normalizeAction, validateAction, isValidAction, describeAction,
-  editableField, estimatedSaving, toPayload,
+  editableField, estimatedSaving, toPayload, actionSignature, dedupeActions,
 } from "./actions";
 import {
   startDeviceFlow, pollForToken, getUser, checkRepoAccess, dispatchWorkflow,
   latestRunId, waitForNewRun, followRun,
 } from "./github";
 
+/**
+ * Su GitHub Pages l'URL contiene gia' owner e repo:
+ * https://carlojan76.github.io/amazon-ads-agent/ -> carlojan76/amazon-ads-agent
+ * Meglio dedurlo che chiederlo: era il campo piu' facile da lasciare vuoto.
+ */
+function guessRepoFromUrl() {
+  try {
+    const host = window.location.hostname;
+    const m = /^([\w-]+)\.github\.io$/.exec(host);
+    if (!m) return "";
+    const seg = window.location.pathname.split("/").filter(Boolean)[0];
+    return seg ? `${m[1]}/${seg}` : "";
+  } catch {
+    return "";
+  }
+}
+
+const isValidRepo = (s) => /^[\w.-]+\/[\w.-]+$/.test((s || "").trim());
+
 let uid = 0;
 const nextId = () => `a${Date.now()}_${uid++}`;
 
-/** Firma stabile di un'azione: serve a riconoscerla tra un caricamento e l'altro. */
-const signature = (a) =>
-  [a.type, a.keywordId || "", a.campaignId || "", a.adGroupId || "",
-    (a.keywordText || "").toLowerCase(), a.matchType || ""].join("|");
+// Firma condivisa con App.jsx e con il deduplico (vedi actions.js).
+const signature = actionSignature;
 
 const TONE = { red: C.red, green: C.green, yellow: C.yellow, blue: C.blue };
 
@@ -81,7 +98,7 @@ function Row({ action, onToggle, onEdit, onRemove }) {
           {d.delta && (
             <Chip color={d.deltaUp ? C.green : C.yellow} bg={d.deltaUp ? C.greenDim : C.yellowDim}>{d.delta}</Chip>
           )}
-          {action.source === "ai" && <Chip color={C.purple} bg={C.purpleDim} title="Proposta dall'AI Advisor in questa sessione">AI</Chip>}
+          {action.source === "ai" && <Chip color={C.purple} bg={C.purpleDim} title="Proposta dal Consulente in questa sessione">AI</Chip>}
           {action.source === "manual" && <Chip color={C.blue} bg={C.blueDim}>manuale</Chip>}
         </div>
 
@@ -262,16 +279,20 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
     const saved = ls.get(storeKey, { overrides: {}, manual: [] });
     setActions((prev) => {
       const prevBySig = new Map(prev.filter((a) => a.source !== "manual").map((a) => [signature(a), a]));
-      const rebuilt = initialActions.map((raw) => {
+      const rebuilt = dedupeActions(initialActions.map(normalizeAction)).map((raw) => {
         const a = normalizeAction(raw);
         const sig = signature(a);
         const keep = prevBySig.get(sig);
         const ov = saved.overrides?.[sig];
+        // Un'azione con avvisi non viene spuntata da sola: se merita
+        // un'occhiata, la spunta la mette l'utente.
+        const check = validateAction(a);
         const merged = {
           ...a,
           id: keep?.id || nextId(),
           source: a.source || "weekly",
-          included: keep ? keep.included : ov?.included ?? isValidAction(a),
+          included: keep ? keep.included
+            : ov?.included ?? (check.errors.length === 0 && check.warnings.length === 0),
         };
         for (const f of ["new_bid", "new_budget", "bid"]) {
           if (keep && f in keep) merged[f] = keep[f];
@@ -347,7 +368,8 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
 
   // ---- connessione GitHub ----
   const [ghClientId, setGhClientId] = useState(() => localStorage.getItem("gh_client_id") || import.meta.env?.VITE_GITHUB_CLIENT_ID || "");
-  const [ghRepo, setGhRepo] = useState(() => localStorage.getItem("gh_repo") || import.meta.env?.VITE_GITHUB_REPO || "");
+  const [ghRepo, setGhRepo] = useState(() =>
+    localStorage.getItem("gh_repo") || import.meta.env?.VITE_GITHUB_REPO || guessRepoFromUrl());
   const [ghWorkflow, setGhWorkflow] = useState(() => localStorage.getItem("gh_workflow") || "apply-actions.yml");
   const [ghProxy, setGhProxy] = useState(() => localStorage.getItem("gh_device_proxy") || "");
   const [ghToken, setGhToken] = useState(() => localStorage.getItem("gh_token") || "");
@@ -428,7 +450,12 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
 
   const launch = async (dryRun) => {
     const [owner, repo] = ghRepo.split("/").map((s) => s.trim());
-    if (!owner || !repo) { setError("Il repository va scritto come owner/repo."); setShowGhSettings(true); return; }
+    if (!isValidRepo(ghRepo)) {
+      setError('Manca il repository di destinazione: scrivilo come "owner/repo" '
+        + '(es. carlojan76/amazon-ads-agent) nel pannello Configurazione, che ho appena aperto.');
+      setShowGhSettings(true);
+      return;
+    }
     setBusy(dryRun ? "preview" : "apply");
     setError(null); setRun(null);
 
@@ -478,7 +505,8 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
     URL.revokeObjectURL(url);
   };
 
-  const canPreview = selected.length > 0 && ghUser && !busy && !tooBig;
+  const repoOk = isValidRepo(ghRepo);
+  const canPreview = selected.length > 0 && ghUser && repoOk && !busy && !tooBig;
   const canApply = canPreview && previewValid && confirmText === "APPLICA";
 
   // ---------------------------------------------------------------- render
@@ -523,8 +551,9 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
               Nessuna azione da rivedere
             </div>
             <div style={{ fontSize: T.small, color: C.textMuted, lineHeight: 1.6, maxWidth: 420, margin: "0 auto" }}>
-              Apri la scheda <strong style={{ color: C.accent }}>AI Advisor</strong> e lancia l'analisi: i consigli
-              con un ID valido compaiono qui, pronti da rivedere. Oppure creane una con “Azione manuale”.
+              Apri la scheda <strong style={{ color: C.accent }}>Consulente</strong> e premi
+              “Analizza le campagne”: i consigli con un ID valido compaiono qui, pronti da rivedere.
+              Oppure creane una tu con “+ Azione manuale”.
             </div>
           </div>
         ) : visible.length === 0 ? (
@@ -584,7 +613,13 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
             <label>
               <span style={{ fontSize: T.micro, color: C.textDim }}>Repository</span>
               <input value={ghRepo} onChange={(e) => setGhRepo(e.target.value)} placeholder="tuo-utente/amazon-ads-agent"
-                style={{ ...input, width: "100%", fontFamily: F.mono }} />
+                style={{ ...input, width: "100%", fontFamily: F.mono,
+                  borderColor: ghRepo && !isValidRepo(ghRepo) ? C.red : C.borderStrong }} />
+              {ghRepo && !isValidRepo(ghRepo) && (
+                <span style={{ fontSize: T.micro, color: C.red }}>
+                  Formato atteso: owner/repo, senza https:// e senza .git
+                </span>
+              )}
             </label>
             <label>
               <span style={{ fontSize: T.micro, color: C.textDim }}>File del workflow</span>
@@ -697,7 +732,13 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
           </button>
           <span style={{ fontSize: T.micro, color: C.textDim, flex: "1 1 240px", lineHeight: 1.5 }}>
             Esegue il workflow in sola lettura: mostra i valori attuali sull'account e cosa cambierebbe,
-            senza toccare nulla.
+            senza toccare nulla. Destinazione:{" "}
+            {repoOk
+              ? <code style={{ fontFamily: F.mono, color: C.textMuted }}>{ghRepo}</code>
+              : <button onClick={() => setShowGhSettings(true)}
+                  style={{ ...button("quiet", { small: true }), padding: 0, color: C.yellow }}>
+                  repository non impostato — aprilo in Configurazione
+                </button>}
           </span>
         </div>
 
@@ -712,9 +753,23 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
           </button>
         </div>
 
-        {!previewValid && previewedJson !== null && (
-          <div style={{ fontSize: T.micro, color: C.yellow, marginTop: S.sm }}>
-            Hai cambiato la selezione dopo l'anteprima: rigenerala prima di applicare.
+        {!previewValid && (
+          <div style={{ fontSize: T.micro, color: C.textDim, marginTop: S.sm, lineHeight: 1.6 }}>
+            {/* Prima il passo 3 era solo disabilitato, senza spiegare cosa mancasse. */}
+            {!selected.length
+              ? "Seleziona almeno un'azione qui sopra."
+              : !ghUser
+                ? "Connetti prima un token GitHub (passo 1)."
+                : !repoOk
+                  ? "Imposta il repository di destinazione in Configurazione."
+                  : previewedJson !== null
+                    ? "Hai cambiato la selezione dopo l'anteprima: rigenerala prima di applicare."
+                    : "Genera prima l'anteprima (passo 2): serve a confrontare le azioni con lo stato "
+                      + "attuale su Amazon. Solo dopo si sblocca la conferma."}
+            {" "}In alternativa, <strong>Scarica JSON</strong> e lancialo da riga di comando:{" "}
+            <code style={{ fontFamily: F.mono }}>
+              python apply_changes.py actions.json --marketplace {ghMarketplace || "IT"}
+            </code>
           </div>
         )}
         {tooBig && (
