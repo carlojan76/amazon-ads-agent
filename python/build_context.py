@@ -802,6 +802,31 @@ def main() -> int:
         sku = ul.resolve_sku(args.asin, marketplace_id)
     print(f"SKU: {sku}\n")
 
+    # --- FAMIGLIA: scopri i child SUBITO (serve prima dei termini di ricerca,
+    # non solo a fine corsa) cosi' il brief/context pack di un PARENT puo' usare
+    # i termini che convertono/il volume SQP dei SUOI child, invece di ricadere
+    # sui termini dell'intero account (spesso di un prodotto tutt'altro: un
+    # parent quasi mai ha una campagna ads propria, sono i child a essere
+    # pubblicizzati singolarmente).
+    child_skus: List[str] = []
+    _child_theme: List[str] = []
+    child_asins: List[str] = []
+    if args.family:
+        child_skus, _child_theme = ufam.discover_children(sku, marketplace_id)
+        print(f"Parent {sku}: {len(child_skus)} child ({', '.join(child_skus) or 'nessuno'})")
+        for child_sku in child_skus:
+            try:
+                child_listing = ul.get_listing(child_sku, marketplace_id, language_tag)
+                summaries = child_listing.get("summaries", [])
+                child_asin = summaries[0].get("asin") if summaries else None
+            except Exception as exc:  # noqa: BLE001 - un child irraggiungibile non deve fermare tutto
+                print(f"  ! {child_sku}: ASIN non risolvibile ({exc})")
+                child_asin = None
+            if child_asin:
+                child_asins.append(child_asin)
+        if child_skus:
+            print(f"  ASIN child risolti: {', '.join(child_asins) or 'nessuno'}")
+
     # --- 1+2 copy + limiti (obbligatori: se falliscono, e' un problema vero)
     print("Fonti:")
     current = fetch_current_copy(sku, marketplace_id, language_tag)
@@ -828,9 +853,21 @@ def main() -> int:
     if not args.no_search_terms and args.data_dir:
         st_md, st_meta = listing_signals.search_terms_section(
             market, args.asin, args.data_dir, top=args.search_terms_top)
+    # FAMIGLIA: il parent quasi mai ha una campagna ads propria (sono i child a
+    # essere pubblicizzati singolarmente), quindi st_meta sopra ricade quasi
+    # sempre su "marketplace" (l'intero account, spesso di un prodotto diverso
+    # — es. 'tiragraffi divano' su una famiglia di amache). Se almeno un child
+    # ha dati ads propri, preferisci l'aggregato dei child: e' lo stesso ASIN
+    # che verra' davvero pubblicizzato, solo raggruppato.
+    if args.family and child_asins and not args.no_search_terms and args.data_dir:
+        fam_md, fam_meta = listing_signals.aggregate_search_terms_for_family(
+            market, child_asins, args.data_dir, top=args.search_terms_top)
+        if fam_meta.get("available"):
+            st_md, st_meta = fam_md, fam_meta
     if st_meta.get("available"):
-        scope_label = ("dell'ASIN" if st_meta["scope"] == "asin"
-                       else "dell'account (ASIN senza dati propri)")
+        scope_label = {
+            "asin": "dell'ASIN", "family": "aggregato dai child (hanno dati propri)",
+        }.get(st_meta["scope"], "dell'account (nessun ASIN della famiglia ha dati propri)")
         print(f"  [search term] {scope_label}: {st_meta['terms_converting']} con acquisti "
               f"su {st_meta['terms_total']} termini")
     else:
@@ -840,18 +877,24 @@ def main() -> int:
     if not args.no_sqp and args.sqp_dir:
         sqp_md, sqp_meta = listing_signals.search_query_performance_section(
             market, args.asin, args.sqp_dir, top=args.sqp_top)
+    if args.family and child_asins and not args.no_sqp and args.sqp_dir:
+        fam_sqp_md, fam_sqp_meta = listing_signals.aggregate_sqp_for_family(
+            market, child_asins, args.sqp_dir, top=args.sqp_top)
+        if fam_sqp_meta.get("available"):
+            sqp_md, sqp_meta = fam_sqp_md, fam_sqp_meta
     if sqp_meta.get("available"):
         print(f"  [sqp] {sqp_meta['queries_total']} query di mercato (periodo "
               f"{sqp_meta.get('start', '?')} -> {sqp_meta.get('end', '?')})")
     else:
         print(f"  [sqp] non incluso ({sqp_meta.get('reason')})")
 
-    # Concorrenti SOLO sui termini che convertono di questo ASIN (scope 'asin'):
-    # se i termini sono dell'intero account (nessun dato ads ancora per l'ASIN)
-    # non sono confermati come intento di ricerca per questo prodotto, quindi
-    # cercare "concorrenti" su quelle parole confronterebbe cose a caso.
+    # Concorrenti SOLO sui termini confermati (scope 'asin' o, per una famiglia,
+    # 'family'): se i termini sono dell'intero account (nessun dato ads ancora
+    # per l'ASIN ne' per i suoi child) non sono confermati come intento di
+    # ricerca per questo prodotto, quindi cercare "concorrenti" su quelle
+    # parole confronterebbe cose a caso.
     competitors, competitors_md = {}, ""
-    if not args.no_competitors and st_meta.get("available") and st_meta.get("scope") == "asin":
+    if not args.no_competitors and st_meta.get("available") and st_meta.get("scope") in ("asin", "family"):
         competitors = fetch_competitors_for_terms(st_meta["top_terms"], marketplace_id, args.asin)
         competitors_md = format_competitors_md(competitors)
         n_hits = sum(len(v) for v in competitors.values())
@@ -891,8 +934,8 @@ def main() -> int:
 
     # --- modalita' FAMIGLIA: produce un family.json per update_family.py
     if args.family:
-        child_skus, _theme = ufam.discover_children(sku, marketplace_id)
-        print(f"\nParent {sku}: {len(child_skus)} child ({', '.join(child_skus) or 'nessuno'})")
+        # child_skus/child_asins gia' scoperti in cima a main(): servivano prima
+        # per i termini di ricerca aggregati, non serve rifare la chiamata SP-API.
         # Il parent spesso non ha bullet/descrizione: se mancano, prendo quelli del primo child.
         if not current["bullet_point"] and child_skus:
             child_copy = fetch_current_copy(child_skus[0], marketplace_id, language_tag)
@@ -912,7 +955,19 @@ def main() -> int:
         with open(fam_out, "w", encoding="utf-8") as fh:
             json.dump(family, fh, ensure_ascii=False, indent=2)
         print(f"Family file salvato in {fam_out}")
-        print(f"Verifica con:\n  python .\\update_family.py --family .\\{fam_out} --diff")
+
+        if args.generate:
+            # Stesso controllo di check_quality.py --family, lanciato qui in automatico:
+            # non e' un gate (non fa fallire la build), solo un avviso ben visibile nel
+            # log se la copy condivisa non rispetta i termini che il brief ha appena letto.
+            print("\nControllo qualita' (copy condivisa):")
+            n_error, n_warning = cq.check_family_one(fam_out, f"{base}.json")
+            if n_error:
+                print(f"\n{n_error} ERROR nel controllo qualita': rileggi bullet/descrizione "
+                     f"prima di applicarli con update_family.py (o rilancia:\n"
+                     f"  python .\\check_quality.py --family .\\{fam_out})")
+
+        print(f"\nVerifica con:\n  python .\\update_family.py --family .\\{fam_out} --diff")
         return 0
 
     # --- generate opzionale (singolo prodotto)

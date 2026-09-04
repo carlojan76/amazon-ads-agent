@@ -179,6 +179,68 @@ def format_search_terms_md(terms: List[Dict[str, Any]], scope: str,
     return "\n".join(md) + "\n"
 
 
+def aggregate_search_terms_for_family(marketplace: str, asins: List[str], data_dir: str,
+                                      top: int = 20) -> Tuple[str, Dict[str, Any]]:
+    """Come search_terms_section, ma per una FAMIGLIA: unisce i termini che
+    convertono di ogni ASIN child che ha una campagna propria (scope=='asin'),
+    invece del singolo ASIN del parent (che quasi mai ha una campagna sua — i
+    child sono pubblicizzati singolarmente, il parent no). Un child senza dati
+    propri viene ignorato (niente doppio fallback sull'intero account: se
+    NESSUN child ha dati, e' il chiamante a ricadere su search_terms_section
+    per il parent, che a sua volta segnala esplicitamente lo scope
+    'marketplace' con l'avviso gia' esistente).
+
+    Ritorna (markdown, meta) con meta['scope'] == 'family' e
+    meta['contributing_asins'] = i child che hanno effettivamente contribuito
+    (per trasparenza: sapere DA QUALI child vengono i termini)."""
+    data = load_market_data(marketplace, data_dir)
+    if not data:
+        return "", {"available": False, "reason": f"nessun {marketplace}.json in {data_dir}"}
+
+    combined: Dict[str, Dict[str, Any]] = {}
+    contributing: List[str] = []
+    for asin in asins:
+        terms, scope = collect_search_terms(data, asin)
+        if scope != "asin" or not terms:
+            continue
+        contributing.append(asin)
+        for t in terms:
+            key = t["searchTerm"]
+            entry = combined.setdefault(
+                key, {"searchTerm": key, "matchTypes": set(), **{f: 0.0 for f in _SUM_FIELDS}})
+            for field in _SUM_FIELDS:
+                entry[field] += t[field]
+            entry["matchTypes"].update(t["matchTypes"])
+
+    if not combined:
+        return "", {"available": False,
+                    "reason": "nessun child della famiglia ha dati ads propri (scope 'asin')"}
+
+    out = []
+    for entry in combined.values():
+        clicks, spend, sales = entry["clicks"], entry["spend"], entry["sales7d"]
+        entry["cpc"] = spend / clicks if clicks else 0.0
+        entry["acos"] = spend / sales if sales else None
+        entry["cvr"] = entry["purchases7d"] / clicks if clicks else 0.0
+        entry["matchTypes"] = sorted(entry["matchTypes"])
+        out.append(entry)
+    out.sort(key=lambda e: (e["purchases7d"], e["clicks"], e["impressions"]), reverse=True)
+
+    label = f"famiglia (child: {', '.join(contributing)})"
+    md = format_search_terms_md(out, "asin", marketplace, label, top=top,
+                                generated_at=data.get("generated_at", ""))
+    meta = {
+        "available": True,
+        "scope": "family",
+        "contributing_asins": contributing,
+        "terms_total": len(out),
+        "terms_converting": len(converting_terms(out)),
+        "top_terms": [t["searchTerm"] for t in converting_terms(out)[:top]],
+        "avoid_terms": [t["searchTerm"] for t in avoid_terms(out)[:top]],
+    }
+    return md, meta
+
+
 def search_terms_section(marketplace: str, asin: str, data_dir: str,
                          top: int = 20) -> Tuple[str, Dict[str, Any]]:
     """Wrapper usato da build_context: ritorna (markdown, meta)."""
@@ -281,6 +343,19 @@ def search_query_performance_section(marketplace: str, asin: str, data_dir: str,
              "differenza di 'Termini che convertono'): usale per capire cosa cerca il "
              "mercato, non come sostituto dei termini con acquisti reali gia' verificati.\n")
 
+    # Query su cui QUESTO ASIN ha gia' generato almeno un acquisto REALE nel
+    # periodo: il segnale piu' vicino a "termine convertitore" che questa fonte
+    # possa dare, ma piu' debole dei "Termini che convertono" (Ads, aggregati
+    # su piu' settimane, attribuiti via ad group) — qui e' un solo periodo (di
+    # norma una settimana) e senza attribuzione ads esplicita. Usato da
+    # check_quality.py come WARNING, mai come ERROR: vedi COPY_CONTRACT.
+    purchase_confirmed = [
+        {"query": r.get("searchQuery", ""), "purchases": r.get("asinPurchaseCount"),
+         "volume": r.get("searchQueryVolume")}
+        for r in rows if (r.get("asinPurchaseCount") or 0) > 0
+    ]
+    purchase_confirmed.sort(key=lambda t: (t["purchases"] or 0, t["volume"] or 0), reverse=True)
+
     meta = {
         "available": True,
         "queries_total": len(rows),
@@ -288,5 +363,81 @@ def search_query_performance_section(marketplace: str, asin: str, data_dir: str,
         "start": data.get("start"),
         "end": data.get("end"),
         "top_queries_by_volume": [r.get("searchQuery", "") for r in ranked[:top]],
+        "purchase_confirmed_terms": purchase_confirmed[:top],
+    }
+    return "\n".join(md) + "\n", meta
+
+
+def aggregate_sqp_for_family(marketplace: str, asins: List[str], data_dir: str,
+                             top: int = 15) -> Tuple[str, Dict[str, Any]]:
+    """Come search_query_performance_section, ma per una FAMIGLIA: somma
+    asinPurchaseCount sulla stessa query tra tutti i child (searchQueryVolume
+    e' un dato di MERCATO, uguale per ogni ASIN che compare per quella query —
+    non va sommato, solo riusato). Un parent quasi mai ha righe SQP proprie
+    (e' raramente acquistabile/ricercato come tale): questo e' il modo in cui
+    la famiglia intera puo' comunque beneficiare del volume di ricerca reale.
+
+    Ritorna (markdown, meta) con meta['scope'] == 'family'."""
+    data = load_sqp_data(marketplace, data_dir)
+    if not data:
+        return "", {"available": False,
+                    "reason": f"nessun SQP_{marketplace.upper()}.json in {data_dir} "
+                             f"(lancia prima fetch_search_query_performance.py)"}
+
+    by_asin = data.get("by_asin") or {}
+    combined: Dict[str, Dict[str, Any]] = {}
+    contributing: List[str] = []
+    for asin in asins:
+        rows = by_asin.get(asin.upper()) or by_asin.get(asin) or []
+        if not rows:
+            continue
+        contributing.append(asin)
+        for r in rows:
+            query = r.get("searchQuery", "")
+            if not query:
+                continue
+            entry = combined.setdefault(query, {
+                "searchQuery": query,
+                "searchQueryVolume": r.get("searchQueryVolume"),
+                "searchQueryScore": r.get("searchQueryScore"),
+                "asinPurchaseCount": 0,
+            })
+            entry["asinPurchaseCount"] += (r.get("asinPurchaseCount") or 0)
+
+    if not combined:
+        return "", {"available": False,
+                    "reason": "nessun child della famiglia ha righe Search Query Performance"}
+
+    rows = list(combined.values())
+    ranked = sorted(rows, key=lambda r: (r.get("searchQueryVolume") or 0), reverse=True)
+
+    md = ["\n## Volume di ricerca reale (Search Query Performance, aggregato sui child)\n",
+         f"Come sopra, ma sommato su tutti i child della famiglia con dati propri "
+         f"({', '.join(contributing)}): il parent quasi mai ha righe sue. "
+         f"Periodo {data.get('start', '?')} -> {data.get('end', '?')}.\n"]
+    md.append("| Query | Volume ricerca | Acquisti famiglia (periodo) |")
+    md.append("|---|---:|---:|")
+    for r in ranked[:top]:
+        md.append(f"| {r['searchQuery']} | {r.get('searchQueryVolume', '-')} | "
+                  f"{r['asinPurchaseCount']:.0f} |")
+    md.append("\nAcquisti sommati sui child: un acquisto su UN child, sulla stessa query, "
+             "conta come segnale per l'intera famiglia (bullet/descrizione sono condivisi).\n")
+
+    purchase_confirmed = [
+        {"query": r["searchQuery"], "purchases": r["asinPurchaseCount"], "volume": r["searchQueryVolume"]}
+        for r in rows if r["asinPurchaseCount"] > 0
+    ]
+    purchase_confirmed.sort(key=lambda t: (t["purchases"] or 0, t["volume"] or 0), reverse=True)
+
+    meta = {
+        "available": True,
+        "scope": "family",
+        "contributing_asins": contributing,
+        "period": data.get("period"),
+        "start": data.get("start"),
+        "end": data.get("end"),
+        "queries_total": len(rows),
+        "top_queries_by_volume": [r["searchQuery"] for r in ranked[:top]],
+        "purchase_confirmed_terms": purchase_confirmed[:top],
     }
     return "\n".join(md) + "\n", meta

@@ -323,9 +323,14 @@ def check_family_converting_terms(shared: Dict[str, Any], meta: Dict[str, Any]) 
     scope = meta.get("scope")
     full = _family_full_text(shared)
     problems = []
+    # 'family' = aggregato dai child con dati ads propri (vedi
+    # aggregate_search_terms_for_family in listing_signals.py): sono ASIN
+    # reali della famiglia, non rumore dell'intero account, quindi vale lo
+    # stesso peso di 'asin'. Solo 'marketplace' (nessun ASIN della famiglia
+    # ha dati propri) resta un WARNING, non vincolante.
     for term in top_terms:
         if term.lower() not in full:
-            sev = "ERROR" if scope == "asin" else "WARNING"
+            sev = "ERROR" if scope in ("asin", "family") else "WARNING"
             problems.append(
                 f"{sev:<8} termine convertitore assente dal testo condiviso: '{term}' "
                 f"non compare ne' nei bullet ne' in descrizione")
