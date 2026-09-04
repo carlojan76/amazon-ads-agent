@@ -157,8 +157,8 @@ Come chiamano il prodotto gli altri venditori che compaiono cercando questi term
 **"grattoir chat":**
 - TRIXIE Carton griffoir solide Wild Cat pour chat – 41 × 24 × 7 cm — TRIXIE
 - Conlun Grattoir pour Chat, Forme en L Montable au Mur, Plateau à Gratter Vertical, Carton Durable pour Protéger Les Meubles des Chats d'Intérieur, Grand,Effet Bois,58 cm — Conlun
-- Amazon Basics Arbre à chat d'intérieur standard avec jouet suspendu, gris, 80 cm — Amazon Basics
 - EHEYCIGA Griffoir en L 68cm, Vertical pour Chat d'Intérieur — EHEYCIGA
+- Amazon Basics Arbre à chat d'intérieur standard avec jouet suspendu, gris, 80 cm — Amazon Basics
 - TRIXIE Carton à gratter Wild Cat avec Herbe à Chat - pour Le Soin Naturel des Griffes - 41 × 7 × 24 cm - Bleu - 48000 (Lot de 2) — Trixie
 
 **"poteau griffoir chat":**
@@ -208,6 +208,6 @@ Come chiamano il prodotto gli altri venditori che compaiono cercando questi term
 - Grand Arbre à Chat de 170 cm, avec 2 Capsules spatiales, 14 piliers en Jute, échelle, Grotte, Jouets pour Chat, Plateformes en Peluche, capacité de Charge 30 kg — Mekidulu
 - Fobyfurny Arbre à Chat Bois avec Litière, 190 cm, Blanc et Marron — Fobyfurny
 - Hey-brother Arbre à Chat Moderne en Bois, Hauteur 167 cm, MPJ111BT — Hey-brother
-- Feandrea Arbre à Chat Moderne avec Cache-litière, 178 cm — Feandrea
+- Heybly Arbre à Chat Moderne, Arbre à Chat en Bois avec 5 Griffoirs, Planche à Griffer, Panier, Tour de Jeu 156 cm, Niche, Plateforme, Hamac, 3 Pompons, Tapis Lavables, Noyer HCT120WB — Heybly
 
 
