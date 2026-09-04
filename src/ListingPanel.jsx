@@ -214,6 +214,12 @@ export default function ListingPanel({ marketplace = "" }) {
   const [bulletText, setBulletText] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
 
+  // Istruzione libera per Claude, valida solo per il prossimo "Genera" su
+  // questo ASIN/mercato (es. "niente emoji", "e' MDF non legno"): la manda
+  // al workflow come input extra_instructions, build_context.py la accoda
+  // allo user message con priorita' sulle regole generiche del contratto.
+  const [extraInstructions, setExtraInstructions] = useState("");
+
   const repoOk = isValidRepo(ghRepo);
   const asinOk = isValidAsin(asin);
   const [owner, repo] = ghRepo.split("/").map((s) => (s || "").trim());
@@ -222,7 +228,7 @@ export default function ListingPanel({ marketplace = "" }) {
   useEffect(() => {
     setContext(null); setContent(null); setPreviewedJson(null); setConfirmText("");
     setAppliedInfo(null); setRun(null); setError(null);
-    setTitleText(""); setBulletText(""); setDescriptionText("");
+    setTitleText(""); setBulletText(""); setDescriptionText(""); setExtraInstructions("");
   }, [asin, mkt]);
 
   const populateEditableFields = (cont) => {
@@ -282,6 +288,7 @@ export default function ListingPanel({ marketplace = "" }) {
         marketplace: mkt, asin, sku: "", generate: "true", family: "false",
         source_marketplace: "", reviews_sort: "MENTIONS", search_terms_top: "20",
         no_image: "false", no_search_terms: "false", no_sqp: "false",
+        extra_instructions: extraInstructions.trim(),
       });
       if (final?.conclusion === "success") {
         await loadFiles();
@@ -433,6 +440,19 @@ export default function ListingPanel({ marketplace = "" }) {
             Lancia "{buildWorkflow}": costruisce il brief (recensioni, A+, termini di ricerca, Search Query
             Performance) e genera la copy. Non scrive nulla su Amazon.
           </span>
+        </div>
+        <div style={{ marginBottom: S.sm }}>
+          <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: 4 }}>
+            Istruzioni particolari per Claude (opzionale)
+          </div>
+          <textarea value={extraInstructions} onChange={(e) => setExtraInstructions(e.target.value)}
+            placeholder='es. "niente emoji nel testo" oppure "e&apos; MDF, non legno: correggi ovunque"'
+            aria-label="Istruzioni particolari per Claude"
+            style={{ ...input, width: "100%", minHeight: 56, resize: "vertical", lineHeight: 1.5, fontFamily: F.ui }} />
+          <div style={{ fontSize: T.micro, color: C.textDim, marginTop: 4, lineHeight: 1.5 }}>
+            Vale solo per il prossimo "Genera" su questo ASIN/mercato: ha priorita' sulle regole generiche
+            del contratto se in conflitto. Si azzera cambiando ASIN o mercato.
+          </div>
         </div>
         {!ghUser && <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.sm }}>Connetti prima un token GitHub (passo 1).</div>}
       </div>

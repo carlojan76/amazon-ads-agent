@@ -215,6 +215,12 @@ export default function FamilyPanel({ marketplace = "" }) {
   const [descriptionText, setDescriptionText] = useState("");
   const [titleTemplate, setTitleTemplate] = useState("");
 
+  // Istruzione libera per Claude, valida solo per il prossimo "Genera" su
+  // questo parent/mercato (es. "niente emoji", "e' MDF non legno"): la manda
+  // al workflow come input extra_instructions, build_context.py la accoda
+  // allo user message con priorita' sulle regole generiche del contratto.
+  const [extraInstructions, setExtraInstructions] = useState("");
+
   const repoOk = isValidRepo(ghRepo);
   const asinOk = isValidAsin(asin);
   const [owner, repo] = ghRepo.split("/").map((s) => (s || "").trim());
@@ -222,7 +228,7 @@ export default function FamilyPanel({ marketplace = "" }) {
   useEffect(() => {
     setContext(null); setFamily(null); setPreviewedJson(null); setConfirmText("");
     setAppliedInfo(null); setRun(null); setError(null);
-    setBulletText(""); setDescriptionText(""); setTitleTemplate("");
+    setBulletText(""); setDescriptionText(""); setTitleTemplate(""); setExtraInstructions("");
   }, [asin, mkt]);
 
   const populateEditableFields = (fam) => {
@@ -281,6 +287,7 @@ export default function FamilyPanel({ marketplace = "" }) {
         marketplace: mkt, asin, sku: "", generate: "true", family: "true",
         source_marketplace: "", reviews_sort: "MENTIONS", search_terms_top: "20",
         no_image: "false", no_search_terms: "false", no_sqp: "false",
+        extra_instructions: extraInstructions.trim(),
       });
       if (final?.conclusion === "success") await loadFiles();
     } catch (err) {
@@ -468,6 +475,23 @@ export default function FamilyPanel({ marketplace = "" }) {
             Lancia "{buildWorkflow}" con family=true sull'ASIN del parent: scopre i child, genera
             bullet/descrizione condivisi e un titolo con placeholder ({"{color}"}/{"{size}"}).
           </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: S.md, marginBottom: S.sm }}>
+          <div style={{ width: 78, flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: 4 }}>
+              Istruzioni particolari per Claude (opzionale)
+            </div>
+            <textarea value={extraInstructions} onChange={(e) => setExtraInstructions(e.target.value)}
+              placeholder='es. "niente emoji nel testo" oppure "e&apos; MDF, non legno: correggi ovunque"'
+              aria-label="Istruzioni particolari per Claude"
+              style={{ ...input, width: "100%", minHeight: 56, resize: "vertical", lineHeight: 1.5, fontFamily: F.ui }} />
+            <div style={{ fontSize: T.micro, color: C.textDim, marginTop: 4, lineHeight: 1.5 }}>
+              Vale solo per il prossimo "Genera" su questo parent/mercato (non per "Aggiorna solo termini
+              di ricerca", che non chiama Claude): ha priorita' sulle regole generiche del contratto se in
+              conflitto. Si azzera cambiando ASIN o mercato.
+            </div>
+          </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: S.md, flexWrap: "wrap" }}>
           <div style={{ width: 78, flexShrink: 0 }} />
