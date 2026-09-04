@@ -552,7 +552,7 @@ STILE:
 """
 
 
-def _claude_json(system: str, user: str, max_tokens: int = 4096,
+def _claude_json(system: str, user: str, max_tokens: int = 6000,
                  images: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """POST unico verso la Messages API; ritorna il JSON parsato dalla risposta.
     Impone JSON puro (niente backtick/preamboli) via system prompt del chiamante.
@@ -567,7 +567,12 @@ def _claude_json(system: str, user: str, max_tokens: int = 4096,
     # non scatta e il model finisce vuoto (da cui l'errore "String should have at
     # least 1 character"). Con "or" il default scatta anche su stringa vuota.
     model = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-5"
-    max_tokens = int(os.getenv("ANTHROPIC_MAX_TOKENS", max_tokens))
+    # Stesso motivo dell'"or" sopra su ANTHROPIC_MODEL: se il workflow imposta questa
+    # env var da un secret non configurato, arriva stringa vuota (non assente), quindi
+    # os.getenv(..., default) NON scatterebbe e int("") esploderebbe. "or" fa scattare
+    # il default anche su stringa vuota.
+    max_tokens_env = os.getenv("ANTHROPIC_MAX_TOKENS") or ""
+    max_tokens = int(max_tokens_env) if max_tokens_env.strip() else max_tokens
 
     # Immagini prima del testo: la Messages API rende meglio con questo ordine.
     content: Any = user if not images else [*images, {"type": "text", "text": user}]
@@ -612,9 +617,23 @@ def _claude_json(system: str, user: str, max_tokens: int = 4096,
                 raise RuntimeError(
                     f"Risposta del modello non parsabile come JSON ({exc}). "
                     f"Inizio risposta: {text[:200]!r}") from exc
+        # Il titolo/5 bullet/descrizione di una copy normale non dovrebbero mai
+        # avvicinarsi a questi limiti (poche centinaia di token in tutto): se si
+        # tronca comunque, e' piu' utile vedere COSA stava scrivendo il modello
+        # (sta scrivendo contenuto valido ma lungo, o si e' incastrato a ripetere
+        # una frase?) che solo dirci "alza il limite" alla cieca — l'errore prima
+        # non stampava mai il testo troncato, rendendo impossibile la diagnosi.
+        tail = text[-600:] if text else "(risposta vuota)"
         raise RuntimeError(
-            f"Risposta troncata anche con {max_tokens * 2} token: riduci la copy "
-            f"richiesta o alza ANTHROPIC_MAX_TOKENS.")
+            f"Risposta troncata anche con {max_tokens * 2} token ({len(text)} caratteri "
+            f"ricevuti finora). Coda della risposta troncata, per capire se il modello "
+            f"stava producendo contenuto valido o si e' incastrato a ripetere qualcosa:\n"
+            f"---\n{tail}\n---\n"
+            f"Se sembra contenuto valido semplicemente lungo: alza ANTHROPIC_MAX_TOKENS "
+            f"(secret del repo). Se invece si ripete o va fuori tema: e' un problema del "
+            f"prompt (probabilmente troppi vincoli in conflitto tra loro, es. istruzioni "
+            f"speciali + termini esatti da includere + limite ripetizioni parole nel "
+            f"titolo) — riduci le richieste per questa generazione e riprova.")
 
 
 def _extra_instructions_block(extra_instructions: str) -> str:
