@@ -46,6 +46,22 @@ def load_market_data(marketplace: str, data_dir: str) -> Optional[Dict[str, Any]
         return None
 
 
+def all_advertised_asins(data: Dict[str, Any]) -> List[str]:
+    """ASIN distinti pubblicizzati in questo mercato (fonte: reports.products,
+    lo stesso report che alimenta adgroups_for_asin). E' la lista di 'ASIN
+    attivi' che fetch_search_query_performance.py usa per sapere su quali
+    prodotti girare, senza bisogno di un catalogo statico separato."""
+    products = (data.get("reports") or {}).get("products") or []
+    seen: List[str] = []
+    seen_set = set()
+    for row in products:
+        asin = str(row.get("advertisedAsin", "")).strip().upper()
+        if asin and asin not in seen_set:
+            seen_set.add(asin)
+            seen.append(asin)
+    return seen
+
+
 def adgroups_for_asin(data: Dict[str, Any], asin: str) -> set:
     """Ad group in cui questo ASIN e' pubblicizzato."""
     products = (data.get("reports") or {}).get("products") or []
@@ -187,3 +203,88 @@ def search_terms_section(marketplace: str, asin: str, data_dir: str,
         "avoid_terms": [t["searchTerm"] for t in avoid_terms(terms)[:top]],
     }
     return md, meta
+
+
+# --------------------------------------------------------- Search Query Performance
+#
+# Fonte separata da quella sopra: i "termini che convertono" arrivano dai TUOI
+# report Amazon Ads (solo query su cui hai gia' fatto pubblicita'). Questa
+# sezione arriva invece dal report Brand Analytics "Search Query Performance"
+# (fetch_search_query_performance.py, SP-API Reports API) e mostra il volume
+# di ricerca REALE di mercato per query, con la quota che QUESTO ASIN ne
+# cattura — utile anche per query su cui non hai MAI fatto pubblicita'.
+
+
+def load_sqp_data(marketplace: str, data_dir: str) -> Optional[Dict[str, Any]]:
+    path = os.path.join(data_dir, f"SQP_{marketplace.upper()}.json")
+    if not os.path.isfile(path):
+        return None
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _fmt_share(value: Any) -> str:
+    """La documentazione Amazon non specifica se le quote (asin*Share) sono
+    espresse come frazione (0-1) o gia' in percentuale (0-100): trattiamo
+    <=1 come frazione (moltiplico per 100) e il resto come gia' in scala
+    percentuale, cosi' il numero mostrato resta leggibile in entrambi i casi
+    senza dare per scontata una convenzione non confermata."""
+    if value is None:
+        return "-"
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return "-"
+    return f"{v * 100:.1f}%" if v <= 1 else f"{v:.1f}%"
+
+
+def search_query_performance_section(marketplace: str, asin: str, data_dir: str,
+                                     top: int = 15) -> Tuple[str, Dict[str, Any]]:
+    """Wrapper usato da build_context: ritorna (markdown, meta). Stringa vuota
+    se fetch_search_query_performance.py non e' ancora stato lanciato per
+    questo mercato/ASIN (fonte best-effort, come le altre)."""
+    data = load_sqp_data(marketplace, data_dir)
+    if not data:
+        return "", {"available": False,
+                    "reason": f"nessun SQP_{marketplace.upper()}.json in {data_dir} "
+                             f"(lancia prima fetch_search_query_performance.py)"}
+
+    by_asin = data.get("by_asin") or {}
+    rows = by_asin.get(asin.upper()) or by_asin.get(asin) or []
+    if not rows:
+        return "", {"available": False,
+                    "reason": "nessuna riga Search Query Performance per questo ASIN "
+                             "(nessun dato Amazon per il periodo, o ASIN non incluso nel fetch)"}
+
+    ranked = sorted(rows, key=lambda r: (r.get("searchQueryVolume") or 0), reverse=True)
+
+    md = ["\n## Volume di ricerca reale (Search Query Performance, non stima)\n",
+         f"Quanto i clienti cercano davvero ogni query su {marketplace} e la quota che "
+         f"QUESTO ASIN ne cattura (impression/click/carrello/acquisti), periodo "
+         f"{data.get('start', '?')} -> {data.get('end', '?')}. A differenza dei 'Termini "
+         "che convertono' sopra (solo dati delle TUE campagne ads), qui il volume e' di "
+         "mercato: mostra anche query che i clienti cercano ma su cui non hai mai fatto "
+         "pubblicita'. Rank 1 = query piu' rilevante per il TUO catalogo brand secondo Amazon.\n"]
+    md.append("| Query | Volume ricerca | Rank | Quota impression | Quota click | Quota acquisti |")
+    md.append("|---|---:|---:|---:|---:|---:|")
+    for r in ranked[:top]:
+        md.append(
+            f"| {r.get('searchQuery', '')} | {r.get('searchQueryVolume', '-')} | "
+            f"{r.get('searchQueryScore', '-')} | {_fmt_share(r.get('asinImpressionShare'))} | "
+            f"{_fmt_share(r.get('asinClickShare'))} | {_fmt_share(r.get('asinPurchaseShare'))} |")
+    md.append("\nQueste query NON sono confermate come acquirenti di QUESTO prodotto (a "
+             "differenza di 'Termini che convertono'): usale per capire cosa cerca il "
+             "mercato, non come sostituto dei termini con acquisti reali gia' verificati.\n")
+
+    meta = {
+        "available": True,
+        "queries_total": len(rows),
+        "period": data.get("period"),
+        "start": data.get("start"),
+        "end": data.get("end"),
+        "top_queries_by_volume": [r.get("searchQuery", "") for r in ranked[:top]],
+    }
+    return "\n".join(md) + "\n", meta

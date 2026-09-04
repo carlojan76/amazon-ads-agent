@@ -461,6 +461,9 @@ def build_markdown(pack: Dict[str, Any]) -> str:
     if pack.get("search_terms_md"):
         md.append(pack["search_terms_md"])
 
+    if pack.get("sqp_md"):
+        md.append(pack["sqp_md"])
+
     if pack.get("competitors_md"):
         md.append(pack["competitors_md"])
 
@@ -506,6 +509,12 @@ STILE:
   simile). Non copiare le loro affermazioni e non attribuire al TUO prodotto caratteristiche
   che vedi nei loro titoli: quello che scrivi deve restare confermato dalla foto e dalla
   scheda di questo ASIN.
+- Se il brief contiene la sezione "Volume di ricerca reale (Search Query Performance)", usala
+  per capire QUALI query i clienti cercano davvero sul mercato e con che frequenza, anche
+  query su cui non hai mai fatto pubblicita'. NON e' una conferma di acquisto per questo ASIN
+  (a differenza di "Termini che convertono"): una query ad alto volume ma bassa quota
+  acquisti per questo ASIN e' un'opportunita' da valutare, non un termine da infilare a forza
+  nel titolo. Preferisci sempre i "Termini che convertono" quando i due elenchi si sovrappongono.
 - Voce del brand: pratica, calda, mai iperbolica. Chiudi la descrizione con la firma Lupo & Felix.
 """
 
@@ -665,7 +674,9 @@ def assemble_pack(asin: str, marketplace: str, sku: Optional[str] = None,
                   want_reviews: bool = True, reviews_sort: str = "MENTIONS",
                   reviews: Optional[Dict[str, Any]] = None,
                   search_terms_dir: Optional[str] = None,
-                  search_terms_top: int = 20) -> Dict[str, Any]:
+                  search_terms_top: int = 20,
+                  sqp_dir: Optional[str] = None,
+                  sqp_top: int = 15) -> Dict[str, Any]:
     """Raccoglie tutte le fonti per un ASIN e restituisce il pack. Se 'reviews'
     e' passato (cache condivisa tra mercati), non le riscarica."""
     marketplace_id = config.MARKETPLACES[marketplace]
@@ -696,11 +707,21 @@ def assemble_pack(asin: str, marketplace: str, sku: Optional[str] = None,
                   f"{search_terms_meta['terms_converting']} termini con acquisti "
                   f"su {search_terms_meta['terms_total']}", file=sys.stderr)
 
+    sqp_md, sqp_meta = "", {"available": False}
+    if sqp_dir:
+        sqp_md, sqp_meta = listing_signals.search_query_performance_section(
+            marketplace, asin, sqp_dir, top=sqp_top)
+        if not sqp_meta.get("available"):
+            print(f"   [sqp] nessun dato: {sqp_meta.get('reason')}", file=sys.stderr)
+        else:
+            print(f"   [sqp] {sqp_meta['queries_total']} query di mercato", file=sys.stderr)
+
     return {
         "asin": asin, "sku": sku, "marketplace": marketplace,
         "current_copy": current, "max_lengths": max_lengths,
         "catalog": catalog, "aplus": aplus, "reviews": reviews,
         "search_terms_md": search_terms_md, "search_terms_meta": search_terms_meta,
+        "sqp_md": sqp_md, "sqp_meta": sqp_meta,
     }
 
 
@@ -756,6 +777,12 @@ def main() -> int:
     ap.add_argument("--no-search-terms", action="store_true",
                     help="Non includere i termini di ricerca nel brief")
     ap.add_argument("--search-terms-top", type=int, default=20)
+    ap.add_argument("--sqp-dir", default="../public/data",
+                    help="Cartella dei JSON pubblicati da fetch_search_query_performance.py "
+                         "(SQP_<MKT>.json, volume di ricerca reale). '' o --no-sqp per saltare.")
+    ap.add_argument("--no-sqp", action="store_true",
+                    help="Non includere il volume di ricerca reale (Search Query Performance) nel brief")
+    ap.add_argument("--sqp-top", type=int, default=15)
     ap.add_argument("--no-competitors", action="store_true",
                     help="Non cercare i concorrenti sui termini che convertono (searchCatalogItems)")
     args = ap.parse_args()
@@ -809,6 +836,16 @@ def main() -> int:
     else:
         print(f"  [search term] non inclusi ({st_meta.get('reason')})")
 
+    sqp_md, sqp_meta = "", {"available": False, "reason": "disattivato"}
+    if not args.no_sqp and args.sqp_dir:
+        sqp_md, sqp_meta = listing_signals.search_query_performance_section(
+            market, args.asin, args.sqp_dir, top=args.sqp_top)
+    if sqp_meta.get("available"):
+        print(f"  [sqp] {sqp_meta['queries_total']} query di mercato (periodo "
+              f"{sqp_meta.get('start', '?')} -> {sqp_meta.get('end', '?')})")
+    else:
+        print(f"  [sqp] non incluso ({sqp_meta.get('reason')})")
+
     # Concorrenti SOLO sui termini che convertono di questo ASIN (scope 'asin'):
     # se i termini sono dell'intero account (nessun dato ads ancora per l'ASIN)
     # non sono confermati come intento di ricerca per questo prodotto, quindi
@@ -831,6 +868,8 @@ def main() -> int:
         "reviews": reviews,
         "search_terms_md": st_md,
         "search_terms_meta": st_meta,
+        "sqp_md": sqp_md,
+        "sqp_meta": sqp_meta,
         "competitors": competitors,
         "competitors_md": competitors_md,
     }
