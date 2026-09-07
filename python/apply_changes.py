@@ -562,6 +562,29 @@ def _campaign_budget(c):
     return float(b or 0)
 
 
+def _campaign_ended(c) -> bool:
+    """True se la campagna ha una endDate nel passato. Amazon rifiuta QUALUNQUE
+    PUT su una campagna "Ended" ("Ended campaign cannot be updated without end
+    date extension." — visto in un run reale, su un update_budget) finche' la
+    endDate non viene estesa o rimossa: cosa che si fa solo su Seller
+    Central/Ads console, non da qui. Meglio segnalarlo come skip PRIMA di
+    tentare la PUT (che fallirebbe comunque, sprecando la chiamata e facendo
+    fallire l'intero batch con exit code 2 anche se il resto e' andato bene)
+    che scoprirlo dall'errore. Formato endDate osservato nell'API: 'YYYYMMDD'
+    (i trattini, se presenti, vengono tollerati)."""
+    end = str(c.get("endDate") or "").strip()
+    if not end:
+        return False
+    digits = end.replace("-", "")
+    if len(digits) != 8 or not digits.isdigit():
+        return False
+    try:
+        end_date = datetime.strptime(digits, "%Y%m%d").date()
+    except ValueError:
+        return False
+    return end_date < datetime.today().date()
+
+
 def enrich_with_current_state(actions, state):
     """Riempie old_bid/old_budget con i valori REALI e segnala le no-op.
 
@@ -599,6 +622,14 @@ def enrich_with_current_state(actions, state):
                 continue
             a.setdefault("campaign", c.get("name", ""))
             cur_state = str(c.get("state", "")).upper()
+            if _campaign_ended(c):
+                notes.append(
+                    f"azione {i}: campagna '{a.get('campaign')}' e' ENDED (end date "
+                    f"{c.get('endDate')} nel passato) — Amazon rifiuta qualunque modifica "
+                    f"finche' non estendi/rimuovi la data di fine su Seller Central o "
+                    f"sulla Ads console; azione rimossa")
+                skip.add(i)
+                continue
             if t == "update_budget":
                 a["old_budget"] = round(_campaign_budget(c), 2)
                 if abs(float(a["new_budget"]) - _campaign_budget(c)) < 0.005:
