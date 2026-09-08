@@ -43,11 +43,11 @@ MARKETPLACES = {
 MARKETPLACE_ID_TO_CODE = {v: k for k, v in MARKETPLACES.items()}
 
 # Mercati effettivamente attivi per il business (usati dal registro transazioni
-# e dai loop multi-mercato). Per aggiungere ES/UK basta cambiare QUI (o la
-# variabile d'ambiente ACTIVE_MARKETS="IT,FR,DE,ES"), non serve toccare altri file.
+# e dai loop multi-mercato). Per aggiungere UK basta cambiare QUI (o la
+# variabile d'ambiente ACTIVE_MARKETS="IT,FR,DE,ES,UK"), non serve toccare altri file.
 ACTIVE_MARKETS = [
     m.strip().upper()
-    for m in os.getenv("ACTIVE_MARKETS", "IT,FR,DE").split(",")
+    for m in os.getenv("ACTIVE_MARKETS", "IT,FR,DE,ES").split(",")
     if m.strip()
 ]
 ACTIVE_MARKETPLACE_IDS = [MARKETPLACES[m] for m in ACTIVE_MARKETS if m in MARKETPLACES]

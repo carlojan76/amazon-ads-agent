@@ -39,8 +39,8 @@ SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASS = os.getenv("SMTP_PASS", "")
 EMAIL_TO = os.getenv("EMAIL_TO", "")
 
-# Marketplaces da analizzare (separati da virgola in env: "IT,FR,DE")
-MARKETPLACES = os.getenv("MARKETPLACES", "IT,FR,DE").split(",")
+# Marketplaces da analizzare (separati da virgola in env: "IT,FR,DE,ES")
+MARKETPLACES = os.getenv("MARKETPLACES", "IT,FR,DE,ES").split(",")
 DAYS = int(os.getenv("ANALYSIS_DAYS", "14"))
 
 

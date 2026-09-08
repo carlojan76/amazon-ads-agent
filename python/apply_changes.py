@@ -467,6 +467,10 @@ GUARDRAILS = {
     "max_budget": 100.00,
     "max_actions": 80,
     "max_new_campaigns": 4,
+    # Somma dei budget giornalieri di TUTTE le campagne create in un solo run.
+    # Serve perche' il limite per singola campagna non impedisce di crearne
+    # quattro da 90 EUR/giorno: quello che conta per il portafoglio e' il totale.
+    "max_new_budget_total": 100.00,
 }
 
 
@@ -778,10 +782,54 @@ def check_guardrails(actions, g=None):
                     bad.append(f"azione {i}: budget '{a.get('campaign', '')}' da EUR {old:.2f} a EUR {new:.2f} "
                                f"= {delta:.0f}% di variazione (max {g['max_budget_change_pct']}%)")
         elif t == "create_campaign":
-            c = a.get("campaign", {})
-            b = float(c.get("dailyBudget", 0) or 0)
-            if b > g["max_budget"]:
-                bad.append(f"azione {i}: nuova campagna con budget EUR {b:.2f}/giorno (max {g['max_budget']:.2f})")
+            bad.extend(_guardrails_create(a, i, g))
+
+    # Somma dei budget delle campagne nuove: il limite per singola campagna non
+    # basta (4 campagne da 90 EUR passerebbero una per una).
+    tot_new = sum(float((a.get("campaign") or {}).get("dailyBudget", 0) or 0)
+                  for a in actions if a.get("type") == "create_campaign")
+    if tot_new > g.get("max_new_budget_total", g["max_budget"]):
+        bad.append(f"le campagne nuove sommano EUR {tot_new:.2f}/giorno di budget "
+                   f"(max {g.get('max_new_budget_total', g['max_budget']):.2f} per run)")
+    return bad
+
+
+def _guardrails_create(a, i, g):
+    """Limiti di sicurezza DENTRO una create_campaign.
+
+    Prima qui si controllava solo il dailyBudget massimo: i bid delle keyword,
+    il defaultBid dell'ad group e i bid degli auto target passavano senza alcun
+    controllo, mentre lo STESSO bid in un'azione add_keyword veniva bloccato.
+    Siccome il blueprint e' editabile a mano nella UI prima di applicarlo, era
+    proprio il caso che i guardrail dicono di voler impedire (bid 45.00 al posto
+    di 0.45), solo per un'altra strada.
+    """
+    bad = []
+    c = a.get("campaign", {})
+    b = float(c.get("dailyBudget", 0) or 0)
+    if b > g["max_budget"]:
+        bad.append(f"azione {i}: nuova campagna con budget EUR {b:.2f}/giorno (max {g['max_budget']:.2f})")
+    elif b < g["min_budget"]:
+        bad.append(f"azione {i}: nuova campagna con budget EUR {b:.2f}/giorno "
+                   f"(min {g['min_budget']:.2f}: sotto questa soglia Amazon spende male)")
+
+    for j, grp in enumerate(a.get("adGroups", []) or []):
+        db = grp.get("defaultBid")
+        if isinstance(db, (int, float)) and not (g["min_bid"] <= float(db) <= g["max_bid"]):
+            bad.append(f"azione {i}.adGroup{j} ('{grp.get('name', '?')}'): bid base EUR {float(db):.2f} "
+                       f"fuori dall'intervallo consentito (EUR {g['min_bid']:.2f}-{g['max_bid']:.2f})")
+        for k in grp.get("keywords", []) or []:
+            kb = k.get("bid")
+            if isinstance(kb, (int, float)) and not (g["min_bid"] <= float(kb) <= g["max_bid"]):
+                bad.append(f"azione {i}.adGroup{j}: keyword '{k.get('keywordText', '?')}' con bid "
+                           f"EUR {float(kb):.2f} fuori dall'intervallo consentito "
+                           f"(EUR {g['min_bid']:.2f}-{g['max_bid']:.2f})")
+        for x in grp.get("autoTargets", []) or []:
+            xb = x.get("bid")
+            if isinstance(xb, (int, float)) and not (g["min_bid"] <= float(xb) <= g["max_bid"]):
+                bad.append(f"azione {i}.adGroup{j}: auto target '{x.get('expressionType', '?')}' con bid "
+                           f"EUR {float(xb):.2f} fuori dall'intervallo consentito "
+                           f"(EUR {g['min_bid']:.2f}-{g['max_bid']:.2f})")
     return bad
 
 

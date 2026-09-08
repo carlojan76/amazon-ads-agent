@@ -40,7 +40,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).parent))
 from amazon_ads_api import fetch_all_data, AmazonAdsAPI, CONFIG  # noqa: E402
-from apply_changes import validate, normalize_actions  # riusa validazione+normalizzazione del blueprint  # noqa: E402
+from apply_changes import validate, normalize_actions, check_guardrails  # riusa validazione+normalizzazione+limiti del blueprint  # noqa: E402
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-6"
@@ -49,6 +49,31 @@ ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-6"
 # seller (IT/FR/DE) usiamo la v4, disponibile ovunque.
 KW_REC_VND = "application/vnd.spkeywordsrecommendation.v4+json"
 
+# Lingua e valuta per mercato. Il codice paese da solo NON basta a far scrivere
+# le keyword nella lingua giusta: le recommendations Amazon arrivano gia' nella
+# lingua locale, ma le keyword estratte dal listing/recensioni e le negative
+# inventate dal modello seguivano solo un'inferenza implicita. Qui la lingua
+# viene dichiarata esplicitamente nel prompt.
+MARKET_LOCALE = {
+    "IT": {"lingua": "italiano", "valuta": "EUR"},
+    "FR": {"lingua": "francese", "valuta": "EUR"},
+    "DE": {"lingua": "tedesco", "valuta": "EUR"},
+    "ES": {"lingua": "spagnolo (castigliano)", "valuta": "EUR"},
+    "UK": {"lingua": "inglese britannico", "valuta": "GBP"},
+    "NL": {"lingua": "olandese", "valuta": "EUR"},
+    "SE": {"lingua": "svedese", "valuta": "SEK"},
+    "PL": {"lingua": "polacco", "valuta": "PLN"},
+    "BE": {"lingua": "olandese e francese (mercato bilingue)", "valuta": "EUR"},
+    "IE": {"lingua": "inglese", "valuta": "EUR"},
+}
+
+# Strutture ammesse per --structure (le regole vere stanno in _structure_rules).
+STRUCTURES = ("auto", "shared", "per_child")
+
+
+def _locale(marketplace):
+    return MARKET_LOCALE.get(str(marketplace).upper(), {"lingua": f"lingua locale di {marketplace}", "valuta": "EUR"})
+
 
 def _num(v):
     try:
@@ -56,6 +81,23 @@ def _num(v):
     except Exception:
         m = re.findall(r"-?\d+\.?\d*", str(v or "").replace(",", ""))
         return float(m[0]) if m else 0.0
+
+
+def _campaign_ended(c) -> bool:
+    """True se la campagna ha una endDate nel passato (stessa logica di
+    apply_changes._campaign_ended e weekly_analysis._campaign_ended: una
+    campagna "Ended" resta spesso con state ENABLED, quindi lo stato da solo
+    non basta a dire se e' viva)."""
+    end = str(c.get("endDate") or "").strip()
+    if not end:
+        return False
+    digits = end.replace("-", "")
+    if len(digits) != 8 or not digits.isdigit():
+        return False
+    try:
+        return datetime.strptime(digits, "%Y%m%d").date() < datetime.today().date()
+    except ValueError:
+        return False
 
 
 # ---------------------------------------------------------------- fonte 1: storico
@@ -68,18 +110,47 @@ def build_family_seed(data, family_asins):
     strp = reports.get("searchTerms", [])
 
     cstate = {str(c.get("campaignId", "")): str(c.get("state", "")).upper() for c in data.get("campaigns", [])}
+    cended = {str(c.get("campaignId", "")): _campaign_ended(c) for c in data.get("campaigns", [])}
+    cinfo = {str(c.get("campaignId", "")): c for c in data.get("campaigns", []) if c.get("campaignId")}
     agstate = {str(g.get("adGroupId", "")): str(g.get("state", "")).upper() for g in data.get("adGroups", [])}
+    agname = {str(g.get("adGroupId", "")): str(g.get("name", "")) for g in data.get("adGroups", [])}
 
     def active(cid, agid):
-        return cstate.get(str(cid), "ENABLED") == "ENABLED" and agstate.get(str(agid), "ENABLED") == "ENABLED"
+        # "Ended" (endDate passata) conta come non attiva anche con state ENABLED.
+        return (cstate.get(str(cid), "ENABLED") == "ENABLED"
+                and not cended.get(str(cid), False)
+                and agstate.get(str(agid), "ENABLED") == "ENABLED")
 
     ag_asins, asin_sku, asin_perf = {}, {}, {}
+    existing = {}  # campaignId -> struttura gia' a scaffale su questi ASIN
     for r in prod:
         asin = str(r.get("advertisedAsin", "")).strip().upper()
         agid = str(r.get("adGroupId", "")).strip()
         if not asin or not agid:
             continue
         ag_asins.setdefault(agid, set()).add(asin)
+        if asin in family:
+            # Chi pubblicizza GIA' questi ASIN: serve al modello per non creare
+            # una campagna doppione (Amazon rifiuta i nomi gia' usati) e per non
+            # mettere le stesse keyword in due campagne che si fanno concorrenza.
+            cid = str(r.get("campaignId", "")).strip()
+            if cid:
+                c = cinfo.get(cid, {})
+                e = existing.setdefault(cid, {
+                    "campaignId": cid,
+                    "name": c.get("name", "") or str(r.get("campaignName", "")),
+                    "state": cstate.get(cid, "?"),
+                    "ended": cended.get(cid, False),
+                    "targetingType": str(c.get("targetingType", "")).upper() or "?",
+                    "budget": _num((c.get("budget") or {}).get("budget")
+                                   if isinstance(c.get("budget"), dict) else c.get("budget")),
+                    "adGroups": [],
+                    "asins": set(),
+                })
+                e["asins"].add(asin)
+                nm = agname.get(agid, agid)
+                if nm not in e["adGroups"]:
+                    e["adGroups"].append(nm)
         if asin in family and r.get("advertisedSku"):
             asin_sku[asin] = r.get("advertisedSku")
         if asin in family:
@@ -145,9 +216,14 @@ def build_family_seed(data, family_asins):
     all_cpc = [k["cpc"] for k in kws if k["cpc"] > 0] + [s["cpc"] for s in sts if s["cpc"] > 0]
     avg_cpc = round(sum(all_cpc) / len(all_cpc), 2) if all_cpc else 0.0
 
+    existing_list = sorted(
+        ({**e, "asins": sorted(e["asins"])} for e in existing.values()),
+        key=lambda x: (x["state"] != "ENABLED" or x["ended"], x["name"]))
+
     return {"family_asins": sorted(family), "asin_sku": asin_sku, "asin_perf": asin_perf,
             "winning_keywords": kws, "winning_search_terms": sts,
-            "waste_search_terms": waste_st[:15], "avg_cpc": avg_cpc}
+            "waste_search_terms": waste_st[:15], "avg_cpc": avg_cpc,
+            "existing_campaigns": existing_list}
 
 
 # ---------------------------------------------------------------- fonte 2: recommendations Amazon
@@ -229,7 +305,72 @@ def fetch_keyword_recommendations(api, asins, max_recs=150, retries=3):
 
 
 # ---------------------------------------------------------------- prompt
-def build_planner_prompt(seed, recs, listing_text, reviews_text, marketplace, budget, target_acos, extra_kw, child_note):
+def _structure_rules(structure):
+    """Regole di raggruppamento dei child, secondo la scelta fatta nella UI.
+
+    'auto' lascia decidere al modello (comportamento storico); le altre due
+    forzano una struttura, perche' la scelta giusta dipende da cose che il
+    modello non puo' sapere (quanto budget vuoi davvero dedicare a un singolo
+    child, se un child e' un best-seller da isolare, se stai facendo un test).
+    """
+    if structure == "shared":
+        return (
+            "- STRUTTURA IMPOSTA DALL'UTENTE: CAMPAGNA DI GRUPPO. TUTTI i child\n"
+            "  vanno pubblicizzati INSIEME, nello stesso ad group, anche se\n"
+            "  differiscono per misura. NON creare una campagna ne' un ad group per\n"
+            "  singolo child. I dati restano concentrati (meno frammentazione,\n"
+            "  ottimizzazione piu' rapida) e non competi contro te stesso.\n"
+            "- Resta valido il default: 1 campagna AUTO (discovery, bid bassi) +\n"
+            "  1 campagna MANUAL con le keyword migliori, entrambe con tutti i child."
+        )
+    if structure == "per_child":
+        return (
+            "- STRUTTURA IMPOSTA DALL'UTENTE: UNA CAMPAGNA PER CHILD. Crea una\n"
+            "  campagna MANUAL dedicata a OGNI child ASIN, con le sue keyword e il\n"
+            "  suo budget, cosi' ogni variante ha budget e bid indipendenti e i\n"
+            "  report sono leggibili per variante.\n"
+            "- Il budget giornaliero indicato va SPLITTATO tra le campagne: la SOMMA\n"
+            "  dei dailyBudget non deve superare il budget richiesto.\n"
+            "- ATTENZIONE, dillo esplicitamente nella spiegazione: con child che\n"
+            "  differiscono solo per COLORE questa struttura fa competere le tue\n"
+            "  campagne tra loro sulle stesse ricerche e frammenta i dati. Se e' il\n"
+            "  caso, segnalalo come rischio pur rispettando la scelta.\n"
+            "- Se i child sono piu' di 4, NON creare piu' di 4 campagne: raggruppa i\n"
+            "  meno importanti e spiega quali hai accorpato e perche'."
+        )
+    return (
+        "- Child che differiscono SOLO per colore -> TUTTI nello stesso ad group (la\n"
+        "  ricerca non distingue il colore; splittare frammenta i dati e ti fa competere\n"
+        "  contro te stesso).\n"
+        "- Child che differiscono per MISURA/capacita' con intento diverso (piccolo vs\n"
+        "  grande, S/M/L) -> ad group SEPARATI per cluster di misura.\n"
+        "- Default consigliato: 1 campagna AUTO (tutti i child, discovery low-bid) + 1\n"
+        "  campagna MANUAL con le keyword migliori. NON una campagna per singolo child a\n"
+        "  meno che sia un vero best-seller."
+    )
+
+
+def _existing_block(seed):
+    """Elenco delle campagne che gia' pubblicizzano questi ASIN."""
+    ex = seed.get("existing_campaigns") or []
+    if not ex:
+        return "(nessuna campagna esistente pubblicizza questi ASIN: partiamo da zero)"
+    out = []
+    for e in ex:
+        if e.get("ended"):
+            stato = "ENDED (data di fine passata)"
+        else:
+            stato = e.get("state", "?")
+        out.append(
+            f'- "{e.get("name", "?")}" [{e.get("targetingType", "?")}] stato {stato}, '
+            f'budget {e.get("budget", 0):.2f}/giorno, ad group: '
+            f'{", ".join(e.get("adGroups", [])) or "?"} — copre {", ".join(e.get("asins", []))}'
+        )
+    return "\n".join(out)
+
+
+def build_planner_prompt(seed, recs, listing_text, reviews_text, marketplace, budget,
+                         target_acos, extra_kw, child_note, structure="auto", sqp_md=""):
     fam = ", ".join(seed["family_asins"])
     sku_map = ", ".join(f"{a}->{s}" for a, s in seed["asin_sku"].items()) or "(nessuno SKU noto dallo storico ads)"
 
@@ -257,15 +398,30 @@ def build_planner_prompt(seed, recs, listing_text, reviews_text, marketplace, bu
 
     listing_block = f"\n## Testo del listing (titolo/bullet/descrizione)\n{listing_text.strip()[:3500]}" if listing_text.strip() else ""
     reviews_block = f"\n## Estratti di recensioni (per long-tail e pain point)\n{reviews_text.strip()[:2500]}" if reviews_text.strip() else ""
+    sqp_block = f"\n## [Fonte 3] {sqp_md.strip()}" if sqp_md.strip() else ""
     extra_line = f'\nKEYWORD FORNITE A MANO: {extra_kw}' if extra_kw else ""
     child_line = f'\nNOTA SUI CHILD: {child_note}' if child_note else ""
     avg_cpc = seed["avg_cpc"] or 0.40
+    loc = _locale(marketplace)
+    structure_rules = _structure_rules(structure)
+    existing_block = _existing_block(seed)
 
     return f"""Sei un architetto di campagne Amazon Sponsored Products, senior, per un
 seller EU (marketplace {marketplace}). Devi PROGETTARE una campagna NUOVA per
 questa famiglia di prodotti. Combina TUTTE le fonti qui sotto per costruire le
 keyword; se lo storico e' vuoto (prodotto mai pubblicizzato) appoggiati alle
 recommendations Amazon e al testo del listing.
+
+## MERCATO E LINGUA — vincolo non negoziabile
+Stai lavorando su Amazon.{marketplace.lower()}: i clienti cercano in {loc["lingua"]}.
+TUTTE le keyword, i search term e le negative che proponi devono essere in
+{loc["lingua"]}, cosi' come li digiterebbe un cliente di quel paese — non
+tradotti parola per parola dall'italiano e non in inglese (a meno che non sia
+davvero il termine usato in quel mercato, es. anglicismi entrati nell'uso).
+Se il testo del listing qui sotto e' in un'altra lingua, usalo per capire il
+PRODOTTO, non per copiarne le parole. I nomi delle campagne e degli ad group
+possono restare in italiano: li leggi solo tu. La valuta del mercato e'
+{loc["valuta"]}: budget e bid vanno intesi in {loc["valuta"]}.
 
 ## Famiglia ASIN
 {fam}
@@ -287,27 +443,43 @@ Mappa ASIN -> SKU (i product ad da SELLER si creano per SKU): {sku_map}
 Queste vengono dall'API Amazon anche senza storico: sono il punto di partenza
 principale per un prodotto mai pubblicizzato. Filtra le poco pertinenti.
 {rec_lines}
-{listing_block}{reviews_block}
+{sqp_block}{listing_block}{reviews_block}
+
+## [Contesto] Campagne che pubblicizzano GIA' questi ASIN
+{existing_block}
+Regole su queste campagne:
+- NON riusare un nome campagna gia' presente qui sopra: Amazon rifiuta i nomi
+  duplicati e la creazione fallirebbe. Usa nomi chiaramente diversi.
+- NON rimettere in una campagna nuova, con lo stesso match type, keyword che
+  sono gia' attive in una campagna ENABLED qui sopra: faresti competere due tue
+  campagne sulla stessa ricerca, alzando il tuo stesso CPC. Se una keyword
+  vincente e' gia' coperta, dillo nella spiegazione invece di duplicarla.
+- Le campagne PAUSED, ARCHIVED o ENDED non competono: le loro keyword vincenti
+  sono materiale buono da riusare.
+- Se quello che serve e' modificare una campagna esistente e non crearne una
+  nuova, dillo chiaramente nella spiegazione (qui puoi solo proporre campagne
+  nuove, ma l'utente deve saperlo).
 
 ## Parametri richiesti
-- Budget giornaliero indicativo: EUR {budget}/giorno (splittabile tra campagne)
+- Budget giornaliero indicativo: {loc["valuta"]} {budget}/giorno COMPLESSIVO. Se
+  proponi piu' campagne, la SOMMA dei loro dailyBudget non deve superare questo
+  numero: e' il tetto di spesa giornaliera che l'utente ha accettato.
 - Target ACoS: {target_acos}%
-- CPC medio storico famiglia: EUR {avg_cpc} (base bid; se 0, usa i bid suggeriti Amazon){extra_line}{child_line}
+- CPC medio storico famiglia: {loc["valuta"]} {avg_cpc} (base bid; se 0, usa i bid suggeriti Amazon){extra_line}{child_line}
 
 ## REGOLE DI STRUTTURA (child ASIN) — IMPORTANTISSIME
-- Child che differiscono SOLO per colore -> TUTTI nello stesso ad group (la
-  ricerca non distingue il colore; splittare frammenta i dati e ti fa competere
-  contro te stesso).
-- Child che differiscono per MISURA/capacita' con intento diverso (piccolo vs
-  grande, S/M/L) -> ad group SEPARATI per cluster di misura.
-- Default consigliato: 1 campagna AUTO (tutti i child, discovery low-bid) + 1
-  campagna MANUAL con le keyword migliori. NON una campagna per singolo child a
-  meno che sia un vero best-seller.
+{structure_rules}
 - Bid: keyword gia' vincenti (Fonte 1) prima; poi le migliori recommendations
   Amazon (Fonte 2) con il loro bid suggerito; long-tail da listing/recensioni in
   PHRASE/BROAD con bid piu' bassi. AUTO con bid conservativi.
 - Genera 3-6 negative di partenza da search term sprecati e da termini fuori
   intento evidenti nel listing/recensioni.
+- LIMITI NUMERICI (li applica un guardrail dopo di te: fuori da questi
+  intervalli il piano viene BLOCCATO e va rifatto a mano):
+  * ogni bid (defaultBid, bid keyword, bid auto target): tra 0.02 e 5.00
+  * dailyBudget di ogni campagna: tra 1.00 e 100.00
+  * somma dei dailyBudget di tutte le campagne nuove: max 100.00/giorno
+  * massimo 4 campagne nuove in un solo piano
 - VALORI AMMESSI (enum ESATTI dell'API, qualsiasi altro valore viene rifiutato):
   * negatives.matchType: SOLO "NEGATIVE_EXACT" o "NEGATIVE_PHRASE"
     (il negative broad NON esiste su Amazon: usa NEGATIVE_PHRASE).
@@ -353,7 +525,7 @@ def call_claude(prompt):
     return "\n".join(b.get("text", "") for b in resp.json().get("content", []))
 
 
-def extract_plan(text, seed):
+def extract_plan(text, seed, budget=None):
     warnings = []
     m = re.search(r"<campaign_plan>(.*?)</campaign_plan>", text, re.DOTALL)
     body = None
@@ -408,6 +580,22 @@ def extract_plan(text, seed):
     warnings.extend(f"[auto-fix] {fx}" for fx in fixes)
     errs = validate(plan.get("actions", []))
     warnings.extend(errs)
+
+    # Gli stessi limiti che apply_changes applichera' al momento di creare: e'
+    # meglio vederli qui, quando il piano si puo' ancora rigenerare, che
+    # scoprirli a run avviato.
+    warnings.extend(f"[guardrail] {v}" for v in check_guardrails(plan.get("actions", [])))
+
+    # Il prompt chiede di splittare il budget richiesto tra le campagne, ma
+    # niente lo garantisce: qui si verifica davvero.
+    if budget:
+        tot = sum(float((a.get("campaign") or {}).get("dailyBudget", 0) or 0)
+                  for a in plan.get("actions", []) if a.get("type") == "create_campaign")
+        if tot > float(budget) + 0.001:
+            warnings.append(
+                f"[budget] le campagne proposte sommano {tot:.2f}/giorno, ma il budget "
+                f"richiesto era {float(budget):.2f}/giorno: riduci i dailyBudget prima di "
+                f"applicare, oppure accetta consapevolmente la spesa maggiore")
     return plan, clean, warnings
 
 
@@ -431,6 +619,13 @@ def main():
     ap.add_argument("--target-acos", type=float, default=30.0)
     ap.add_argument("--seed-keywords", default="")
     ap.add_argument("--child-note", default="", help="Come differiscono i child (colore/misura)")
+    ap.add_argument("--structure", default="auto", choices=STRUCTURES,
+                    help="auto = decide il modello; shared = campagna di gruppo (tutti i child "
+                         "insieme); per_child = una campagna per ogni child")
+    ap.add_argument("--sqp-dir", default="../public/data",
+                    help="Cartella con SQP_<MKT>.json (volume di ricerca reale). "
+                         "'' per saltare.")
+    ap.add_argument("--sqp-top", type=int, default=15)
     ap.add_argument("--listing-text", default="", help="Testo listing inline")
     ap.add_argument("--listing-file", default="", help="File col testo del listing (titolo/bullet/descrizione)")
     ap.add_argument("--reviews-text", default="", help="Estratti recensioni inline")
@@ -474,13 +669,35 @@ def main():
     listing_text = args.listing_text or _read(args.listing_file)
     reviews_text = args.reviews_text or _read(args.reviews_file)
 
+    # Fonte 3: volume di ricerca REALE (Search Query Performance), lo stesso che
+    # usa build_context.py per la copy. Qui dice quali query hanno davvero
+    # volume di mercato, non solo quali hanno convertito nelle tue campagne.
+    sqp_md = ""
+    if args.sqp_dir:
+        try:
+            import listing_signals
+            sqp_md, sqp_meta = listing_signals.aggregate_sqp_for_family(
+                args.marketplace, family, args.sqp_dir, top=args.sqp_top)
+            if sqp_meta.get("available"):
+                print(f"   SQP: {sqp_meta.get('queries_total', '?')} query di mercato", flush=True)
+            else:
+                print(f"   SQP non incluso ({sqp_meta.get('reason')})", flush=True)
+        except Exception as e:
+            print(f"   SQP saltato: {e}", flush=True)
+
+    if seed.get("existing_campaigns"):
+        print(f"   {len(seed['existing_campaigns'])} campagne gia' attive su questi ASIN "
+              f"(passate al modello per evitare doppioni)", flush=True)
+
+    print(f"Struttura richiesta: {args.structure}", flush=True)
     prompt = build_planner_prompt(
         seed, recs, listing_text, reviews_text, args.marketplace, args.budget,
         args.target_acos, args.seed_keywords.strip(), args.child_note.strip(),
+        structure=args.structure, sqp_md=sqp_md,
     )
     print(f"Invio a Claude ({len(prompt)} caratteri)...", flush=True)
     text = call_claude(prompt)
-    plan, clean, warnings = extract_plan(text, seed)
+    plan, clean, warnings = extract_plan(text, seed, budget=args.budget)
 
     ts = datetime.now().strftime("%Y%m%d_%H%M")
     out_dir = Path("plans")
@@ -520,6 +737,18 @@ def main():
                 "recs_count": len(recs),
                 "had_history": bool(seed["winning_keywords"] or seed["winning_search_terms"]),
                 "status": "ok" if plan is not None else "no_plan",
+                # Serve alla UI per mostrare il confronto budget richiesto/proposto,
+                # la struttura scelta e la lingua del mercato.
+                "structure": args.structure,
+                "budget_requested": float(args.budget),
+                "language": _locale(args.marketplace)["lingua"],
+                "currency": _locale(args.marketplace)["valuta"],
+                "sqp_used": bool(sqp_md),
+                "existing_campaigns": [
+                    {"name": e.get("name", ""), "state": e.get("state", ""),
+                     "ended": e.get("ended", False), "targetingType": e.get("targetingType", "")}
+                    for e in seed.get("existing_campaigns", [])
+                ],
             },
         }
         pub_file = pub / f"{args.asin}.json"
