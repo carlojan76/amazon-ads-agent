@@ -67,7 +67,22 @@ permissions:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 45 (prima 20): il fetch dei report Ads e' la parte lenta e la sua durata
+    # la decide Amazon, non noi. In un run reale (60 giorni = 2 finestre, 10
+    # report chiesti insieme) i report ci hanno messo 12m52s e l'intero job 15
+    # minuti: dentro i 20 di prima, ma con soli 5 minuti di margine su una fase
+    # che il codice stesso descrive come "2-10 minuti, su periodi lunghi anche
+    # di piu'".
+    #
+    # Il punto vero e' un altro: il polling ha un budget di 1800s (30 min, vedi
+    # REPORT_MAX_WAIT) e quando scade il codice NON si pianta — segnala i report
+    # mancanti come "dati INCOMPLETI" e produce comunque il blueprint con quello
+    # che ha. Con il timeout a 20 minuti quella degradazione controllata non
+    # poteva mai avvenire: GitHub uccideva il job prima, lasciando zero output.
+    # A 45 minuti il polling puo' arrivare fino in fondo e restano ~15 minuti
+    # per recommendations, Claude e commit. Si pagano i minuti davvero usati,
+    # quindi alzare il tetto non costa nulla quando il job finisce prima.
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
