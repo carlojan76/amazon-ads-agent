@@ -110,10 +110,30 @@ def resolve_sku(asin: str, marketplace_id: str) -> str:
     items = out.get("items", [])
     if not items:
         raise RuntimeError(f"Nessuno SKU trovato per ASIN {asin} su questo marketplace.")
-    if len(items) > 1:
-        skus = ", ".join(i.get("sku", "?") for i in items)
+
+    # Amazon genera da sola SKU tecnici che NON sono inserzioni del venditore e
+    # non vanno mai modificate: i piu' comuni sono quelli con prefisso
+    # "amzn.gr." (Grade and Resell: unita' rese e ricondizionate, rimesse in
+    # vendita da Amazon con uno SKU proprio). Comparivano nell'elenco e facevano
+    # fallire la risoluzione con "Piu' SKU per <ASIN>" al primo reso, anche
+    # quando l'inserzione vera era una sola. Qui vengono scartati.
+    def _tecnico(sku: str) -> bool:
+        return str(sku or "").lower().startswith(("amzn.gr.", "amzn."))
+
+    reali = [i for i in items if not _tecnico(i.get("sku"))]
+    scartati = [i.get("sku", "?") for i in items if _tecnico(i.get("sku"))]
+    if scartati and reali:
+        print(f"   SKU tecnici di Amazon ignorati ({len(scartati)}): {', '.join(scartati)}",
+              flush=True)
+    if not reali:
+        # Solo SKU tecnici: meglio dirlo, invece di modificarne uno per sbaglio.
+        raise RuntimeError(
+            f"Per ASIN {asin} risultano solo SKU generati da Amazon "
+            f"({', '.join(scartati)}): non sono inserzioni tue e non vanno modificate.")
+    if len(reali) > 1:
+        skus = ", ".join(i.get("sku", "?") for i in reali)
         raise RuntimeError(f"Piu' SKU per {asin} ({skus}). Indica 'sku' nel JSON.")
-    return items[0]["sku"]
+    return reali[0]["sku"]
 
 
 def get_listing(sku: str, marketplace_id: str, issue_locale: str) -> Dict[str, Any]:
