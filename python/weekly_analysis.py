@@ -44,6 +44,30 @@ MARKETPLACES = os.getenv("MARKETPLACES", "IT,FR,DE").split(",")
 DAYS = int(os.getenv("ANALYSIS_DAYS", "14"))
 
 
+def _campaign_ended(c) -> bool:
+    """True se la campagna ha una endDate nel passato. Amazon rifiuta QUALUNQUE
+    PUT su una campagna "Ended" ("Ended campaign cannot be updated without end
+    date extension." — visto in un run reale, su un update_budget) finche' la
+    endDate non viene estesa o rimossa: cosa che si fa solo su Seller
+    Central/Ads console, non da qui. Trattarla come non-attiva qui evita che i
+    "consigli" settimanali (budget/bid/pause/enable) propongano modifiche su
+    campagne che Amazon rifiuterebbe comunque in apply_changes.py — stessa
+    logica, duplicata li' per lo stesso motivo (moduli indipendenti, nessun
+    modulo condiviso tra i due script). Formato endDate osservato nell'API:
+    'YYYYMMDD' (i trattini, se presenti, vengono tollerati)."""
+    end = str(c.get("endDate") or "").strip()
+    if not end:
+        return False
+    digits = end.replace("-", "")
+    if len(digits) != 8 or not digits.isdigit():
+        return False
+    try:
+        end_date = datetime.strptime(digits, "%Y%m%d").date()
+    except ValueError:
+        return False
+    return end_date < datetime.today().date()
+
+
 def build_asin_view(data):
     """Vista per-ASIN con attribuzione CERTA.
 
@@ -66,18 +90,21 @@ def build_asin_view(data):
             return float(m[0]) if m else 0.0
 
     # stato campagne e ad group
-    cstate, ctarget = {}, {}
+    cstate, ctarget, cended = {}, {}, {}
     for c in data.get("campaigns", []):
         cid = str(c.get("campaignId", ""))
         if cid:
             cstate[cid] = str(c.get("state", "")).upper()
             ctarget[cid] = str(c.get("targetingType", "MANUAL")).upper()
+            cended[cid] = _campaign_ended(c)
     agstate = {}
     for g in data.get("adGroups", []):
         agid = str(g.get("adGroupId", ""))
         if agid:
             agstate[agid] = str(g.get("state", "")).upper()
-    cact = lambda cid: cstate.get(str(cid), "ENABLED") == "ENABLED"
+    # Ended (endDate nel passato) conta come non-attiva anche se lo stato e'
+    # ancora ENABLED: vedi _campaign_ended sopra.
+    cact = lambda cid: cstate.get(str(cid), "ENABLED") == "ENABLED" and not cended.get(str(cid), False)
     agact = lambda agid: agstate.get(str(agid), "ENABLED") == "ENABLED"
 
     # 1) adGroup -> set(ASIN) + aggregati per ASIN dal report prodotto (CERTO)
@@ -188,11 +215,14 @@ def build_summary(data):
     # Fonte primaria: lista strutturale delle campagne (campo `state`).
     # Fallback: colonna `campaignStatus` del report performance.
     state_by_id = {}
+    ended_by_id = {}
     for c in data.get("campaigns", []):
         cid = str(c.get("campaignId", ""))
         state = str(c.get("state", "")).upper()
         if cid and state:
             state_by_id[cid] = state
+        if cid:
+            ended_by_id[cid] = _campaign_ended(c)
     for r in campaigns_report:
         cid = str(r.get("campaignId", ""))
         status = str(r.get("campaignStatus", "")).upper()
@@ -200,8 +230,15 @@ def build_summary(data):
             state_by_id[cid] = status
 
     def is_active(campaign_id):
-        # Stato ignoto -> per prudenza trattata come attiva (non nasconde costi)
-        return state_by_id.get(str(campaign_id), "ENABLED") == "ENABLED"
+        # Stato ignoto -> per prudenza trattata come attiva (non nasconde costi).
+        # Una campagna "Ended" (endDate nel passato) conta pero' come NON
+        # attiva anche se lo stato e' ancora ENABLED: Amazon rifiuta qualunque
+        # modifica finche' la endDate non viene estesa/rimossa (vedi
+        # _campaign_ended), quindi non ha senso proporla nei consigli.
+        cid = str(campaign_id)
+        if ended_by_id.get(cid, False):
+            return False
+        return state_by_id.get(cid, "ENABLED") == "ENABLED"
 
     # ---- Metadati strutturali: bid e stato REALI delle keyword ----
     # Il report performance (spKeywords) NON contiene la colonna bid: senza

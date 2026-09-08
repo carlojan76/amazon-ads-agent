@@ -181,11 +181,7 @@
       "#12969 in Prodotti per animali domestici"
     ]
   },
-  "aplus": {
-    "name": "",
-    "locale": "it_IT",
-    "texts": []
-  },
+  "aplus": null,
   "reviews": null,
   "search_terms_md": "",
   "search_terms_meta": {

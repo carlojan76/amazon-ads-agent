@@ -1,0 +1,26 @@
+{
+  "parent_asin": "B0G4KNTV6R",
+  "parent_sku": "0G-O24Q-AWMF",
+  "marketplace": "IT",
+  "appliedAt": "2026-09-04T21:42:34+00:00",
+  "tally": {
+    "ok": 2,
+    "diff": 0,
+    "skip": 0,
+    "error": 0
+  },
+  "children": [
+    {
+      "sku": "64-V1UJ-NUA2",
+      "status": "ACCEPTED",
+      "submissionId": "74b88e37ed054f65ae33feb1893e95e7"
+    },
+    {
+      "sku": "UA-2PHD-GYNK",
+      "status": "ACCEPTED",
+      "submissionId": "8ab4cdcc121349029a96d9e77b4319cc"
+    }
+  ],
+  "runNumber": "6",
+  "runUrl": "https://github.com/carlojan76/amazon-ads-agent/actions/runs/33922293773"
+}

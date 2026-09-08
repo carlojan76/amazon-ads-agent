@@ -49,9 +49,6 @@ Comfort e Design: La forma semi-aperta ricorda una cuccia gatto igloo o un morbi
     - PT02: https://m.media-amazon.com/images/I/415n-llhhNL.jpg
     - PT02: https://m.media-amazon.com/images/I/415n-llhhNL._SL75_.jpg
 
-## Contenuti A+ (locale it_IT)
-
-
 ## Volume di ricerca reale (Search Query Performance, aggregato sui child)
 
 Come sopra, ma sommato su tutti i child della famiglia con dati propri (B0G4KMGDJ9, B0G4KKC9QF): il parent quasi mai ha righe sue. Periodo 2026-08-16 -> 2026-08-22.
