@@ -17,6 +17,30 @@
 
 const GH_API = "https://api.github.com";
 
+/**
+ * Costruisce il pezzo "<owner>/<repo>" dell'URL, tollerando l'errore piu'
+ * comune: incollare "carlojan76/amazon-ads-agent" nel campo repo, che produce
+ * /repos/<owner>/<owner>/<repo>. Quel percorso non esiste, GitHub risponde 404
+ * anche alla preflight OPTIONS, e siccome una risposta di errore non porta gli
+ * header CORS il browser lo riporta come "blocked by CORS policy" / "Failed to
+ * fetch": un messaggio che manda a cercare il problema nella direzione
+ * sbagliata. Meglio normalizzare qui, una volta per tutte le chiamate.
+ *
+ * Accetta: ("tizio", "repo"), ("tizio", "tizio/repo"), ("", "tizio/repo"),
+ * e ripulisce spazi e slash di troppo.
+ */
+export function repoSlug(owner, repo) {
+  const clean = (s) => String(s ?? "").trim().replace(/^\/+|\/+$/g, "");
+  let o = clean(owner);
+  let r = clean(repo);
+  if (r.includes("/")) {
+    const parts = r.split("/").filter(Boolean);
+    r = parts[parts.length - 1];
+    if (!o && parts.length > 1) o = parts[parts.length - 2];
+  }
+  return `${o}/${r}`;
+}
+
 /** Riconosce il fallimento di rete/CORS e lo spiega, invece di lasciare "Failed to fetch". */
 function explainNetworkError(err, what) {
   if (err instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(err?.message || "")) {
@@ -106,11 +130,11 @@ export async function getUser(token) {
  */
 export async function checkRepoAccess({ token, owner, repo, workflow }) {
   try {
-    const r = await fetch(`${GH_API}/repos/${owner}/${repo}/actions/workflows/${workflow}`, {
+    const r = await fetch(`${GH_API}/repos/${repoSlug(owner, repo)}/actions/workflows/${workflow}`, {
       headers: { Authorization: `token ${token}`, Accept: "application/vnd.github+json" },
     });
     if (r.status === 404) {
-      return { ok: false, message: `Non trovo ${owner}/${repo}/${workflow}. Controlla nome del repo e del file, e che il token abbia accesso a questo repository.` };
+      return { ok: false, message: `Non trovo ${repoSlug(owner, repo)}/${workflow}. Controlla nome del repo e del file, e che il token abbia accesso a questo repository.` };
     }
     if (r.status === 403) {
       return { ok: false, message: "Il token non ha il permesso Actions su questo repository (serve lettura e scrittura)." };
@@ -123,18 +147,34 @@ export async function checkRepoAccess({ token, owner, repo, workflow }) {
 }
 
 export async function dispatchWorkflow({ token, owner, repo, workflow, ref = "main", inputs }) {
-  const resp = await fetch(
-    `${GH_API}/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `token ${token}`,
-        Accept: "application/vnd.github+json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ref, inputs }),
-    }
-  );
+  const slug = repoSlug(owner, repo);
+  let resp;
+  try {
+    resp = await fetch(
+      `${GH_API}/repos/${slug}/actions/workflows/${workflow}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ref, inputs }),
+      }
+    );
+  } catch (err) {
+    // "Failed to fetch"/CORS su api.github.com quasi sempre vuol dire che
+    // l'URL non esiste (owner o repo sbagliati): una risposta 404 non porta
+    // gli header CORS e il browser la maschera da errore di CORS. Diciamo
+    // quale URL abbiamo davvero chiamato, invece di lasciare l'utente a
+    // cercare un problema di rete che non c'e'.
+    throw new Error(
+      `Non sono riuscito a contattare GitHub per ${slug} (workflow ${workflow}). `
+      + `Controlla che owner e repo siano corretti: owner deve essere solo il nome utente `
+      + `e repo solo il nome del repository, senza barre. `
+      + `Se sono giusti, il blocco viene dalla rete o da un'estensione del browser.`
+    );
+  }
   if (resp.status !== 204) {
     let detail = "";
     try { detail = (await resp.json()).message; } catch { /* ignore */ }
@@ -146,7 +186,7 @@ export async function dispatchWorkflow({ token, owner, repo, workflow, ref = "ma
 /** Best-effort: find the run that was just dispatched, to give the user a direct link. */
 export async function findLatestRun({ token, owner, repo, workflow }) {
   const resp = await fetch(
-    `${GH_API}/repos/${owner}/${repo}/actions/workflows/${workflow}/runs?event=workflow_dispatch&per_page=1`,
+    `${GH_API}/repos/${repoSlug(owner, repo)}/actions/workflows/${workflow}/runs?event=workflow_dispatch&per_page=1`,
     { headers: { Authorization: `token ${token}`, Accept: "application/vnd.github+json" } }
   );
   if (!resp.ok) return null;
@@ -157,7 +197,7 @@ export async function findLatestRun({ token, owner, repo, workflow }) {
 /** Stato/conclusione di un run specifico. Ritorna { status, conclusion, html_url } o null. */
 export async function getRun({ token, owner, repo, runId }) {
   const resp = await fetch(
-    `${GH_API}/repos/${owner}/${repo}/actions/runs/${runId}`,
+    `${GH_API}/repos/${repoSlug(owner, repo)}/actions/runs/${runId}`,
     { headers: { Authorization: `token ${token}`, Accept: "application/vnd.github+json" } }
   );
   if (!resp.ok) return null;
@@ -172,7 +212,7 @@ export async function getRun({ token, owner, repo, runId }) {
  */
 export async function getRepoFileContents({ token, owner, repo, path, ref = "main" }) {
   const resp = await fetch(
-    `${GH_API}/repos/${owner}/${repo}/contents/${encodeURI(path)}?ref=${encodeURIComponent(ref)}&t=${Date.now()}`,
+    `${GH_API}/repos/${repoSlug(owner, repo)}/contents/${encodeURI(path)}?ref=${encodeURIComponent(ref)}&t=${Date.now()}`,
     {
       headers: {
         Authorization: `token ${token}`,
@@ -203,7 +243,7 @@ export async function getRepoFileContents({ token, owner, repo, path, ref = "mai
  * Ritorna { sha, date, message } dell'ultimo commit, o null se il path non esiste.
  */
 export async function getLatestCommitForPath({ token, owner, repo, path, ref = "main" }) {
-  const url = `${GH_API}/repos/${owner}/${repo}/commits?path=${encodeURIComponent(path)}&sha=${encodeURIComponent(ref)}&per_page=1&t=${Date.now()}`;
+  const url = `${GH_API}/repos/${repoSlug(owner, repo)}/commits?path=${encodeURIComponent(path)}&sha=${encodeURIComponent(ref)}&per_page=1&t=${Date.now()}`;
   const resp = await fetch(url, {
     headers: {
       Authorization: `token ${token}`,
