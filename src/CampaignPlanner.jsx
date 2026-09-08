@@ -449,10 +449,23 @@ export default function CampaignPlanner({ onClose }) {
     }, 4000);
 
     const start = Date.now();
-    const TIMEOUT = 8 * 60 * 1000;
-    setStatus("Generazione in corso (fetch dati + recommendations + Claude)... puo' richiedere 1-3 minuti.");
+    // 50 minuti, non 8. La parte lenta e' Amazon che genera i report Ads: in un
+    // run reale (60 giorni = 2 finestre, 10 report) ci ha messo 12m52s, con il
+    // job intero a 15 minuti. Con il tetto a 8 minuti questa pagina dichiarava
+    // "Timeout" mentre il workflow stava lavorando benissimo, e il blueprint
+    // finiva committato nel repo senza che l'utente lo vedesse mai.
+    // Il valore deve restare PIU' ALTO del timeout-minutes del workflow (45),
+    // altrimenti si torna a mollare prima che GitHub abbia detto la sua.
+    const TIMEOUT = 50 * 60 * 1000;
+    setStatus("Generazione in corso (report Ads + recommendations + Claude)... "
+      + "i report Amazon sono la parte lenta: in genere 10-15 minuti.");
     clearInterval(pollRef.current);
     let tickCount = 0;
+    let lastRunStatus = null;
+    const mmss = (ms) => {
+      const s = Math.round(ms / 1000);
+      return `${Math.floor(s / 60)}m${String(s % 60).padStart(2, "0")}s`;
+    };
 
     const loadPlan = async (fromLabel) => {
       addDebug(`loadPlan(${fromLabel}): reading file`);
@@ -481,7 +494,13 @@ export default function CampaignPlanner({ onClose }) {
       tickCount++;
       if (Date.now() - start > TIMEOUT) {
         clearInterval(pollRef.current); setPhase("error");
-        setStatus("Timeout: il workflow non ha prodotto il blueprint in tempo. Controlla i log del run.");
+        setStatus(
+          lastRunStatus === "completed"
+            ? "Il run e' finito ma il blueprint non e' comparso nel repo entro "
+              + `${mmss(Date.now() - start)}. Controlla i log del run e il commit su plans/.`
+            : `Ho smesso di attendere dopo ${mmss(Date.now() - start)}, ma il run su GitHub `
+              + `risulta ancora in corso: NON e' detto che sia fallito. Aprilo dal link, e quando `
+              + `lo vedi finito torna qui e usa "Carica ultimo piano" per recuperare il blueprint.`);
         return;
       }
 
@@ -491,6 +510,7 @@ export default function CampaignPlanner({ onClose }) {
           const r = await getRun({ token, owner, repo, runId });
           if (r) runStatus = r;
         } catch (e) { addDebug(`getRun err: ${e.message}`); }
+        if (runStatus?.status) lastRunStatus = runStatus.status;
         if (runStatus?.status === "completed") {
           if (runStatus.conclusion && runStatus.conclusion !== "success") {
             clearInterval(pollRef.current); setPhase("error");
@@ -501,6 +521,17 @@ export default function CampaignPlanner({ onClose }) {
         }
       }
       addDebug(`tick ${tickCount}: run=${runStatus?.status || "?"} conc=${runStatus?.conclusion || "?"}`);
+
+      // Tempo trascorso a schermo: un'attesa di 15 minuti senza nessun segnale
+      // sembra un blocco, ed e' il motivo per cui viene la tentazione di
+      // ricaricare la pagina proprio mentre il workflow sta lavorando.
+      if (!runSucceeded) {
+        const stato = lastRunStatus === "in_progress" ? "in esecuzione su GitHub"
+          : lastRunStatus === "queued" ? "in coda su GitHub"
+            : lastRunStatus || "avvio in corso";
+        setStatus(`Generazione in corso da ${mmss(Date.now() - start)} (${stato}). `
+          + "I report Amazon richiedono in genere 10-15 minuti: puoi lasciare la pagina aperta.");
+      }
 
       if (runSucceeded) {
         const ok = await loadPlan("run-success");
@@ -552,6 +583,11 @@ export default function CampaignPlanner({ onClose }) {
       setState({ state: "running", msg: dryRun ? "Anteprima in corso..." : "Creazione in corso...", url: run.html_url });
       const done = await followRun({
         token, owner, repo, runId: run.id,
+        // 20 minuti: apply-actions.yml ha timeout-minutes 15, e il default di
+        // followRun e' esattamente 15 — cioe' avremmo mollato nello stesso
+        // istante in cui GitHub decide, senza mai leggere l'esito. Meglio
+        // sopravvivere al job che stiamo seguendo.
+        timeoutMs: 20 * 60 * 1000,
         onUpdate: i => setState(p => ({ ...p, msg: `${dryRun ? "Anteprima" : "Creazione"}: ${i.status}...`, url: i.html_url })),
       });
       return { done, sig, url: done?.html_url || run.html_url };
