@@ -6,9 +6,9 @@ on:
     # Permette di lanciarlo manualmente dal tab Actions
     inputs:
       marketplaces:
-        description: 'Marketplaces da analizzare (es. IT,FR,DE)'
+        description: 'Marketplaces da analizzare (es. IT,FR,DE,ES)'
         required: false
-        default: 'IT,FR,DE'
+        default: 'IT,FR,DE,ES'
       days:
         description: 'Giorni da analizzare'
         required: false
@@ -54,7 +54,7 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
 
           # Parametri (override manuale se eseguito on-demand)
-          MARKETPLACES: ${{ github.event.inputs.marketplaces || 'IT,FR,DE' }}
+          MARKETPLACES: ${{ github.event.inputs.marketplaces || 'IT,FR,DE,ES' }}
           ANALYSIS_DAYS: ${{ github.event.inputs.days || '14' }}
           # Report API v3 spesso richiedono 15-25 min: 600s erano troppo pochi
           # e facevano tornare dati VUOTI (tutti zero) per timeout.
