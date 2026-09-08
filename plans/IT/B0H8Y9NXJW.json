@@ -1,0 +1,335 @@
+{
+  "actions": [
+    {
+      "type": "create_campaign",
+      "campaign": {
+        "name": "SP-Auto-BorsaAnimali-B0H8Y9NXJW",
+        "targetingType": "AUTO",
+        "dailyBudget": 1.5,
+        "biddingStrategy": "LEGACY_FOR_SALES",
+        "state": "PAUSED"
+      },
+      "adGroups": [
+        {
+          "name": "AG-auto-borsa-animali",
+          "defaultBid": 0.4,
+          "products": [
+            {
+              "sku": "49-7EQL-RUS8",
+              "asin": "B0H8Y9NXJW"
+            }
+          ],
+          "autoTargets": [
+            {
+              "expressionType": "QUERY_HIGH_REL_MATCHES",
+              "bid": 0.4
+            },
+            {
+              "expressionType": "QUERY_BROAD_REL_MATCHES",
+              "bid": 0.3
+            },
+            {
+              "expressionType": "ASIN_SUBSTITUTE_RELATED",
+              "bid": 0.3
+            },
+            {
+              "expressionType": "ASIN_ACCESSORY_RELATED",
+              "bid": 0.25
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "cibo gatti",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "felix",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "cibo cani",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "mangime",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "addestramento cane",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "snack cane",
+              "matchType": "NEGATIVE_PHRASE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "create_campaign",
+      "campaign": {
+        "name": "SP-Manual-BorsaAnimali-B0H8Y9NXJW",
+        "targetingType": "MANUAL",
+        "dailyBudget": 2.5,
+        "biddingStrategy": "LEGACY_FOR_SALES",
+        "state": "PAUSED"
+      },
+      "adGroups": [
+        {
+          "name": "AG-exact-trasportino-gatto-cane",
+          "defaultBid": 0.4,
+          "products": [
+            {
+              "sku": "49-7EQL-RUS8",
+              "asin": "B0H8Y9NXJW"
+            }
+          ],
+          "keywords": [
+            {
+              "keywordText": "borsa gatti",
+              "matchType": "EXACT",
+              "bid": 0.5
+            },
+            {
+              "keywordText": "borsa cani",
+              "matchType": "EXACT",
+              "bid": 0.5
+            },
+            {
+              "keywordText": "porta gatti",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "porta cani",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "cat carrier",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "pet carrier",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "dog carrier",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "borsa trasporto cane",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "borsa trasporto gatto",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "cat carrier bag",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "pet carrier bag",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "dog carrier bag",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "small dog carrier",
+              "matchType": "EXACT",
+              "bid": 0.45
+            },
+            {
+              "keywordText": "borsa con gatti",
+              "matchType": "EXACT",
+              "bid": 0.35
+            },
+            {
+              "keywordText": "borsa porta cibo",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "porta ciotola cani",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "porta ciotola gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "cibo gatti",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "felix",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "cibo cani",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "mangime",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "addestramento cane",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "snack cane",
+              "matchType": "NEGATIVE_PHRASE"
+            }
+          ]
+        },
+        {
+          "name": "AG-phrase-broad-trasportino",
+          "defaultBid": 0.35,
+          "products": [
+            {
+              "sku": "49-7EQL-RUS8",
+              "asin": "B0H8Y9NXJW"
+            }
+          ],
+          "keywords": [
+            {
+              "keywordText": "borsa trasporto animali",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "borsa per cane",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "borsa per gatto",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "trasportino borsa gatto",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "trasportino borsa cane",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "borsa passeggio cane",
+              "matchType": "PHRASE",
+              "bid": 0.35
+            },
+            {
+              "keywordText": "borsa porta animali domestici",
+              "matchType": "PHRASE",
+              "bid": 0.35
+            },
+            {
+              "keywordText": "pet carrier bag",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "cat carrier bag",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "dog carrier bag",
+              "matchType": "PHRASE",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "borsa animali domestici",
+              "matchType": "BROAD",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "trasportino morbido gatto",
+              "matchType": "BROAD",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "trasportino morbido cane",
+              "matchType": "BROAD",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "borsa viaggio animale",
+              "matchType": "BROAD",
+              "bid": 0.28
+            },
+            {
+              "keywordText": "borsa porta ciotola animali",
+              "matchType": "BROAD",
+              "bid": 0.28
+            }
+          ],
+          "negatives": [
+            {
+              "keywordText": "cibo gatti",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "felix",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "cibo cani",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "mangime",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "addestramento cane",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "snack cane",
+              "matchType": "NEGATIVE_PHRASE"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-09-08T15:10:09.094733",
+    "marketplace": "IT",
+    "asin": "B0H8Y9NXJW",
+    "children": [],
+    "explanation": "## Spiegazione strategica\n\n**Prodotto:** Un solo ASIN (B0H8Y9NXJW / SKU 49-7EQL-RUS8), nessuna variante per taglia o colore da gestire separatamente. Si tratta chiaramente di una **borsa/trasportino per animali domestici** (cani/gatti), probabilmente con scomparto porta-cibo/ciotola, come suggeriscono le recommendations Amazon con keyword tipo \"borsa porta cibo\", \"porta ciotola\", \"borsa gatti/cani\".\n\n**Struttura proposta (2 campagne, totale EUR 4,00/giorno):**\n- **Campagna AUTO** (EUR 1,50/giorno): discovery pura con bid conservativi. Attivo tutti e 4 i target auto (close, loose, substitutes, complements) per raccogliere dati da un mercato vergine. Bid a EUR 0,40 (CPC storico famiglia).\n- **Campagna MANUAL EXACT + PHRASE** (EUR 2,50/giorno): keyword in italiano selezionate dalle recommendations Amazon, dopo aver **scartato** i termini chiaramente fuori intento: \"cibo gatti felix\", \"felix gatti\" (bid assurdi, intento alimentare puro), \"porta cibo\" generico, \"dog training pouch\", \"cat food pouch\", \"cat lunch bag\". Ho tenuto i termini italiani pertinenti e gli anglicismi realmente usati su Amazon.it (cat carrier, pet carrier, dog carrier). I bid sono **cappati a EUR 5,00** per rispettare il guardrail, anche dove Amazon suggerisce cifre irragionevoli.\n\nLe **negative** coprono gli intenti chiaramente sbagliati: cibo per gatti/cani, addestramento, felix, mangime.\n\n---",
+    "warnings": [],
+    "recs_count": 150,
+    "had_history": false,
+    "status": "ok",
+    "structure": "auto",
+    "budget_requested": 4.0,
+    "language": "italiano",
+    "currency": "EUR",
+    "sqp_used": false,
+    "existing_campaigns": []
+  }
+}
