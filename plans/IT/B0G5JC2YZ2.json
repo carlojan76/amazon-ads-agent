@@ -3,16 +3,16 @@
     {
       "type": "create_campaign",
       "campaign": {
-        "name": "SP-Auto-AmacaGatto-v2",
+        "name": "SP-Auto-AmacaGatto-Discovery",
         "targetingType": "AUTO",
-        "dailyBudget": 3.0,
+        "dailyBudget": 2.5,
         "biddingStrategy": "LEGACY_FOR_SALES",
         "state": "PAUSED"
       },
       "adGroups": [
         {
-          "name": "AG-auto-amacagatto",
-          "defaultBid": 0.34,
+          "name": "AG-auto-discovery",
+          "defaultBid": 0.35,
           "products": [
             {
               "sku": "FR-4DCI-RB8W",
@@ -26,25 +26,33 @@
             },
             {
               "expressionType": "QUERY_BROAD_REL_MATCHES",
+              "bid": 0.28
+            },
+            {
+              "expressionType": "ASIN_SUBSTITUTE_RELATED",
+              "bid": 0.3
+            },
+            {
+              "expressionType": "ASIN_ACCESSORY_RELATED",
               "bid": 0.25
             }
           ],
           "negatives": [
             {
               "keywordText": "amaca per gatti",
-              "matchType": "NEGATIVE_EXACT"
+              "matchType": "NEGATIVE_PHRASE"
             },
             {
               "keywordText": "tiragraffi per gatti",
-              "matchType": "NEGATIVE_EXACT"
+              "matchType": "NEGATIVE_PHRASE"
             },
             {
               "keywordText": "letto per gatti",
-              "matchType": "NEGATIVE_EXACT"
+              "matchType": "NEGATIVE_PHRASE"
             },
             {
               "keywordText": "divano gatto",
-              "matchType": "NEGATIVE_EXACT"
+              "matchType": "NEGATIVE_PHRASE"
             },
             {
               "keywordText": "poltrona per gatti",
@@ -52,7 +60,7 @@
             },
             {
               "keywordText": "cuccia sospesa per gatti",
-              "matchType": "NEGATIVE_EXACT"
+              "matchType": "NEGATIVE_PHRASE"
             }
           ]
         }
@@ -61,16 +69,16 @@
     {
       "type": "create_campaign",
       "campaign": {
-        "name": "SP-Manual-AmacaGatto-Exact-v2",
+        "name": "SP-Manual-AmacaGatto-ExactPhrase-v2",
         "targetingType": "MANUAL",
-        "dailyBudget": 5.0,
+        "dailyBudget": 5.5,
         "biddingStrategy": "LEGACY_FOR_SALES",
         "state": "PAUSED"
       },
       "adGroups": [
         {
-          "name": "AG-exact-amacagatto-core",
-          "defaultBid": 0.34,
+          "name": "AG-exact-core-amaca-sdraietta",
+          "defaultBid": 0.4,
           "products": [
             {
               "sku": "FR-4DCI-RB8W",
@@ -81,42 +89,32 @@
             {
               "keywordText": "sdraietta per gatti",
               "matchType": "EXACT",
-              "bid": 0.44
+              "bid": 0.5
             },
             {
               "keywordText": "sedia per gatti",
               "matchType": "EXACT",
-              "bid": 0.4
+              "bid": 0.45
             },
             {
               "keywordText": "sdraio gatto",
               "matchType": "EXACT",
-              "bid": 0.42
+              "bid": 0.45
             },
             {
               "keywordText": "sdraio per gatti",
               "matchType": "EXACT",
-              "bid": 0.42
-            },
-            {
-              "keywordText": "letto tiragraffi per gatti",
-              "matchType": "EXACT",
-              "bid": 0.3
-            },
-            {
-              "keywordText": "amaca gatto pavimento",
-              "matchType": "EXACT",
-              "bid": 0.28
-            },
-            {
-              "keywordText": "amaca gatto esterno",
-              "matchType": "EXACT",
-              "bid": 0.38
+              "bid": 0.45
             },
             {
               "keywordText": "sdraietta tiragraffi per gatti",
               "matchType": "EXACT",
-              "bid": 0.38
+              "bid": 0.5
+            },
+            {
+              "keywordText": "tiragraffi gatto con amaca",
+              "matchType": "EXACT",
+              "bid": 0.45
             },
             {
               "keywordText": "cat hammock",
@@ -124,14 +122,24 @@
               "bid": 0.4
             },
             {
-              "keywordText": "tiragraffi gatto con amaca",
+              "keywordText": "letto tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "amaca gatto pavimento",
+              "matchType": "EXACT",
+              "bid": 0.38
+            },
+            {
+              "keywordText": "amaca gatto esterno",
               "matchType": "EXACT",
               "bid": 0.38
             },
             {
               "keywordText": "sdraietta gatti",
               "matchType": "EXACT",
-              "bid": 0.45
+              "bid": 0.5
             },
             {
               "keywordText": "sdraio gatti",
@@ -141,7 +149,17 @@
             {
               "keywordText": "lettino gatto rialzato",
               "matchType": "EXACT",
-              "bid": 0.38
+              "bid": 0.45
+            },
+            {
+              "keywordText": "cuccia gatto rialzata",
+              "matchType": "EXACT",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "amaca tiragraffi per gatti",
+              "matchType": "EXACT",
+              "bid": 0.5
             },
             {
               "keywordText": "amaca gatti tiragraffi",
@@ -149,78 +167,58 @@
               "bid": 0.5
             },
             {
-              "keywordText": "amaca tiragraffi per gatti",
+              "keywordText": "poltroncina tiragraffi per gatti",
               "matchType": "EXACT",
               "bid": 0.48
             },
             {
-              "keywordText": "amaca tiragraffi",
+              "keywordText": "sdraio tiragraffi per gatti",
               "matchType": "EXACT",
-              "bid": 0.42
-            },
-            {
-              "keywordText": "poltroncina tiragraffi per gatti",
-              "matchType": "EXACT",
-              "bid": 0.44
-            },
-            {
-              "keywordText": "amaca x gatti",
-              "matchType": "EXACT",
-              "bid": 0.35
-            },
-            {
-              "keywordText": "amache per gatti",
-              "matchType": "EXACT",
-              "bid": 0.36
-            },
-            {
-              "keywordText": "cuccia gatto rialzata",
-              "matchType": "EXACT",
-              "bid": 0.38
+              "bid": 0.48
             },
             {
               "keywordText": "sedia gatto",
               "matchType": "EXACT",
-              "bid": 0.4
+              "bid": 0.45
+            },
+            {
+              "keywordText": "amache per gatti",
+              "matchType": "EXACT",
+              "bid": 0.42
+            },
+            {
+              "keywordText": "amaca x gatti",
+              "matchType": "EXACT",
+              "bid": 0.38
             },
             {
               "keywordText": "cat lounger",
               "matchType": "EXACT",
-              "bid": 0.35
-            },
-            {
-              "keywordText": "lettino tiragraffi per gatti",
-              "matchType": "EXACT",
-              "bid": 0.34
+              "bid": 0.4
             },
             {
               "keywordText": "divanetto tiragraffi per gatti",
               "matchType": "EXACT",
-              "bid": 0.3
+              "bid": 0.38
             },
             {
-              "keywordText": "poltrona gatto tiragraffi",
-              "matchType": "EXACT",
-              "bid": 0.34
-            },
-            {
-              "keywordText": "sdraio tiragraffi per gatti",
+              "keywordText": "lettino tiragraffi per gatti",
               "matchType": "PHRASE",
-              "bid": 0.36
+              "bid": 0.42
+            },
+            {
+              "keywordText": "amaca tiragraffi",
+              "matchType": "PHRASE",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "sdraietta gatto",
+              "matchType": "PHRASE",
+              "bid": 0.45
             },
             {
               "keywordText": "amaca per gatto",
               "matchType": "PHRASE",
-              "bid": 0.34
-            },
-            {
-              "keywordText": "sdraietta gatto",
-              "matchType": "EXACT",
-              "bid": 0.45
-            },
-            {
-              "keywordText": "amaca gatto",
-              "matchType": "EXACT",
               "bid": 0.4
             }
           ],
@@ -243,10 +241,10 @@
             },
             {
               "keywordText": "poltrona per gatti",
-              "matchType": "NEGATIVE_PHRASE"
+              "matchType": "NEGATIVE_EXACT"
             },
             {
-              "keywordText": "cuccia sospesa per gatti",
+              "keywordText": "amaca gatti",
               "matchType": "NEGATIVE_EXACT"
             }
           ]
@@ -255,11 +253,11 @@
     }
   ],
   "_meta": {
-    "generated_at": "2026-09-08T07:57:37.437647",
+    "generated_at": "2026-09-08T08:31:38.717556",
     "marketplace": "IT",
     "asin": "B0G5JC2YZ2",
     "children": [],
-    "explanation": "## Spiegazione struttura proposta\n\n**Prodotto:** amaca/sdraietta per gatti (con funzione tiragraffi), un solo ASIN/SKU (`FR-4DCI-RB8W`). Non ci sono varianti per misura con intento diverso, quindi un unico ad group per campagna.\n\n**Campagne esistenti attive:** `IT_Amaca_Manual_Exact_07_Jun` (ENABLED) copre già con EXACT le keyword `sdraietta gatto` e `amaca gatto` (le più forti da Fonte 1). Non le duplico. La PAUSED `SP1-Manual-AmacaGatto` e la ENDED `SP1-Auto-AmacaGatto` sono sorgenti libere da riutilizzare.\n\n**Struttura proposta (2 campagne, somma budget = EUR 8.00/giorno):**\n\n1. **AUTO – discovery** (EUR 3.00/giorno): close match + loose match con bid conservativo (EUR 0.34). Copre ricerche nuove che lo storico non ha ancora visto. ASIN substitute/complement esclusi per evitare spreco su tiragraffi generici.\n2. **MANUAL PHRASE+BROAD – espansione** (EUR 5.00/giorno): keyword vincenti recuperate dalle campagne chiuse (ENDED/PAUSED) con match EXACT, più i search term candidati EXACT da Fonte 1 (`sdraietta per gatti`, `sedia per gatti`, `sdraio gatto`, ecc.), più keyword ad alto impression share da Fonte 2 non ancora coperte dalla campagna ENABLED. Uso bid calibrati su ACoS target 30% e CPC storico EUR 0.34, con cap a EUR 5.00 per le recommendation Amazon che suggeriscono bid assurdi (EUR 30-40).\n\n**Negative di partenza:** search term spreconi da Fonte 1 (`amaca per gatti`, `tiragraffi per gatti`, `letto per gatti`, `divano gatto`, `poltrona per gatti`, `cuccia sospesa per gatti`) applicati come NEGATIVE_EXACT/NEGATIVE_PHRASE dove opportuno, per bloccare volumi alti senza conversioni.\n\n**Keyword NON inserite perché già in campagna ENABLED:** `sdraietta gatto` [BROAD], `amaca gatto` [BROAD] → già coperti da `IT_Amaca_Manual_Exact_07_Jun`. Le inserisco solo con match type diverso (EXACT) se non già presenti lì; per sicurezza le escludo del tutto e segnalo di verificare manualmente.\n\n---",
+    "explanation": "## Spiegazione della struttura proposta\n\n**Prodotto:** amaca/sdraietta per gatti (potenzialmente con tiragraffi integrato). Un solo ASIN attivo (B0G5JC2YZ2 → SKU FR-4DCI-RB8W), quindi un unico ad group per campagna senza necessità di split per misura.\n\n**Campagne esistenti da rispettare:**\n- `IT_Amaca_Manual_Exact_07_Jun` è **ENABLED**: le keyword già attive lì (es. \"sdraietta gatto\" BROAD, \"amaca gatto\" BROAD) non vengono duplicate. Valuta di aggiungere direttamente a quella campagna le keyword mancanti, piuttosto che creare nuove campagne — ma qui propongo campagne nuove come richiesto.\n- `SP1-Manual-AmacaGatto` è PAUSED: le sue keyword vincenti (da campagne chiuse) sono riusabili.\n\n**Struttura proposta (2 campagne, budget totale EUR 8/giorno):**\n\n1. **AUTO di discovery** (EUR 2.50/giorno) — close match + loose match a bid conservativo (EUR 0.35), per intercettare nuovi search term senza bruciare budget. Negative di partenza sui termini spreconi più costosi.\n\n2. **MANUAL EXACT/PHRASE** (EUR 5.50/giorno) — keyword prioritarie da Fonte 1 (search term vincenti non ancora keyword: \"sdraietta per gatti\", \"sedia per gatti\", \"sdraio gatto\", ecc.) + keyword da campagne chiuse riusabili (\"sdraio per gatti\", \"tiragraffi gatto con amaca\", \"sdraietta tiragraffi per gatti\") + best recommendation Amazon con imp.share alto e pertinenza stretta. Bid calibrati sull'ACoS target 30% e CPC storico EUR 0.34. Escludo \"tiragraffi per gatti\" e \"letto per gatti\" come negative (spreconi confermati). I bid Amazon suggeriti (decine di EUR) sono chiaramente inflati per categorie competitive: li cap a EUR 0.50–0.75 allineandoli al CPC storico reale.\n\n**Keyword escluse per duplicazione con campagna ENABLED:** \"sdraietta gatto\" BROAD e \"amaca gatto\" BROAD sono già attive — non le reinserisco.\n\n---",
     "warnings": [],
     "recs_count": 150,
     "had_history": true,
