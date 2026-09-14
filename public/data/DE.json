@@ -1,20 +1,26 @@
 {
   "_meta": {
-    "fetched_at": "2026-09-07T13:39:24.941721",
+    "fetched_at": "2026-09-14T13:59:57.565108",
     "profile_id": "2593537292052861",
     "marketplace": "DE",
     "days": 14,
     "region": "eu",
-    "reports_incomplete": false,
-    "reports_timed_out": [],
+    "reports_incomplete": true,
+    "reports_timed_out": [
+      "spCampaigns",
+      "spKeywords",
+      "spSearchTerm",
+      "spTargeting",
+      "spAdvertisedProduct"
+    ],
     "reports_skipped_425": [],
     "reports_failed": [],
     "incomplete_lists": [],
     "days_requested": 14,
     "report_windows": [
       [
-        "2026-08-24",
-        "2026-09-06"
+        "2026-08-31",
+        "2026-09-13"
       ]
     ]
   },
@@ -106,6 +112,17 @@
       "startDate": "2026-05-08",
       "endDate": "",
       "bidding": {}
+    },
+    {
+      "campaignId": "131473497025172",
+      "name": "Borsa AMZ AU",
+      "state": "ENABLED",
+      "budget": 3.0,
+      "budgetType": "DAILY",
+      "targetingType": "AUTO",
+      "startDate": "2026-09-09",
+      "endDate": "",
+      "bidding": {}
     }
   ],
   "adGroups": [
@@ -129,6 +146,13 @@
       "name": "Claude DE Sdraietta",
       "state": "ARCHIVED",
       "defaultBid": 0.55
+    },
+    {
+      "adGroupId": "218311782608849",
+      "campaignId": "131473497025172",
+      "name": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+      "state": "ENABLED",
+      "defaultBid": 0.4
     },
     {
       "adGroupId": "486155076821537",
@@ -956,6 +980,54 @@
       "expressionType": "AUTO",
       "state": "ARCHIVED",
       "bid": 0.1
+    },
+    {
+      "targetId": "131984954286319",
+      "campaignId": "131473497025172",
+      "expression": [
+        {
+          "type": "QUERY_BROAD_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "143412251403315",
+      "campaignId": "131473497025172",
+      "expression": [
+        {
+          "type": "QUERY_HIGH_REL_MATCHES"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "89873300709418",
+      "campaignId": "131473497025172",
+      "expression": [
+        {
+          "type": "ASIN_SUBSTITUTE_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
+    },
+    {
+      "targetId": "22834405008795",
+      "campaignId": "131473497025172",
+      "expression": [
+        {
+          "type": "ASIN_ACCESSORY_RELATED"
+        }
+      ],
+      "expressionType": "AUTO",
+      "state": "ENABLED",
+      "bid": 0
     }
   ],
   "reports": {
@@ -965,9 +1037,9 @@
     "targeting": [],
     "products": []
   },
-  "analysis": "# 📊 Stato Generale\n\nIl marketplace DE non presenta **nessuna campagna attiva** nel periodo analizzato (ultimi 14 giorni). Spesa, impression, click e ordini sono tutti a zero. Non ci sono campagne in pausa o archiviate da considerare, né dati storici per ASIN o keyword. Il profilo è essenzialmente **inattivo su Amazon DE**: non c'è traffico a pagamento in corso, il che significa zero visibilità e zero vendite PPC attribuite.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Lanciare almeno una campagna attiva su DE**\n- **Azione**: Creare una campagna Sponsored Products (Auto + Manual) per i principali ASIN del catalogo su marketplace DE. Iniziare con budget test di €10-15/giorno per campagna Auto, targeting automatico, per raccogliere search term data in 14 giorni.\n- **Motivo**: Zero campagne attive = zero dati, zero vendite PPC, zero visibilità organica supportata da Ads. Il marketplace DE è completamente buio.\n- **Impatto stimato**: Anche con budget minimo si inizia a raccogliere dati di conversione reali entro 7-14 giorni, fondamentali per ogni ottimizzazione futura.\n\n**2. Definire una struttura campagne manuale EXACT/PHRASE per DE**\n- **Azione**: Parallelamente alla campagna Auto, lanciare una campagna Manual con le keyword più ovvie per categoria (tradotte in tedesco), bid di partenza conservativo €0.30-0.50, match EXACT sulle keyword core.\n- **Motivo**: Il mercato DE ha comportamenti di ricerca specifici (tedesco, compound words). Senza keyword manuali in tedesco, la campagna Auto da sola potrebbe sprecare budget su termini irrilevanti.\n- **Impatto stimato**: Controllo del traffico qualificato fin dall'inizio, ACoS potenzialmente più basso rispetto a solo Auto.\n\n**3. Impostare un sistema di monitoraggio settimanale per DE**\n- **Azione**: Programmare revisione settimanale dei search term report a partire dal giorno 7 dal lancio. Avere un target ACoS obiettivo definito prima del lancio (es. breakeven ACoS basato su margine prodotto).\n- **Motivo**: Senza baseline dati e senza un target ACoS chiaro, qualsiasi ottimizzazione futura sarà arbitraria.\n- **Impatto stimato**: Struttura di ottimizzazione scalabile dal giorno 1, evita sprechi nelle prime settimane critiche.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n**Nessun search term disponibile** — non ci sono campagne attive né dati di traffico nel periodo analizzato.\n\n➡️ *Azione futura*: Dopo 7-14 giorni di campagna Auto attiva, il search term report sarà la prima fonte da analizzare per negativizzare termini irrilevanti e promuovere i convertitori a keyword EXACT.\n\n**Search Terms Vincenti → Nuove Keyword**: Nessun dato disponibile al momento. Da valorizzare nella prossima revisione post-lancio.\n\n---\n\n# 🟢 Keywords da Scalare\n\n**Nessuna keyword attiva presente** nel periodo.\n\n**Da fare al lancio**:\n- Preparare una lista seed di keyword in tedesco per la categoria dei prodotti venduti su DE (usare Helium10 / Brand Analytics DE / suggerimenti Amazon.de).\n- Priorità a keyword EXACT con volume medio, bassa concorrenza, rilevanza alta → bid iniziale €0.35-0.45.\n- Dopo 14 giorni: scalare bid (+20%) sulle keyword con ACoS < target e almeno 2 ordini.\n\n---\n\n# 💡 Quick Wins\n\n1. **Controlla la validità degli ASIN su Amazon.de**: Prima di lanciare campagne, verifica che i prodotti siano listati, buybox attiva e inventario disponibile su DE. Campagne attive con ASIN senza buybox bruciano budget a zero conversioni.\n\n2. **Imposta il budget giornaliero con cautela**: Inizia con €10-15/giorno per campagna Auto. Evita budget alti senza dati — il marketplace DE può avere CPC più alti rispetto a IT/ES, specialmente in categorie competitive.\n\n3. **Usa la lingua tedesca nelle keyword manuali**: Le keyword composte tedesche (es. *Holzschneidebrett* invece di *tagliere legno*) sono critiche su DE. Un tool di traduzione non basta: usa il search suggestion di Amazon.de direttamente.\n\n4. **Valuta Sponsored Brands solo dopo aver dati SP**: Non lanciare SB o SD senza avere prima dati di conversione da Sponsored Products. Massimizza prima l'efficienza del canale base.\n\n5. **Collega DE al Brand Registry se non ancora fatto**: Sblocca accesso a Search Query Performance e Brand Analytics per DE — dati gratuiti e preziosi per la selezione keyword pre-lancio, senza spendere in Ads.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n\n\n> ⚠️ **Nessuna azione automatizzabile**: non esistono campagne attive, keyword, ad group o ID reali nei dati forniti. Tutte le azioni richieste (lancio campagne, struttura, keyword seed) devono essere eseguite **manualmente** dalla console Amazon Ads o tramite bulk upload, poiché richiedono creazione ex-novo di entità non presenti nel sistema. Procedere con il lancio manuale seguendo le indicazioni nelle sezioni precedenti.",
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace DE non presenta attualmente **nessuna campagna attiva** nel periodo analizzato (ultimi 14 giorni). Spesa, vendite, impression e click sono tutti a zero. Non ci sono dati storici recuperabili né da campagne in pausa né da ad group con ASIN attribuibili con certezza. Il marketplace è di fatto **fermo pubblicitariamente**: nessuna visibilità a pagamento sta girando in questo momento.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Verifica immediata dello stato delle campagne DE**\n- **Azione**: Accedere alla console Amazon Ads (DE) e verificare perché non risultano campagne attive. Controllare se sono state messe in pausa accidentalmente, se il budget è esaurito a livello di account, o se c'è un problema di fatturazione/pagamento.\n- **Motivo**: Zero campagne attive = zero visibilità organica supportata da PPC. In un marketplace competitivo come DE, l'assenza totale di advertising compromette ranking e Buy Box.\n- **Impatto stimato**: Riattivare anche solo 1-2 campagne core può ripristinare traffico e vendite immediatamente, con impatto stimabile in funzione del budget storico.\n\n**2. Lancia almeno una campagna AUTO per ogni ASIN principale**\n- **Azione**: Creare campagne Sponsored Products AUTO su DE per i tuoi ASIN più venduti, budget iniziale €10-20/giorno, bid €0.40-0.60. Serve come base dati per capire cosa cerca il mercato tedesco.\n- **Motivo**: Non esistono dati di search term, keyword o performance su cui lavorare. Una campagna AUTO genera dati reali in 7-14 giorni da cui estrarre keyword e negativizzare sprechi.\n- **Impatto stimato**: Prime impression e vendite attribuite entro 5-7 giorni; dati utilizzabili per ottimizzazione nella settimana successiva.\n\n**3. Pianifica una struttura campagne MANUAL per DE**\n- **Azione**: Sulla base dei dati da altri marketplace (IT, FR, ES se attivi), trasla le top keyword convertenti in campagne MANUAL EXACT su DE. Traduci i termini in tedesco e adatta i bid al CPC locale (tendenzialmente più alto della media EU).\n- **Motivo**: DE è il marketplace Amazon più grande d'Europa. Partire senza struttura MANUAL significa lasciare margini e ranking sul tavolo per settimane.\n- **Impatto stimato**: Campagne MANUAL ben strutturate tipicamente abbassano ACoS del 20-35% rispetto alle sole AUTO a parità di spesa.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n**Nessun search term disponibile** — non ci sono campagne attive né dati di traffico nel periodo. Non è possibile generare negativizzazioni senza dati reali.\n\n> ⚠️ **Appena le campagne AUTO saranno attive**, torna qui la settimana prossima: il report estrarrà automaticamente i search term spreconi da negativizzare e i vincitori da promuovere a keyword EXACT.\n\n---\n\n# 🟢 Keywords da Scalare\n\n**Nessuna keyword attiva disponibile** da scalare nel periodo analizzato.\n\n**Suggerimento operativo**: Quando riattivi/crei campagne, dai priorità a keyword in EXACT match per i termini che hanno già convertito su altri marketplace EU. Su DE, i modificatori linguistici contano molto (es. termini composti tedeschi): usa uno strumento come Helium 10 Magnet o il keyword tool nativo Amazon DE per trovare varianti locali.\n\n---\n\n# 💡 Quick Wins\n\n1. **Controlla la fatturazione account DE**: Spesso lo zero assoluto è causato da una carta scaduta o un limite di credito raggiunto — si risolve in 5 minuti e sblocca tutto.\n\n2. **Importa struttura da altro marketplace**: Se hai campagne attive su IT o UK con buone performance, usa la funzione \"Copia campagna\" di Amazon Ads tra marketplace, adatta budget e bid al CPC DE (+15-25% rispetto a IT in media).\n\n3. **Imposta budget rules automatiche**: Prima di rilanciare, configura regole di budget automatico (es. pausa se ACoS > 60% per 7 giorni) per evitare spesa non controllata su un marketplace da zero.\n\n4. **Benchmark ACoS target DE**: Per prodotti consumer su DE, un ACoS target realistico in fase di lancio è 35-45%; a regime punta a <25%. Imposta questo come KPI prima di lanciare.\n\n5. **Programma review del report tra 7 giorni**: Con campagne attive da 7+ giorni avrai i primi dati significativi. Pianifica già ora la sessione di ottimizzazione (negativizzazioni, bid adjustment, promozione search term vincenti).\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n\n\n> **Motivazione**: Non esistono ID reali (campagne, ad group, keyword) visibili nei dati forniti — tutte le campagne attive sono 0 e nessun dato è disponibile. Generare azioni con ID inventati causerebbe errori nello script o modifiche su campagne errate. **Nessuna azione automatizzabile questa settimana**: tutte le azioni richieste sono manuali (verifica account, creazione campagne, import struttura). Torna con dati attivi la prossima settimana.",
   "actions": {
     "actions": []
   },
-  "generated_at": "2026-09-07T13:39:59.028985"
+  "generated_at": "2026-09-14T14:00:31.289888"
 }
