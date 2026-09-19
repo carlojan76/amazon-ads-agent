@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "fetched_at": "2026-09-19T16:50:31.918783",
+    "profile_id": "437143147046114",
+    "marketplace": "ES",
+    "days": 14,
+    "region": "eu",
+    "reports_incomplete": false,
+    "reports_timed_out": [],
+    "reports_skipped_425": [],
+    "reports_failed": [],
+    "incomplete_lists": [],
+    "days_requested": 14,
+    "report_windows": [
+      [
+        "2026-09-05",
+        "2026-09-18"
+      ]
+    ]
+  },
+  "campaigns": [],
+  "adGroups": [],
+  "keywords": [],
+  "negativeKeywords": [],
+  "targets": [],
+  "reports": {
+    "campaigns": [],
+    "keywords": [],
+    "searchTerms": [],
+    "targeting": [],
+    "products": []
+  },
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace **ES (Spagna)** risulta completamente inattivo nel periodo analizzato (ultimi 14 giorni): **0 campagne attive**, spesa €0, vendite €0, zero impression e click. Non ci sono dati storici da campagne in pausa o archiviate, né dati per-ASIN disponibili. Il marketplace è essenzialmente spento — non si tratta di performance scarsa, ma di **assenza totale di presenza pubblicitaria**.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Attivare almeno una campagna sul marketplace ES**\n- **Azione**: Creare o riattivare una campagna Sponsored Products (Auto targeting) per i principali ASIN venduti in Spagna, con budget giornaliero iniziale di €10–15.\n- **Motivo**: Zero campagne attive = zero visibilità organica/paid. Se il prodotto è listato su Amazon.es, stai perdendo quote di mercato ogni giorno senza dati per ottimizzare.\n- **Impatto stimato**: Anche con budget minimo, si inizia a raccogliere dati di search term e impression — prerequisito per qualsiasi ottimizzazione futura.\n\n**2. Verificare lo stato dei listing su Amazon.es**\n- **Azione**: Controllare che gli ASIN siano attivi, con buybox acquisita e inventario disponibile su ES prima di investire in ads.\n- **Motivo**: L'assenza totale di campagne potrebbe essere intenzionale (listing non disponibili, buybox persa, stock esaurito). Rilanciare ads su listing non funzionanti è spreco certo.\n- **Impatto stimato**: Evita di bruciare budget su ASIN non acquistabili.\n\n**3. Definire una struttura campagna minima per ES**\n- **Azione**: Impostare almeno 1 campagna Auto + 1 campagna Manual (Exact/Phrase) con le keyword già performanti su altri marketplace (IT, DE, FR se attivi), adattate in spagnolo.\n- **Motivo**: Senza struttura, non c'è storia, non ci sono dati, non si può ottimizzare. Il marketplace ES è a zero assoluto.\n- **Impatto stimato**: Prime settimane di raccolta dati per identificare search term convertenti nel mercato spagnolo.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n> **Nessun search term disponibile** — non ci sono campagne attive né dati di traffico nel periodo. Non è possibile generare negativizzazioni.\n\n✅ **SEARCH TERMS VINCENTI → NUOVE KEYWORD**: Nessun dato disponibile. Da rivalutare dopo l'attivazione delle prime campagne.\n\n---\n\n# 🟢 Keywords da Scalare\n\n> **Nessuna keyword attiva presente.** Non ci sono bid da aumentare né keyword-idee da campagne in pausa da recuperare.\n\n💡 *Dopo il lancio delle prime campagne Auto, estrarre settimanalmente i search term con ACoS < 25% e aggiungerli come EXACT in campagne Manual dedicate.*\n\n---\n\n# 💡 Quick Wins\n\n1. **Copia le strutture vincenti da altri marketplace**: Se hai campagne attive su IT/DE/FR, esporta le keyword EXACT con ACoS < 30% e traducile in spagnolo — punto di partenza immediato per ES senza partire da zero.\n\n2. **Budget conservativo in fase di lancio**: Inizia con €10–20/giorno per campagna. ES è un mercato più piccolo di DE/FR — il CPM è generalmente più basso, ottimo per raccogliere dati a costo contenuto.\n\n3. **Imposta subito negative brand dei competitor**: Prima ancora di avere dati, aggiungi come NEGATIVE EXACT i brand concorrenti principali per evitare dispersione del budget iniziale.\n\n4. **Monitora l'impression share da subito**: Su un marketplace a zero storico, il primo KPI da guardare non è ACoS ma **impression** — se non arrivano, il problema è bid troppo basso o listing non eligible.\n\n5. **Pianifica una review a 7 giorni**: Dopo il lancio delle prime campagne, fissa una review rapida per bloccare subito i search term ovviamente irrilevanti prima che consumino budget prezioso.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n\n\n> ⚠️ **Nessuna azione automatizzabile**: non esistono campagne attive, keyword ID, ad group ID o search term reali su cui operare. Tutte le azioni necessarie (creazione campagne, struttura, lancio) richiedono intervento **manuale** su Amazon Ads Console o tramite bulk upload. Appena le prime campagne saranno attive e avranno generato dati, lo script potrà operare normalmente.",
+  "actions": {
+    "actions": []
+  },
+  "generated_at": "2026-09-19T16:51:00.529352"
+}
