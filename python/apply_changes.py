@@ -156,6 +156,53 @@ def normalize_actions(actions):
                     new = _AUTO_EXPRESSION_ALIASES[et]
                     fixes.append(f"azione {i}.adGroup{j}: expressionType {et} -> {new}")
                     x["expressionType"] = new
+
+    fixes.extend(_drop_redundant_negatives(actions))
+    return fixes
+
+
+def _drop_redundant_negatives(actions):
+    """Toglie la negativa EXACT quando nello stesso invio c'e' gia' la PHRASE.
+
+    Una negative PHRASE su "borsa da viaggio per cani" blocca gia' la ricerca
+    esatta con lo stesso testo: la coppia e' ridondante. Amazon se ne accorge
+    e rifiuta la seconda con un laconico "Keyword is invalid", facendo fallire
+    l'intero batch di negative anche quando le altre sei erano perfette.
+
+    Le due arrivano facilmente insieme perche' la firma di deduplico include
+    il match type, quindi PHRASE e EXACT sullo stesso testo sono due azioni
+    distinte per la UI. Qui sono la stessa cosa, e ne basta una.
+
+    Modifica la lista in-place. Ritorna le correzioni fatte, per il log.
+    """
+    fixes = []
+
+    def scope(a):
+        return (
+            str(a.get("campaignId") or ""),
+            str(a.get("adGroupId") or ""),
+            str(a.get("keywordText") or "").strip().lower(),
+        )
+
+    phrase = {
+        scope(a) for a in actions
+        if a.get("type") == "add_negative" and a.get("matchType") == "NEGATIVE_PHRASE"
+    }
+    if not phrase:
+        return fixes
+
+    superflue = []
+    for i, a in enumerate(actions):
+        if (a.get("type") == "add_negative"
+                and a.get("matchType") == "NEGATIVE_EXACT"
+                and scope(a) in phrase):
+            superflue.append(i)
+            fixes.append(
+                f"azione {i}: negativa esatta '{a.get('keywordText')}' rimossa, "
+                f"la stessa in frase e' gia' nell'invio e la copre"
+            )
+    for i in reversed(superflue):
+        actions.pop(i)
     return fixes
 
 
@@ -1435,6 +1482,30 @@ def main():
         for m in rollback["_manual_undo"]:
             print("   (a mano) " + m)
 
+    dump_report()
+
+    # Esito del processo.
+    #
+    # Prima bastava UN elemento rifiutato da Amazon perche' `all_ok` cadesse e
+    # il run diventasse rosso: 16 modifiche applicate correttamente e una
+    # negativa scartata risultavano indistinguibili da un fallimento totale.
+    # Oltre a essere fuorviante, faceva saltare gli step successivi — fra cui
+    # il commit del registro delle azioni applicate.
+    #
+    # Ora: rosso solo se NIENTE e' andato a buon fine. Un rifiuto parziale e'
+    # giallo, cioe' esce 0 ma lo dice forte nel riepilogo.
+    n_ok = sum(1 for _, ok, _ in results if ok)
+    n_ko = sum(1 for _, ok, _ in results if not ok)
+
+    if n_ko and n_ok:
+        print(f"\nPARZIALE: {n_ok} operazioni riuscite, {n_ko} con almeno un elemento rifiutato.")
+        print("   Le modifiche riuscite SONO state applicate e sono nel registro.")
+        print("   Gli elementi rifiutati sono elencati qui sopra: vanno rivisti a mano.")
+        report["outcome"] = "partial"
+        dump_report()
+        sys.exit(0)
+
+    report["outcome"] = "ok" if all_ok else "failed"
     dump_report()
     sys.exit(0 if all_ok else 2)
 
