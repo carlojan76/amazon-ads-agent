@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "node tests/smoke.mjs",
     "test:py": "cd python && python3 -m unittest discover tests -v",
-    "test:worker": "node cloudflare/test/worker.test.mjs",
+    "test:worker": "node cloudflare/test/worker.test.mjs && node cloudflare/test/stream.test.mjs",
     "test:all": "npm test && npm run test:worker && npm run test:py"
   },
   "dependencies": {
