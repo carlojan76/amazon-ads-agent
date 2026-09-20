@@ -4,10 +4,19 @@ import ActionsPanel from "./ActionsPanel";
 import ListingPanel from "./ListingPanel";
 import FamilyPanel from "./FamilyPanel";
 import CampaignPlanner from "./CampaignPlanner";
-import { ACTIONS_PROMPT, extractActionsFromText, validateAgainstData, actionSignature, dedupeActions } from "./actions";
+import {
+  ACTIONS_PROMPT, actionsPromptWith, extractActionsFromText, validateAgainstData,
+  actionSignature, dedupeActions, EMPTY_CAPS,
+} from "./actions";
 import { parseCSV, processJSON, processCSV } from "./parse";
+import * as api from "./api";
 
-const ENV_KEY = typeof import.meta !== "undefined" ? import.meta.env?.VITE_ANTHROPIC_API_KEY : "";
+// NOTA: VITE_ANTHROPIC_API_KEY e' stata RIMOSSA di proposito.
+// Vite inlinea le variabili VITE_* nel bundle compilato: su GitHub Pages,
+// che e' pubblico anche con repository privato, la chiave sarebbe leggibile
+// da chiunque aprisse il sorgente della pagina. La via corretta e' il Worker
+// (src/api.js), che tiene la chiave nei secrets Cloudflare. Resta possibile
+// incollare una chiave a mano per l'uso locale: vive solo in memoria.
 const BASE_URL = typeof import.meta !== "undefined" ? import.meta.env.BASE_URL : "/";
 const MODEL = "claude-sonnet-5";
 
@@ -50,9 +59,80 @@ function Banner({ tone = "blue", children, action }) {
   );
 }
 
+/**
+ * Delta rispetto alla rilevazione precedente.
+ * L'ACoS del singolo periodo dice poco: il segno della variazione dice molto
+ * di piu', ed e' esattamente il numero che prima non esisteva da nessuna parte
+ * perche' public/data veniva sovrascritto ogni lunedi'.
+ */
+function Delta({ current, previous, invert }) {
+  if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0) return null;
+  const pct = ((current - previous) / Math.abs(previous)) * 100;
+  if (!Number.isFinite(pct) || Math.abs(pct) < 0.5) {
+    return <span style={{ color: C.textDim }}>invariato</span>;
+  }
+  // invert: per ACoS e CPC scendere e' la notizia buona.
+  const good = invert ? pct < 0 : pct > 0;
+  return (
+    <span style={{ color: good ? C.green : C.red, fontWeight: 600 }}>
+      {pct > 0 ? "▲" : "▼"} {Math.abs(pct).toFixed(1)}% vs precedente
+    </span>
+  );
+}
+
+/** Impostazioni del Worker: indirizzo e token. Condivise fra le due schermate. */
+function WorkerSettings({ apiBase, apiToken, onBase, onToken, apiKey, onKey }) {
+  const [probe, setProbe] = useState(null);
+  return (
+    <div>
+      <div style={{ fontSize: T.small, fontWeight: 600, marginBottom: S.sm }}>Worker (Cloudflare)</div>
+      <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.sm, lineHeight: 1.6 }}>
+        Tiene la chiave Anthropic e il token GitHub lato server, e ospita il registro
+        delle azioni applicate, lo storico e i tetti sui bid. Senza, l'app funziona
+        come prima ma quelle funzioni restano spente.
+      </div>
+      <input
+        value={apiBase} onChange={(e) => onBase(e.target.value)}
+        placeholder="https://amazon-ads-agent-api.tuo-subdominio.workers.dev"
+        aria-label="Indirizzo del Worker"
+        style={{ ...input, width: "100%", fontFamily: F.mono, marginBottom: S.sm }} />
+      <input
+        value={apiToken} onChange={(e) => onToken(e.target.value)} type="password"
+        placeholder="Token del Worker (API_TOKEN)" aria-label="Token del Worker"
+        style={{ ...input, width: "100%", fontFamily: F.mono }} />
+      <div style={{ display: "flex", gap: S.sm, alignItems: "center", marginTop: S.sm, flexWrap: "wrap" }}>
+        <button
+          onClick={async () => {
+            setProbe("...");
+            try { await api.health(); setProbe("ok"); } catch (e) { setProbe(e.message); }
+          }}
+          style={button("ghost", { small: true })}>Prova la connessione</button>
+        {probe === "ok" && <span style={{ color: C.green, fontSize: T.micro }}>Worker raggiungibile.</span>}
+        {probe && probe !== "ok" && probe !== "..." && (
+          <span style={{ color: C.red, fontSize: T.micro }}>{probe}</span>
+        )}
+      </div>
+
+      <details style={{ marginTop: S.lg }}>
+        <summary style={{ cursor: "pointer", fontSize: T.small, color: C.textMuted }}>
+          Chiave Anthropic diretta (solo uso locale)
+        </summary>
+        <input value={apiKey} onChange={(e) => onKey(e.target.value)} type="password" placeholder="sk-ant-…"
+          style={{ ...input, width: "100%", marginTop: S.sm, fontFamily: F.mono }} />
+        <div style={{ fontSize: T.micro, color: C.yellow, marginTop: 6, lineHeight: 1.6 }}>
+          Da usare solo con <code style={{ fontFamily: F.mono }}>npm run dev</code> sul tuo computer.
+          Resta in memoria e non viene salvata. Non impostarla come variabile di build
+          (<code style={{ fontFamily: F.mono }}>VITE_…</code>): Vite la scriverebbe dentro il
+          JavaScript pubblicato, e il sito su GitHub Pages è pubblico.
+        </div>
+      </details>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------- AI Advisor
 
-function AiAdvisor({ metrics, sourceType, apiKey, onActions, onGoToActions }) {
+function AiAdvisor({ metrics, sourceType, apiKey, caps, appliedSignatures, onActions, onGoToActions }) {
   const [advice, setAdvice] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -122,7 +202,14 @@ ${best || "Nessuna"}${stSection}${negSection}${prodSection}`;
   };
 
   const askAI = useCallback(async (customQ) => {
-    if (!apiKey) { setError("Inserisci la tua API key Anthropic nelle impostazioni (icona ⚙ in alto)."); return; }
+    const viaWorker = api.isConfigured();
+    if (!viaWorker && !apiKey) {
+      setError(
+        "Serve il Worker (impostazioni ⚙ → Worker) oppure, per l'uso in locale, "
+        + "una chiave Anthropic incollata a mano.",
+      );
+      return;
+    }
     setLoading(true); setError(null);
 
     const sys = `Sei un consulente senior di Amazon PPC per marketplace europei (IT, FR, DE, ES).
@@ -138,46 +225,61 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
     // successive il modello lo ha gia' in cronologia, rimandarlo ogni volta
     // moltiplicava i token (e il costo) di ogni follow-up.
     const first = history.length === 0;
+    // Il prompt porta con se' i tetti sui bid e il gia'-applicato: dirglielo
+    // prima costa meno che correggerlo dopo, e la lista che torna e' gia'
+    // utilizzabile invece di essere mezza da adeguare.
+    const prompt = actionsPromptWith(caps, appliedSignatures);
     const msg = first
-      ? `${buildContext()}\n\n---\n${customQ ? `DOMANDA: ${customQ}` : "Analisi completa con consigli operativi per tutte le categorie."}\n${ACTIONS_PROMPT}`
-      : `${customQ || "Continua l'analisi."}\n${ACTIONS_PROMPT}`;
+      ? `${buildContext()}\n\n---\n${customQ ? `DOMANDA: ${customQ}` : "Analisi completa con consigli operativi per tutte le categorie."}\n${prompt}`
+      : `${customQ || "Continua l'analisi."}\n${prompt}`;
 
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey.trim(),
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: MODEL, max_tokens: MAX_TOKENS, system: sys,
-          messages: [...history, { role: "user", content: msg }],
-        }),
-      });
-
+      const messages = [...history, { role: "user", content: msg }];
       let data;
-      try {
-        data = await resp.json();
-      } catch {
-        throw new Error(`Risposta non leggibile dall'API (HTTP ${resp.status}). `
-          + `Se sei dietro una VPN o un proxy aziendale, potrebbe stare bloccando la chiamata.`);
+
+      if (viaWorker) {
+        // La chiave sta sul Worker: il browser non la vede mai.
+        data = await api.askAnthropic(sys, messages);
+      } else {
+        const resp = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey.trim(),
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-direct-browser-access": "true",
+          },
+          body: JSON.stringify({
+            model: MODEL, max_tokens: MAX_TOKENS, system: sys, messages,
+          }),
+        });
+
+        try {
+          data = await resp.json();
+        } catch {
+          throw new Error(`Risposta non leggibile dall'API (HTTP ${resp.status}). `
+            + `Se sei dietro una VPN o un proxy aziendale, potrebbe stare bloccando la chiamata.`);
+        }
+
+        // Prima l'errore veniva cercato solo in data.error, e qualsiasi altro
+        // caso finiva in un generico "Nessuna risposta" che non diceva nulla.
+        if (!resp.ok || data.type === "error" || data.error) {
+          const e = data.error || {};
+          const hint = resp.status === 401
+            ? " La chiave API non è valida o è stata revocata."
+            : resp.status === 400 && /credit|balance/i.test(e.message || "")
+              ? " Il piano non ha credito residuo: controlla la fatturazione su console.anthropic.com."
+              : resp.status === 429
+                ? " Hai superato il limite di richieste: riprova tra qualche minuto."
+                : "";
+          throw new Error(`API Anthropic — HTTP ${resp.status}${e.type ? ` (${e.type})` : ""}: `
+            + `${e.message || "errore non specificato"}.${hint}`);
+        }
       }
 
-      // Prima l'errore veniva cercato solo in data.error, e qualsiasi altro
-      // caso finiva in un generico "Nessuna risposta" che non diceva nulla.
-      if (!resp.ok || data.type === "error" || data.error) {
+      if (data?.type === "error" || data?.error) {
         const e = data.error || {};
-        const hint = resp.status === 401
-          ? " La chiave API non è valida o è stata revocata."
-          : resp.status === 400 && /credit|balance/i.test(e.message || "")
-            ? " Il piano non ha credito residuo: controlla la fatturazione su console.anthropic.com."
-            : resp.status === 429
-              ? " Hai superato il limite di richieste: riprova tra qualche minuto."
-              : "";
-        throw new Error(`API Anthropic — HTTP ${resp.status}${e.type ? ` (${e.type})` : ""}: `
-          + `${e.message || "errore non specificato"}.${hint}`);
+        throw new Error(`API Anthropic: ${e.message || "errore non specificato"}`);
       }
 
       const blocks = Array.isArray(data.content) ? data.content : [];
@@ -195,7 +297,7 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
       }
 
       const { actions, cleanText, warnings } = extractActionsFromText(text);
-      const { kept, rejected } = validateAgainstData(actions, metrics);
+      const { kept, rejected } = validateAgainstData(actions, metrics, { caps, appliedSignatures });
       setAdvice(cleanText || text);
       setHistory((p) => [...p, { role: "user", content: msg }, { role: "assistant", content: text }]);
       setLastResult({ kept: kept.length, rejected, warnings });
@@ -203,7 +305,7 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
     } catch (err) {
       setError(err.message);
     } finally { setLoading(false); }
-  }, [metrics, history, apiKey]); // eslint-disable-line
+  }, [metrics, history, apiKey, caps, appliedSignatures]); // eslint-disable-line
 
   const renderMarkdown = (text) => text.split("\n").map((line, i) => {
     if (line.startsWith("###")) return <h4 key={i} style={{ color: C.accent, margin: "16px 0 6px", fontSize: T.body, fontWeight: 700 }}>{line.replace(/^###\s*/, "")}</h4>;
@@ -320,7 +422,7 @@ export default function App() {
   const [tab, setTab] = useState("overview");
   const [kwSort, setKwSort] = useState("spend");
   const [kwFilter, setKwFilter] = useState("all");
-  const [apiKey, setApiKey] = useState(ENV_KEY || "");
+  const [apiKey, setApiKey] = useState("");
   const [showSettings, setShowSettings] = useState(false);
   const [publishedIndex, setPublishedIndex] = useState(null);
   const [loadingMp, setLoadingMp] = useState(null);
@@ -328,6 +430,13 @@ export default function App() {
   const [aiActions, setAiActions] = useState([]);
   const [selectedCount, setSelectedCount] = useState(0);
   const [parseError, setParseError] = useState(null);
+  const [kwSearch, setKwSearch] = useState("");
+  const [kwCampaign, setKwCampaign] = useState("");
+  const [caps, setCaps] = useState(EMPTY_CAPS);
+  const [appliedSignatures, setAppliedSignatures] = useState(new Set());
+  const [historySeries, setHistorySeries] = useState(null);
+  const [apiBase, setApiBaseState] = useState(() => api.getApiBase());
+  const [apiToken, setApiTokenState] = useState(() => api.getApiToken());
   const fileRef = useRef();
 
   useEffect(() => {
@@ -335,7 +444,37 @@ export default function App() {
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
       .then(setPublishedIndex)
       .catch(() => setPublishedIndex(null));
+    // Serie storica pubblicata dalla weekly analysis. Se manca, i delta
+    // semplicemente non compaiono: e' un di piu', non un requisito.
+    fetch(`${BASE_URL}data/history.json`)
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((h) => setHistorySeries(h?.series || null))
+      .catch(() => setHistorySeries(null));
   }, []);
+
+  // Tetti sui bid e registro delle azioni applicate, per il marketplace
+  // attualmente caricato. Entrambi best effort: senza Worker la UI funziona
+  // esattamente come prima.
+  const currentMp = metrics?.meta?.marketplace || "";
+  useEffect(() => {
+    if (!currentMp || !api.isConfigured()) { setCaps(EMPTY_CAPS); setAppliedSignatures(new Set()); return; }
+    let alive = true;
+    api.fetchBidCaps(currentMp)
+      .then((r) => {
+        if (!alive) return;
+        setCaps({
+          market: Number.isFinite(r?.market_cap) ? r.market_cap : null,
+          campaigns: Object.fromEntries(
+            (r?.campaign_caps || []).map((c) => [String(c.scope_id), Number(c.max_bid)]),
+          ),
+        });
+      })
+      .catch(() => alive && setCaps(EMPTY_CAPS));
+    api.fetchAppliedSignatures(currentMp, 28)
+      .then((r) => alive && setAppliedSignatures(r.signatures))
+      .catch(() => alive && setAppliedSignatures(new Set()));
+    return () => { alive = false; };
+  }, [currentMp, apiBase, apiToken]);
 
   const resetForNewData = () => { setAiActions([]); setTab("overview"); setParseError(null); };
 
@@ -386,9 +525,18 @@ export default function App() {
     });
   }, []);
 
+  // Anche le azioni che arrivano dal file pubblicato passano dai tetti e dal
+  // registro: sono state generate lunedi' mattina, e nel frattempo puoi aver
+  // applicato meta' di quelle proposte o abbassato un tetto.
+  const fileActions = useMemo(() => {
+    const raw = metrics?.proposedActions || [];
+    if (!raw.length || !metrics) return [];
+    return validateAgainstData(raw, metrics, { caps, appliedSignatures }).kept;
+  }, [metrics, caps, appliedSignatures]);
+
   const allProposed = useMemo(
-    () => dedupeActions([...(metrics?.proposedActions || []), ...aiActions]),
-    [metrics?.proposedActions, aiActions]
+    () => dedupeActions([...fileActions, ...aiActions]),
+    [fileActions, aiActions]
   );
 
   if (showPlanner) return <CampaignPlanner onClose={() => setShowPlanner(false)} />;
@@ -460,11 +608,15 @@ export default function App() {
           </button>
 
           <details style={{ ...card, padding: S.md }}>
-            <summary style={{ cursor: "pointer", fontSize: T.small, color: C.textMuted }}>Chiave API Anthropic</summary>
-            <input value={apiKey} onChange={(e) => setApiKey(e.target.value)} type="password" placeholder="sk-ant-…"
-              style={{ ...input, width: "100%", marginTop: S.sm, fontFamily: F.mono }} />
-            <div style={{ fontSize: T.micro, color: C.textDim, marginTop: 6 }}>
-              Serve solo per il consulente. Resta nel browser e non viene salvata; in alternativa usa VITE_ANTHROPIC_API_KEY nel file .env.
+            <summary style={{ cursor: "pointer", fontSize: T.small, color: C.textMuted }}>
+              Impostazioni {api.isConfigured() ? "· Worker collegato" : "· Worker non configurato"}
+            </summary>
+            <div style={{ marginTop: S.md }}>
+              <WorkerSettings
+                apiBase={apiBase} apiToken={apiToken} apiKey={apiKey}
+                onBase={(v) => { api.setApiBase(v); setApiBaseState(v); }}
+                onToken={(v) => { api.setApiToken(v); setApiTokenState(v); }}
+                onKey={setApiKey} />
             </div>
           </details>
         </div>
@@ -477,11 +629,19 @@ export default function App() {
   const bestKws = metrics.keywords.filter((k) => k.orders > 0 && k.acos < 25).sort((a, b) => a.acos - b.acos);
   const wasteST = (metrics.searchTerms || []).filter((s) => s.spend > 0.5 && s.orders === 0).sort((a, b) => b.spend - a.spend);
 
+  // Ricerca testuale e filtro per campagna. Senza, con 840 keyword su IT si
+  // vedeva il 12% del totale e l'unico modo di raggiungerne una specifica era
+  // sperare che rientrasse nelle prime 100 per il criterio scelto.
+  const kwNeedle = kwSearch.trim().toLowerCase();
   const sortedKws = [...metrics.keywords].filter((k) => {
     if (kwFilter === "waste") return k.spend > 0 && k.orders === 0;
     if (kwFilter === "top") return k.orders > 0 && k.acos < 25;
     if (kwFilter === "active") return k.spend > 0;
     return true;
+  }).filter((k) => {
+    if (kwCampaign && String(k.campaignId || "") !== kwCampaign) return false;
+    if (!kwNeedle) return true;
+    return `${k.keyword} ${k.campaign} ${k.adGroup} ${k.matchType}`.toLowerCase().includes(kwNeedle);
   }).sort((a, b) => {
     if (kwSort === "spend") return b.spend - a.spend;
     if (kwSort === "acos") return (a.acos || 999) - (b.acos || 999);
@@ -489,6 +649,17 @@ export default function App() {
     if (kwSort === "clicks") return b.clicks - a.clicks;
     return 0;
   });
+
+  // Punto di confronto: l'ultima rilevazione con una finestra DIVERSA da
+  // quella attualmente caricata. Rilanciare l'analisi sulla stessa settimana
+  // non deve produrre un delta dello 0% che sembra un dato e non lo e'.
+  const currentPeriodEnd = metrics.meta?.report_windows?.slice(-1)?.[0]?.slice(-1)?.[0] || null;
+  const prevPoint = (() => {
+    const pts = historySeries?.[currentMp] || [];
+    if (!pts.length) return null;
+    const older = pts.filter((p) => !currentPeriodEnd || p.period_end !== currentPeriodEnd);
+    return older.length ? older[older.length - 1] : null;
+  })();
 
   const pendingActions = allProposed.length;
   const tabs = [
@@ -523,9 +694,11 @@ export default function App() {
 
         {showSettings && (
           <div style={{ ...card, padding: S.lg, marginBottom: S.md }}>
-            <div style={{ fontSize: T.small, fontWeight: 600, marginBottom: S.sm }}>Chiave API Anthropic</div>
-            <input value={apiKey} onChange={(e) => setApiKey(e.target.value)} type="password" placeholder="sk-ant-…"
-              style={{ ...input, width: "100%", fontFamily: F.mono }} />
+            <WorkerSettings
+              apiBase={apiBase} apiToken={apiToken} apiKey={apiKey}
+              onBase={(v) => { api.setApiBase(v); setApiBaseState(v); }}
+              onToken={(v) => { api.setApiToken(v); setApiTokenState(v); }}
+              onKey={setApiKey} />
           </div>
         )}
 
@@ -535,6 +708,21 @@ export default function App() {
             {metrics.meta.reports_timed_out?.length ? ` (timeout: ${metrics.meta.reports_timed_out.join(", ")})` : ""}
             {metrics.meta.reports_skipped_425?.length ? ` (saltati: ${metrics.meta.reports_skipped_425.join(", ")})` : ""}.
             Dove vedi zero potrebbe mancare il dato, non l'attivita'.
+          </Banner>
+        )}
+
+        {metrics.missingReports?.length > 0 && (
+          <Banner tone="red">
+            {metrics.missingReports.includes("keywords") ? (
+              <>
+                <strong>Il report keyword è vuoto</strong> ma l'account ha {metrics.structuralKeywords} keyword
+                configurate: nella scheda Keyword vedrai tutto a 0,00 €. Non significa che non hanno speso,
+                significa che Amazon non ha restituito quel report. Il filtro “Sprechi” qui non è attendibile.
+              </>
+            ) : (
+              <>Report mancanti in questo file: {metrics.missingReports.join(", ")}. I numeri delle schede
+                corrispondenti sono a zero per assenza di dato, non per assenza di attività.</>
+            )}
           </Banner>
         )}
 
@@ -564,16 +752,22 @@ export default function App() {
         {tab === "overview" && (
           <div>
             <div style={{ display: "flex", gap: S.md, flexWrap: "wrap", marginBottom: S.md }}>
-              <Metric label="Spesa" value={eur(metrics.totalSpend)} color={C.red} icon="💸" />
-              <Metric label="Vendite" value={eur(metrics.totalSales)} color={C.green} icon="💰" />
-              <Metric label="ACoS" value={`${metrics.acos.toFixed(1)}%`} sub={metrics.acos > 30 ? "sopra la soglia" : "in linea"} color={metrics.acos > 30 ? C.red : C.green} icon="📉" />
-              <Metric label="ROAS" value={`${(metrics.totalSpend > 0 ? metrics.totalSales / metrics.totalSpend : 0).toFixed(2)}x`} color={C.blue} icon="📈" />
+              <Metric label="Spesa" value={eur(metrics.totalSpend)} color={C.red} icon="💸"
+                sub={<Delta current={metrics.totalSpend} previous={prevPoint?.spend} />} />
+              <Metric label="Vendite" value={eur(metrics.totalSales)} color={C.green} icon="💰"
+                sub={<Delta current={metrics.totalSales} previous={prevPoint?.sales} />} />
+              <Metric label="ACoS" value={`${metrics.acos.toFixed(1)}%`}
+                sub={prevPoint ? <Delta current={metrics.acos} previous={prevPoint.acos} invert /> : (metrics.acos > 30 ? "sopra la soglia" : "in linea")}
+                color={metrics.acos > 30 ? C.red : C.green} icon="📉" />
+              <Metric label="ROAS" value={`${(metrics.totalSpend > 0 ? metrics.totalSales / metrics.totalSpend : 0).toFixed(2)}x`} color={C.blue} icon="📈"
+                sub={<Delta current={metrics.totalSpend > 0 ? metrics.totalSales / metrics.totalSpend : 0} previous={prevPoint?.roas} />} />
             </div>
             <div style={{ display: "flex", gap: S.md, flexWrap: "wrap", marginBottom: S.lg }}>
               <Metric label="Impression" value={metrics.totalImpress.toLocaleString("it-IT")} color={C.textDim} icon="👁" />
               <Metric label="Click" value={metrics.totalClicks.toLocaleString("it-IT")} color={C.blue} icon="🖱" />
               <Metric label="CTR" value={`${metrics.ctr.toFixed(2)}%`} color={C.blue} icon="🎯" />
-              <Metric label="CPC" value={eur(metrics.cpc)} color={C.accent} icon="💶" />
+              <Metric label="CPC" value={eur(metrics.cpc)} color={C.accent} icon="💶"
+                sub={<Delta current={metrics.cpc} previous={prevPoint?.cpc} invert />} />
               <Metric label="Ordini" value={metrics.totalOrders} color={C.green} icon="📦" />
               <Metric label="CVR" value={`${metrics.cvr.toFixed(1)}%`} color={C.green} icon="✅" />
             </div>
@@ -646,6 +840,18 @@ export default function App() {
                 <button key={v} onClick={() => setKwFilter(v)} style={button(kwFilter === v ? "accentGhost" : "ghost", { small: true })}>{l}</button>
               ))}
               <div style={{ flex: 1 }} />
+              <input
+                value={kwSearch} onChange={(e) => setKwSearch(e.target.value)}
+                placeholder="Cerca keyword, campagna, ad group…" aria-label="Cerca fra le keyword"
+                style={{ ...input, padding: "6px 9px", fontSize: T.small, minWidth: 220 }} />
+              <select value={kwCampaign} onChange={(e) => setKwCampaign(e.target.value)} aria-label="Filtra per campagna"
+                style={{ ...input, padding: "6px 9px", fontSize: T.small, maxWidth: 240 }}>
+                <option value="">Tutte le campagne</option>
+                {Object.values(metrics.campaigns)
+                  .filter((c) => c.campaignId)
+                  .sort((a, b) => b.spend - a.spend)
+                  .map((c) => <option key={c.campaignId} value={c.campaignId}>{c.name}</option>)}
+              </select>
               <select value={kwSort} onChange={(e) => setKwSort(e.target.value)} aria-label="Ordina le keyword"
                 style={{ ...input, padding: "6px 9px", fontSize: T.small }}>
                 <option value="spend">Ordina per spesa</option>
@@ -678,6 +884,8 @@ export default function App() {
               </div>
               <div style={{ padding: `${S.sm}px ${S.md}px`, borderTop: `1px solid ${C.border}`, fontSize: T.micro, color: C.textDim }}>
                 {Math.min(100, sortedKws.length)} di {sortedKws.length} keyword
+                {sortedKws.length !== metrics.keywords.length && ` (su ${metrics.keywords.length} totali)`}
+                {sortedKws.length > 100 && " — restringi con la ricerca per vedere le altre"}
               </div>
             </div>
           </div>
@@ -707,6 +915,7 @@ export default function App() {
         {/* Consulente */}
         {tab === "ai" && (
           <AiAdvisor metrics={metrics} sourceType={sourceType} apiKey={apiKey}
+            caps={caps} appliedSignatures={appliedSignatures}
             onActions={addAiActions} onGoToActions={() => setTab("actions")} />
         )}
 
@@ -734,6 +943,9 @@ export default function App() {
               key={fileName}
               initialActions={allProposed}
               marketplace={metrics.meta?.marketplace || ""}
+              campaigns={Object.values(metrics.campaigns).filter((c) => c.campaignId)}
+              caps={caps}
+              onCapsChange={setCaps}
               onSelectionChange={setSelectedCount}
             />
           </div>

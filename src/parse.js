@@ -202,9 +202,26 @@ export function processJSON(json) {
   //  - hasPerformance: ci sono righe di report? Se no, il file ha la struttura
   //    delle campagne ma nessun numero (tipico di un report rifiutato da Amazon).
   //  - hasIds: le keyword hanno un ID? Se no, le azioni non sono applicabili.
-  const reportRows = ["campaigns", "keywords", "searchTerms", "targeting", "products"]
-    .reduce((n, k) => n + (json.reports?.[k]?.length || 0), 0);
+  //
+  // Il conteggio era AGGREGATO su tutti i report: bastava una riga in uno
+  // qualsiasi perche' hasPerformance fosse true. Su DE, che ha 12 righe in
+  // totale ma ZERO nel report keywords, la scheda Keyword mostrava 48
+  // keyword tutte a 0,00 € senza nessun avviso — e "tutto a zero" si legge
+  // come "nessuno spreco", che e' il contrario di "dato mancante".
+  const REPORT_KINDS = ["campaigns", "keywords", "searchTerms", "targeting", "products"];
+  m.reportRows = Object.fromEntries(
+    REPORT_KINDS.map((k) => [k, json.reports?.[k]?.length || 0]),
+  );
+  const reportRows = REPORT_KINDS.reduce((n, k) => n + m.reportRows[k], 0);
   m.hasPerformance = reportRows > 0;
+  // Un report vuoto conta come "mancante" solo se la struttura corrispondente
+  // esiste: senza keyword configurate, zero righe keyword e' corretto.
+  m.missingReports = REPORT_KINDS.filter((k) => {
+    if (m.reportRows[k] > 0) return false;
+    if (k === "keywords") return (json.keywords || []).length > 0;
+    if (k === "campaigns") return (json.campaigns || []).length > 0;
+    return false;
+  });
   m.hasIds = m.keywords.some((k) => k.keywordId)
     || (json.keywords || []).some((k) => k.keywordId);
   m.structuralKeywords = (json.keywords || []).length;
@@ -269,6 +286,8 @@ export function processCSV(parsed) {
   m.cpc = m.totalClicks > 0 ? m.totalSpend / m.totalClicks : 0;
   m.meta = {};
   m.proposedActions = [];
+  m.reportRows = {};
+  m.missingReports = [];
   return m;
 }
 

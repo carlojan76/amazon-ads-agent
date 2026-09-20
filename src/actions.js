@@ -68,6 +68,54 @@ export const ACTION_TYPES = {
 
 export const GROUP_ORDER = ["Tagliare gli sprechi", "Far crescere", "Ottimizzare i bid", "Budget e campagne"];
 
+// ---------------------------------------------------------------------------
+// Tetti sui bid
+//
+// GUARDRAILS.maxBid e' un limite ASSOLUTO contro l'errore di battitura (5.00
+// invece di 0.50). Non dice niente sulla marginalita': su un prodotto che
+// rende 3 EUR a pezzo un bid da 1,20 EUR e' dentro i guardrail e fuori dal
+// buon senso. I tetti qui sotto sono il secondo livello, quello economico.
+//
+// Forma: { market: number|null, campaigns: { [campaignId]: number } }
+// Il tetto di campagna vince su quello di mercato.
+// ---------------------------------------------------------------------------
+
+export const EMPTY_CAPS = { market: null, campaigns: {} };
+
+/** Tetto applicabile a un'azione. null = nessun tetto configurato. */
+export function capFor(caps, campaignId) {
+  if (!caps) return null;
+  const cid = String(campaignId || "");
+  const perCamp = caps.campaigns || {};
+  if (cid && Number.isFinite(perCamp[cid])) return perCamp[cid];
+  return Number.isFinite(caps.market) ? caps.market : null;
+}
+
+/** Il campo bid rilevante per il tipo di azione. */
+export function bidFieldOf(a) {
+  if (a?.type === "update_bid") return "new_bid";
+  if (a?.type === "add_keyword") return "bid";
+  return null;
+}
+
+/**
+ * Riporta il bid dentro il tetto, arrotondando al centesimo.
+ * Ritorna una NUOVA azione; se non c'e' niente da fare ritorna quella di
+ * partenza, cosi' chi chiama puo' confrontare per identita'.
+ */
+export function clampToCap(a, caps) {
+  const field = bidFieldOf(a);
+  if (!field) return a;
+  const cap = capFor(caps, a.campaignId);
+  if (cap === null || typeof a[field] !== "number" || a[field] <= cap) return a;
+  return { ...a, [field]: Math.floor(cap * 100) / 100, _capped_from: a[field] };
+}
+
+/** Quante azioni di una lista sforano il tetto. */
+export function overCapCount(actions, caps) {
+  return (actions || []).reduce((n, a) => (clampToCap(a, caps) === a ? n : n + 1), 0);
+}
+
 const numOrNull = (v) => {
   if (v === "" || v === null || v === undefined) return null;
   const n = typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
@@ -107,7 +155,7 @@ export function normalizeAction(raw) {
  * errors  -> l'azione non e' inviabile (checkbox disabilitata)
  * warnings-> inviabile, ma merita un'occhiata (fuori dai limiti di sicurezza)
  */
-export function validateAction(a) {
+export function validateAction(a, ctx) {
   const errors = [];
   const warnings = [];
   const meta = ACTION_TYPES[a.type];
@@ -116,6 +164,21 @@ export function validateAction(a) {
   const needId = (field, label) => {
     if (!a[field]) errors.push(`Manca ${label}`);
   };
+
+  // Tetto economico: errore, non avviso. Il senso della funzione e' impedire
+  // che una proposta sopra soglia venga applicata per distrazione, quindi la
+  // checkbox deve restare disabilitata finche' non si adegua il valore.
+  const cap = capFor(ctx?.caps, a.campaignId);
+  const bidField = bidFieldOf(a);
+  if (cap !== null && bidField && typeof a[bidField] === "number" && a[bidField] > cap) {
+    const scope = a.campaignId && Number.isFinite(ctx?.caps?.campaigns?.[String(a.campaignId)])
+      ? "di questa campagna"
+      : "di mercato";
+    errors.push(
+      `Bid €${a[bidField].toFixed(2)} sopra il tetto ${scope} di €${cap.toFixed(2)}. `
+      + "Abbassalo o alza il tetto nelle impostazioni.",
+    );
+  }
 
   switch (a.type) {
     case "update_bid":
@@ -188,7 +251,7 @@ export function validateAction(a) {
   return { errors, warnings };
 }
 
-export const isValidAction = (a) => validateAction(a).errors.length === 0;
+export const isValidAction = (a, ctx) => validateAction(a, ctx).errors.length === 0;
 
 /** Descrizione leggibile: { title, detail, delta } */
 export function describeAction(a) {
@@ -205,12 +268,21 @@ export function describeAction(a) {
         detail: `bid ${eur(a.old_bid)} → ${eur(a.new_bid)}`,
         delta: pct === null ? null : `${pct > 0 ? "+" : ""}${pct.toFixed(0)}%`,
         deltaUp: pct !== null && pct > 0,
+        capped: typeof a._capped_from === "number"
+          ? `proposto ${eur(a._capped_from)}, ridotto al tetto`
+          : null,
       };
     }
     case "pause_keyword": return { title: `"${kw}"`, detail: "verra' messa in pausa" };
     case "enable_keyword": return { title: `"${kw}"`, detail: "verra' riattivata" };
     case "add_keyword":
-      return { title: `"${a.keywordText}"`, detail: `nuova keyword ${a.matchType} a ${eur(a.bid)} — ad group ${a.adGroupId}` };
+      return {
+        title: `"${a.keywordText}"`,
+        detail: `nuova keyword ${a.matchType} a ${eur(a.bid)} — ad group ${a.adGroupId}`,
+        capped: typeof a._capped_from === "number"
+          ? `proposto ${eur(a._capped_from)}, ridotto al tetto`
+          : null,
+      };
     case "add_negative":
       return {
         title: `"${a.keywordText}"`,
@@ -278,7 +350,9 @@ export function dedupeActions(actions) {
 export function toPayload(actions) {
   return actions.map((a) => {
     // Campi solo-UI che non devono finire nel JSON inviato allo script.
-    const { id, included, reason, impact_eur, wasted_spend, source, ...rest } = a;
+    const {
+      id, included, reason, impact_eur, wasted_spend, source, _capped_from, ...rest
+    } = a;
     return rest;
   });
 }
@@ -322,6 +396,57 @@ Esempio di formato (solo JSON dentro il blocco):
 </actions>`;
 
 /**
+ * Il prompt, piu' i tetti sui bid e le azioni gia' applicate.
+ *
+ * Meglio dirglielo prima che correggerlo dopo: se il modello sa che il tetto
+ * su quella campagna e' 0,45 EUR non propone 1,20, e la lista di proposte che
+ * arriva e' gia' utilizzabile invece di essere mezza da adeguare.
+ */
+export function actionsPromptWith(caps, appliedSignatures) {
+  let out = ACTIONS_PROMPT;
+
+  const hasCaps = caps && (Number.isFinite(caps.market) || Object.keys(caps.campaigns || {}).length);
+  if (hasCaps) {
+    const lines = [];
+    if (Number.isFinite(caps.market)) {
+      lines.push(`- Tetto generale di mercato: €${caps.market.toFixed(2)}. Nessun bid proposto puo' superarlo.`);
+    }
+    for (const [cid, v] of Object.entries(caps.campaigns || {})) {
+      lines.push(`- Campagna ${cid}: tetto €${Number(v).toFixed(2)} (prevale su quello di mercato).`);
+    }
+    out += `
+
+# TETTI MASSIMI SUI BID (vincolanti)
+
+Questi tetti nascono dalla marginalita' dei prodotti, non dai dati delle campagne: un bid
+sopra soglia fa perdere soldi anche quando l'ACoS sembra accettabile. Valgono sia per
+update_bid (new_bid) sia per add_keyword (bid).
+
+${lines.join("\n")}
+
+Se il calcolo che faresti porterebbe sopra il tetto, proponi il tetto stesso e dillo nel
+"reason". Se anche il tetto non basta a rendere sensata l'azione, non generarla.`;
+  }
+
+  const sigs = appliedSignatures instanceof Set ? [...appliedSignatures] : (appliedSignatures || []);
+  if (sigs.length) {
+    out += `
+
+# GIA' APPLICATO DI RECENTE (non riproporre)
+
+Queste modifiche sono gia' state applicate sull'account nelle ultime settimane.
+Formato: tipo|keywordId|campaignId|adGroupId|testo|matchType
+
+${sigs.slice(0, 120).join("\n")}
+
+Non rigenerarle. Se i dati suggeriscono che una di queste non ha funzionato, dillo a
+parole nel report invece di riproporre la stessa azione.`;
+  }
+
+  return out;
+}
+
+/**
  * Estrae il blocco <actions> dal testo del modello.
  * Ritorna { actions, cleanText, warnings }.
  */
@@ -346,14 +471,52 @@ export function extractActionsFromText(text) {
  * E' la protezione contro gli ID inventati: senza di questa una singola cifra
  * sbagliata modificherebbe la keyword di un'altra campagna.
  */
-export function validateAgainstData(actions, metrics) {
+export function validateAgainstData(actions, metrics, ctx) {
   const kwIds = new Set((metrics?.keywords || []).map((k) => k.keywordId).filter(Boolean));
   const campIds = new Set(Object.values(metrics?.campaigns || {}).map((c) => c.campaignId).filter(Boolean));
   const agIds = new Set((metrics?.adGroupIds || []));
 
+  // Indice keywordId -> keyword, per poter risalire alla campagna di
+  // un'azione che porta solo il keywordId. Serve al tetto per campagna:
+  // senza campaignId ricadrebbe sempre sul tetto di mercato.
+  const kwById = new Map();
+  for (const k of metrics?.keywords || []) {
+    if (k.keywordId) kwById.set(String(k.keywordId), k);
+  }
+
+  // Negative gia' attive sull'account, normalizzate. Senza questo controllo
+  // il Consulente ripropone ogni volta negative che ci sono gia': l'API le
+  // scarta comunque come duplicate, ma intanto occupano posto nel carrello.
+  const existingNeg = new Set();
+  for (const n of metrics?.negativeKeywords || []) {
+    const text = String(n.keywordText || n.keyword || "").trim().toLowerCase();
+    if (!text) continue;
+    const mt = String(n.matchType || "").toUpperCase();
+    existingNeg.add(`${String(n.campaignId || "")}|${text}|${mt}`);
+    // Anche senza match type: una negativa esatta gia' presente rende inutile
+    // riproporla in frase sullo stesso ambito, e viceversa raramente serve.
+    existingNeg.add(`${String(n.campaignId || "")}|${text}|`);
+  }
+
+  const alreadyApplied = ctx?.appliedSignatures instanceof Set
+    ? ctx.appliedSignatures
+    : new Set(ctx?.appliedSignatures || []);
+
   const kept = [];
   const rejected = [];
-  for (const a of actions) {
+  for (const raw of actions) {
+    // Arricchimento: campagna e nome leggibile dalla keyword, quando mancano.
+    let a = raw;
+    if (!a.campaignId && a.keywordId && kwById.has(String(a.keywordId))) {
+      const k = kwById.get(String(a.keywordId));
+      a = {
+        ...a,
+        campaignId: k.campaignId || a.campaignId,
+        adGroupId: a.adGroupId || k.adGroupId,
+        campaign: a.campaign || k.campaign,
+      };
+    }
+
     if (a.type === "pause_campaign" || a.type === "enable_campaign") {
       rejected.push({ action: a, why: "azioni sull'intera campagna: da fare a mano" });
       continue;
@@ -370,8 +533,41 @@ export function validateAgainstData(actions, metrics) {
       rejected.push({ action: a, why: `adGroupId ${a.adGroupId} non presente nei dati caricati` });
       continue;
     }
-    if (!isValidAction(a)) {
-      rejected.push({ action: a, why: validateAction(a).errors.join("; ") });
+    if (a.type === "add_negative") {
+      const text = String(a.keywordText || "").trim().toLowerCase();
+      const key = `${String(a.campaignId || "")}|${text}|${String(a.matchType || "").toUpperCase()}`;
+      const loose = `${String(a.campaignId || "")}|${text}|`;
+      if (existingNeg.has(key) || existingNeg.has(loose)) {
+        rejected.push({ action: a, why: `"${a.keywordText}" e' gia' fra le negative di questa campagna` });
+        continue;
+      }
+    }
+    if (alreadyApplied.size && alreadyApplied.has(actionSignature(a))) {
+      rejected.push({ action: a, why: "gia' applicata di recente (registro delle azioni)" });
+      continue;
+    }
+
+    // Tetto: qui si ADEGUA, non si scarta. Se il modello propone 1,20 EUR e
+    // il tuo tetto e' 0,45 EUR, l'intervento utile e' portare il bid a 0,45,
+    // non buttare via il suggerimento. L'unico caso in cui si scarta e'
+    // quando dopo l'adeguamento non resta nessuna modifica da fare.
+    const capped = clampToCap(a, ctx?.caps);
+    if (capped !== a) {
+      const field = bidFieldOf(capped);
+      if (capped.type === "update_bid"
+          && typeof capped.old_bid === "number"
+          && Math.abs(capped[field] - capped.old_bid) < 0.01) {
+        rejected.push({
+          action: a,
+          why: `bid proposto €${a.new_bid.toFixed(2)} oltre il tetto; al tetto il valore coincide con quello attuale`,
+        });
+        continue;
+      }
+      a = capped;
+    }
+
+    if (!isValidAction(a, ctx)) {
+      rejected.push({ action: a, why: validateAction(a, ctx).errors.join("; ") });
       continue;
     }
     kept.push(a);

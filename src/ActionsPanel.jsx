@@ -4,10 +4,12 @@ import {
   ACTION_TYPES, GROUP_ORDER, KW_MATCH, NEG_MATCH, GUARDRAILS,
   normalizeAction, validateAction, isValidAction, describeAction,
   editableField, estimatedSaving, toPayload, actionSignature, dedupeActions,
+  EMPTY_CAPS, capFor, clampToCap, overCapCount,
 } from "./actions";
+import * as api from "./api";
 import {
   startDeviceFlow, pollForToken, getUser, checkRepoAccess, dispatchWorkflow,
-  latestRunId, waitForNewRun, followRun,
+  latestRunId, findLatestRun, waitForNewRun, followRun,
 } from "./github";
 
 /**
@@ -68,8 +70,8 @@ function Stat({ label, value, color = C.text }) {
   );
 }
 
-function Row({ action, onToggle, onEdit, onRemove }) {
-  const { errors, warnings } = validateAction(action);
+function Row({ action, caps, onToggle, onEdit, onRemove }) {
+  const { errors, warnings } = validateAction(action, { caps });
   const valid = errors.length === 0;
   const meta = ACTION_TYPES[action.type] || {};
   const d = describeAction(action);
@@ -100,6 +102,7 @@ function Row({ action, onToggle, onEdit, onRemove }) {
           )}
           {action.source === "ai" && <Chip color={C.purple} bg={C.purpleDim} title="Proposta dal Consulente in questa sessione">AI</Chip>}
           {action.source === "manual" && <Chip color={C.blue} bg={C.blueDim}>manuale</Chip>}
+          {d.capped && <Chip color={C.yellow} bg={C.yellowDim} title={d.capped}>al tetto</Chip>}
         </div>
 
         <div style={{ fontSize: T.small, color: C.textMuted, marginTop: 3, fontFamily: F.ui }}>{d.detail}</div>
@@ -138,6 +141,167 @@ function Row({ action, onToggle, onEdit, onRemove }) {
         <button onClick={() => onRemove(action.id)} title="Rimuovi dall'elenco" aria-label="Rimuovi"
           style={{ ...button("quiet", { small: true }), padding: "4px 7px", fontSize: T.body }}>✕</button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Tetti massimi sui bid.
+ *
+ * I guardrail (0,02 – 5,00 €) sono un limite assoluto contro l'errore di
+ * battitura e non sanno niente dei tuoi margini: su un prodotto che rende 3 €
+ * a pezzo un bid da 1,20 € li passa tutti e perde comunque soldi. Qui si
+ * imposta il limite economico: uno per mercato, con override per le campagne
+ * che stanno su marginalita' diverse.
+ *
+ * Il valore viaggia in tre punti: nel prompt (cosi' il modello non propone
+ * nemmeno sopra soglia), qui nella UI (dove le proposte fuori tetto vengono
+ * abbassate e segnate "al tetto"), e in apply_changes.py prima di toccare
+ * l'API. Tre, perche' il primo e' un modello linguistico e il secondo gira
+ * nel browser.
+ */
+function BidCapsPanel({ marketplace, campaigns, caps, onCapsChange }) {
+  const [open, setOpen] = useState(false);
+  const [marketDraft, setMarketDraft] = useState("");
+  const [campDraft, setCampDraft] = useState({ id: "", value: "" });
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  useEffect(() => {
+    setMarketDraft(Number.isFinite(caps?.market) ? String(caps.market) : "");
+  }, [caps?.market]);
+
+  const configured = api.isConfigured();
+  const campList = Object.entries(caps?.campaigns || {});
+  const nameOf = (id) => campaigns.find((c) => String(c.campaignId) === String(id))?.name || id;
+
+  const reload = async () => {
+    const r = await api.fetchBidCaps(marketplace);
+    onCapsChange?.({
+      market: Number.isFinite(r?.market_cap) ? r.market_cap : null,
+      campaigns: Object.fromEntries((r?.campaign_caps || []).map((c) => [String(c.scope_id), Number(c.max_bid)])),
+    });
+  };
+
+  const run = async (fn, okMsg) => {
+    setBusy(true); setMsg(null);
+    try { await fn(); await reload(); setMsg({ ok: true, text: okMsg }); }
+    catch (e) { setMsg({ ok: false, text: e.message }); }
+    finally { setBusy(false); }
+  };
+
+  const summary = !configured
+    ? "Worker non configurato"
+    : Number.isFinite(caps?.market) || campList.length
+      ? [Number.isFinite(caps?.market) ? `mercato €${caps.market.toFixed(2)}` : null,
+        campList.length ? `${campList.length} campagn${campList.length === 1 ? "a" : "e"}` : null]
+        .filter(Boolean).join(" · ")
+      : "nessun tetto impostato";
+
+  return (
+    <div style={{ ...card, padding: S.lg, marginBottom: S.md }}>
+      <div style={{ display: "flex", alignItems: "center", gap: S.md, flexWrap: "wrap" }}>
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ fontSize: T.body, fontWeight: 700, color: C.text }}>
+            Tetti sui bid <span style={{ color: C.textDim, fontWeight: 400 }}>· {marketplace || "?"}</span>
+          </div>
+          <div style={{ fontSize: T.micro, color: C.textDim, marginTop: 2 }}>{summary}</div>
+        </div>
+        <button onClick={() => setOpen((v) => !v)} style={button("ghost", { small: true })}>
+          {open ? "Chiudi" : "Imposta"}
+        </button>
+      </div>
+
+      {open && (
+        <div style={{ marginTop: S.lg }}>
+          {!configured ? (
+            <div style={{ fontSize: T.small, color: C.yellow, lineHeight: 1.6 }}>
+              I tetti sono salvati sul Worker Cloudflare, cosi' valgono anche per la weekly
+              analysis e per lo script che applica le modifiche — non solo per questo browser.
+              Configura l'indirizzo del Worker nelle impostazioni (⚙ in alto) per usarli.
+            </div>
+          ) : (
+            <>
+              <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.sm, lineHeight: 1.6 }}>
+                Bid massimo sostenibile per questo mercato. Le proposte sopra soglia non vengono
+                scartate: vengono abbassate al tetto e segnate con l'etichetta “al tetto”.
+              </div>
+              <div style={{ display: "flex", gap: S.sm, alignItems: "center", flexWrap: "wrap", marginBottom: S.lg }}>
+                <span style={{ fontSize: T.small, color: C.textMuted, minWidth: 130 }}>Tetto di mercato</span>
+                <input type="number" step="0.01" min="0.02" max="5" value={marketDraft}
+                  onChange={(e) => setMarketDraft(e.target.value)} placeholder="es. 0.45"
+                  aria-label="Tetto di mercato in euro"
+                  style={{ ...input, width: 110, fontFamily: F.mono }} />
+                <button disabled={busy || !marketDraft}
+                  onClick={() => run(
+                    () => api.saveBidCap({ marketplace, scope: "market", max_bid: parseFloat(marketDraft) }),
+                    "Tetto di mercato aggiornato.",
+                  )}
+                  style={button("primary", { small: true, disabled: busy || !marketDraft })}>Salva</button>
+                {Number.isFinite(caps?.market) && (
+                  <button disabled={busy}
+                    onClick={() => run(() => api.deleteBidCap(marketplace, "market"), "Tetto di mercato rimosso.")}
+                    style={button("quiet", { small: true })}>Rimuovi</button>
+                )}
+              </div>
+
+              <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.sm, lineHeight: 1.6 }}>
+                Override per campagna, per i prodotti che stanno su marginalita' diverse.
+                Prevale sul tetto di mercato.
+              </div>
+              <div style={{ display: "flex", gap: S.sm, alignItems: "center", flexWrap: "wrap", marginBottom: S.md }}>
+                <select value={campDraft.id} onChange={(e) => setCampDraft((p) => ({ ...p, id: e.target.value }))}
+                  aria-label="Campagna" style={{ ...input, flex: "1 1 220px", maxWidth: 320, fontSize: T.small }}>
+                  <option value="">Scegli una campagna…</option>
+                  {campaigns.sort((a, b) => b.spend - a.spend).map((c) => (
+                    <option key={c.campaignId} value={c.campaignId}>{c.name}</option>
+                  ))}
+                </select>
+                <input type="number" step="0.01" min="0.02" max="5" value={campDraft.value}
+                  onChange={(e) => setCampDraft((p) => ({ ...p, value: e.target.value }))}
+                  placeholder="es. 0.30" aria-label="Tetto della campagna in euro"
+                  style={{ ...input, width: 110, fontFamily: F.mono }} />
+                <button disabled={busy || !campDraft.id || !campDraft.value}
+                  onClick={() => run(
+                    () => api.saveBidCap({
+                      marketplace, scope: "campaign", scope_id: campDraft.id,
+                      scope_label: nameOf(campDraft.id), max_bid: parseFloat(campDraft.value),
+                    }),
+                    "Tetto della campagna salvato.",
+                  ).then(() => setCampDraft({ id: "", value: "" }))}
+                  style={button("primary", { small: true, disabled: busy || !campDraft.id || !campDraft.value })}>
+                  Aggiungi
+                </button>
+              </div>
+
+              {campList.length > 0 && (
+                <div style={{ border: `1px solid ${C.border}`, borderRadius: R.md, overflow: "hidden" }}>
+                  {campList.map(([cid, v]) => (
+                    <div key={cid} style={{
+                      display: "flex", alignItems: "center", gap: S.sm, padding: `${S.sm}px ${S.md}px`,
+                      borderBottom: `1px solid ${C.border}`, fontSize: T.small,
+                    }}>
+                      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {nameOf(cid)}
+                      </span>
+                      <Chip color={C.accent}>€{Number(v).toFixed(2)}</Chip>
+                      <button disabled={busy}
+                        onClick={() => run(() => api.deleteBidCap(marketplace, "campaign", cid), "Tetto rimosso.")}
+                        style={{ ...button("quiet", { small: true }), padding: "4px 7px" }}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {msg && (
+                <div style={{ marginTop: S.md, fontSize: T.micro, color: msg.ok ? C.green : C.red }}>
+                  {msg.text}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -262,7 +426,10 @@ function RunStatus({ run }) {
 
 // ---------------------------------------------------------------- pannello
 
-export default function ActionsPanel({ initialActions = [], marketplace = "", onSelectionChange }) {
+export default function ActionsPanel({
+  initialActions = [], marketplace = "", campaigns = [],
+  caps = EMPTY_CAPS, onCapsChange, onSelectionChange,
+}) {
   const storeKey = `aa_review_${marketplace || "default"}`;
 
   // ---- elenco azioni ----
@@ -321,7 +488,8 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
     ls.set(storeKey, { overrides, manual: toPayload(actions.filter((a) => a.source === "manual")) });
   }, [actions, storeKey]);
 
-  const selected = useMemo(() => actions.filter((a) => a.included && isValidAction(a)), [actions]);
+  const selected = useMemo(
+    () => actions.filter((a) => a.included && isValidAction(a, { caps })), [actions, caps]);
   const payload = useMemo(() => ({ actions: toPayload(selected) }), [selected]);
   const payloadJson = useMemo(() => JSON.stringify(payload), [payload]);
 
@@ -335,7 +503,7 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
     setShowAdd(false);
   };
   const setAll = (value, subset = null) => setActions((p) => p.map((a) => (
-    (subset ? subset.has(a.id) : true) && isValidAction(a) ? { ...a, included: value } : a
+    (subset ? subset.has(a.id) : true) && isValidAction(a, { caps }) ? { ...a, included: value } : a
   )));
 
   // ---- filtro + raggruppamento ----
@@ -364,7 +532,8 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
   const totalSaving = useMemo(
     () => selected.reduce((s, a) => s + (estimatedSaving(a) || 0), 0), [selected]
   );
-  const invalidCount = actions.filter((a) => !isValidAction(a)).length;
+  const invalidCount = actions.filter((a) => !isValidAction(a, { caps })).length;
+  const cappedCount = actions.filter((a) => typeof a._capped_from === "number").length;
 
   // ---- connessione GitHub ----
   const [ghClientId, setGhClientId] = useState(() => localStorage.getItem("gh_client_id") || import.meta.env?.VITE_GITHUB_CLIENT_ID || "");
@@ -462,6 +631,24 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
     const token = ghToken;
     const myFollow = ++followRef.current;
     try {
+      // Lock: due dispatch ravvicinati (due schede aperte, o un doppio click
+      // mentre la prima richiesta e' ancora in volo) applicano due volte. Su
+      // un update_bid significa due variazioni in cascata: da 0,50 € si arriva
+      // a 1,12 € passando due volte il limite del +50%, che preso una volta
+      // per volta e' sempre "dentro i guardrail".
+      const inFlight = await findLatestRun({ token, owner, repo, workflow: ghWorkflow })
+        .catch(() => null);
+      if (inFlight && inFlight.status !== "completed") {
+        setBusy(null);
+        setError(
+          `C'e' gia' un run di ${ghWorkflow} in corso (stato: ${inFlight.status}). `
+          + "Aspetta che finisca prima di lanciarne un altro: applicarlo due volte "
+          + "raddoppierebbe le variazioni di bid e budget.",
+        );
+        setRun({ status: inFlight.status, html_url: inFlight.html_url });
+        return;
+      }
+
       const before = await latestRunId({ token, owner, repo, workflow: ghWorkflow }).catch(() => null);
       await dispatchWorkflow({
         token, owner, repo, workflow: ghWorkflow,
@@ -512,12 +699,17 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
   // ---------------------------------------------------------------- render
   return (
     <div style={{ fontFamily: F.ui }}>
+      <BidCapsPanel
+        marketplace={ghMarketplace} campaigns={campaigns}
+        caps={caps} onCapsChange={onCapsChange} />
+
       {/* Riepilogo */}
       <div style={{ ...card, padding: S.lg, marginBottom: S.md, display: "flex", gap: S.xl, flexWrap: "wrap", alignItems: "center" }}>
         <Stat label="Proposte" value={actions.length} />
         <Stat label="Selezionate" value={selected.length} color={selected.length ? C.accent : C.textDim} />
         {totalSaving > 0 && <Stat label="Impatto stimato" value={`€${totalSaving.toFixed(2)}`} color={C.green} />}
         {invalidCount > 0 && <Stat label="Non applicabili" value={invalidCount} color={C.red} />}
+        {cappedCount > 0 && <Stat label="Ridotte al tetto" value={cappedCount} color={C.yellow} />}
         <div style={{ flex: 1 }} />
         <button onClick={() => setShowAdd((v) => !v)} style={button("accentGhost", { small: true })}>
           {showAdd ? "✕ Chiudi" : "+ Azione manuale"}
@@ -584,7 +776,7 @@ export default function ActionsPanel({ initialActions = [], marketplace = "", on
                   </button>
                 </div>
                 {!isCollapsed && rows.map((a) => (
-                  <Row key={a.id} action={a} onToggle={toggle} onEdit={edit} onRemove={remove} />
+                  <Row key={a.id} action={a} caps={caps} onToggle={toggle} onEdit={edit} onRemove={remove} />
                 ))}
               </div>
             );
