@@ -342,11 +342,17 @@ async function proxyAnthropic(request, env) {
   const body = await request.json();
   // Modello e max_tokens li decide il Worker: il client puo' solo mandare la
   // conversazione. Cosi' una pagina compromessa non puo' chiedere run costosi.
+  //
+  // stream: true NON e' un vezzo. Cloudflare chiude la connessione dopo 100
+  // secondi (errore 524), e un'analisi completa con 16.000 token di budget ci
+  // mette spesso di piu'. In streaming i primi byte partono quasi subito, la
+  // connessione resta viva e il tetto non viene mai raggiunto.
   const payload = {
     model: env.ANTHROPIC_MODEL || "claude-sonnet-5",
     max_tokens: parseInt(env.ANTHROPIC_MAX_TOKENS || "16000", 10),
     system: typeof body.system === "string" ? body.system : undefined,
     messages: Array.isArray(body.messages) ? body.messages : [],
+    stream: true,
   };
   if (!payload.messages.length) throw new Error("messages vuoto");
 
@@ -359,7 +365,13 @@ async function proxyAnthropic(request, env) {
     },
     body: JSON.stringify(payload),
   });
-  return { status: r.status, data: await r.json() };
+
+  // Gli errori arrivano come JSON normale anche quando si chiede lo stream.
+  if (!r.ok) {
+    return { status: r.status, data: await r.json().catch(() => ({ error: { message: `HTTP ${r.status}` } })) };
+  }
+  // Corpo passato al client cosi' com'e': il Worker non bufferizza niente.
+  return { stream: r.body };
 }
 
 // ---------------------------------------------------------------- proxy GitHub
@@ -473,8 +485,19 @@ export default {
       if (path === "/api/bid-caps" && m === "DELETE") return json(await deleteBidCap(url, env), 200, request, env);
 
       if (path === "/api/anthropic" && m === "POST") {
-        const { status, data } = await proxyAnthropic(request, env);
-        return json(data, status, request, env);
+        const res = await proxyAnthropic(request, env);
+        if (res.stream) {
+          return new Response(res.stream, {
+            status: 200,
+            headers: {
+              "Content-Type": "text/event-stream; charset=utf-8",
+              "Cache-Control": "no-cache",
+              Connection: "keep-alive",
+              ...corsHeaders(request, env),
+            },
+          });
+        }
+        return json(res.data, res.status, request, env);
       }
       if (path === "/api/github/dispatch" && m === "POST") {
         const { status, data } = await githubDispatch(request, env);
