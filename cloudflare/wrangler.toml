@@ -1,0 +1,43 @@
+name = "amazon-ads-agent-api"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+
+# --- D1 --------------------------------------------------------------------
+# Crea il database con:
+#   wrangler d1 create amazon-ads
+# e incolla qui sotto il database_id che ti stampa.
+[[d1_databases]]
+binding = "DB"
+database_name = "amazon-ads"
+database_id = "METTI-QUI-L-ID-CHE-TI-DA-WRANGLER"
+
+[vars]
+# Origini ammesse per CORS, separate da virgola. Deve combaciare ESATTAMENTE
+# con l'origine del sito (niente slash finale, schema incluso).
+ALLOWED_ORIGINS = "https://carlojan76.github.io,http://localhost:5173"
+
+# Repo su cui il proxy GitHub e' autorizzato ad agire. Il Worker rifiuta
+# qualsiasi altro repo: se il token del browser finisce in mano a qualcuno,
+# non puo' comunque usarlo per toccare altri tuoi repository.
+GITHUB_REPO = "carlojan76/amazon-ads-agent"
+
+# Workflow che il proxy puo' lanciare. Elenco chiuso, stessa logica di sopra.
+ALLOWED_WORKFLOWS = "apply-actions.yml,build-listing.yml,apply-listing.yml,apply-family.yml,plan-campaign.yml,fetch-search-query-performance.yml"
+
+# Modello e tetto di token per il Consulente.
+ANTHROPIC_MODEL = "claude-sonnet-5"
+ANTHROPIC_MAX_TOKENS = "16000"
+
+# Tetto di chiamate al giorno sul proxy Anthropic (protezione del credito).
+DAILY_LIMIT_ANTHROPIC = "120"
+
+# --- Cloudflare Access (opzionale ma consigliato per il browser) -----------
+# Se valorizzi questi due, il Worker accetta anche le richieste autenticate
+# da Access senza bisogno del token condiviso. Vedi README.
+# ACCESS_TEAM_DOMAIN = "iltuoteam.cloudflareaccess.com"
+# ACCESS_AUD = "l-aud-tag-della-application-access"
+
+# --- Secrets (NON vanno qui: si impostano con `wrangler secret put`) --------
+#   wrangler secret put API_TOKEN
+#   wrangler secret put ANTHROPIC_API_KEY
+#   wrangler secret put GITHUB_TOKEN
