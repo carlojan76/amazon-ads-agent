@@ -5,7 +5,7 @@
         "marketplace": "IT",
         "period_end": "2026-09-19",
         "period_start": "2026-09-06",
-        "captured_at": "2026-09-20T19:49:23.344665",
+        "captured_at": "2026-09-20T19:56:39.234612",
         "days": 14,
         "spend": 46.22,
         "sales": 149.97,
@@ -26,7 +26,7 @@
         "marketplace": "FR",
         "period_end": "2026-09-19",
         "period_start": "2026-09-06",
-        "captured_at": "2026-09-20T19:49:19.974338",
+        "captured_at": "2026-09-20T19:56:07.027302",
         "days": 14,
         "spend": 98.16,
         "sales": 257.06,
@@ -47,7 +47,7 @@
         "marketplace": "DE",
         "period_end": "2026-09-19",
         "period_start": "2026-09-06",
-        "captured_at": "2026-09-20T19:48:58.898382",
+        "captured_at": "2026-09-20T19:55:52.352289",
         "days": 14,
         "spend": 4.89,
         "sales": 39.99,
@@ -64,5 +64,5 @@
       }
     ]
   },
-  "generated_at": "2026-09-20T19:49:54.000938"
+  "generated_at": "2026-09-20T19:57:05.377112"
 }
