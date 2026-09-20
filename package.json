@@ -8,7 +8,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/smoke.mjs"
+    "test": "node tests/smoke.mjs",
+    "test:py": "cd python && python3 -m unittest discover tests -v",
+    "test:worker": "node cloudflare/test/worker.test.mjs",
+    "test:all": "npm test && npm run test:worker && npm run test:py"
   },
   "dependencies": {
     "react": "^18.3.1",
