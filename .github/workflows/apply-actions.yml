@@ -161,7 +161,11 @@ jobs:
             --yes --json-out applied.json
 
       - name: 🗂️ Committa il registro delle azioni applicate
-        if: ${{ github.event.inputs.dry_run != 'true' }}
+        # always(): il registro descrive cosa e' stato applicato DAVVERO, e
+        # serve soprattutto quando qualcosa e' andato storto. Legarlo al
+        # successo dello step precedente significava perderlo proprio nei
+        # casi in cui conta di piu'.
+        if: ${{ always() && github.event.inputs.dry_run != 'true' }}
         run: |
           # apply_changes.py scrive applied/<MP>/<timestamp>.json con le sole
           # azioni CONFERMATE dall'API. Prima l'unica traccia era applied.json
@@ -194,6 +198,33 @@ jobs:
           # Il registro e' importante ma non deve far fallire un'applicazione
           # gia' andata a buon fine su Amazon: resta negli artefatti.
           echo "Push del registro non riuscito: i file restano fra gli artefatti."
+
+      - name: 📊 Riepilogo degli esiti
+        if: ${{ always() && github.event.inputs.dry_run != 'true' }}
+        run: |
+          cd python
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          p = pathlib.Path("applied.json")
+          if not p.exists():
+              print("## Esito non disponibile\n\nLo script si e' fermato prima di applicare.")
+              raise SystemExit
+          d = json.loads(p.read_text())
+          esito = d.get("outcome", "?")
+          titolo = {"ok": "Applicato", "partial": "Applicato in parte", "failed": "Non applicato"}
+          print(f"## {titolo.get(esito, 'Esito')} \u2014 {d['marketplace']}\n")
+          ok = [r for r in d.get("results", []) if r.get("ok")]
+          ko = [r for r in d.get("results", []) if not r.get("ok")]
+          for r in ok:
+              print(f"- \u2705 `{r['op']}` \u2014 {r['detail']}")
+          for r in ko:
+              print(f"- \u26a0\ufe0f `{r['op']}` \u2014 {r['detail']}")
+          if esito == "partial":
+              print("\n> Le operazioni riuscite sono state applicate e registrate.")
+              print("> Gli elementi rifiutati da Amazon vanno rivisti a mano: non verranno riproposti in automatico.")
+          if d.get("applied_file"):
+              print(f"\nRegistro: `{d['applied_file']}`")
+          PY
 
       - name: ↩️ Come annullare
         if: ${{ always() && github.event.inputs.dry_run != 'true' }}
