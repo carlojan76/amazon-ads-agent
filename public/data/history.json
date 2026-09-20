@@ -1,0 +1,65 @@
+{
+  "series": {
+    "IT": [
+      {
+        "period_end": "2026-09-19",
+        "period_start": "2026-09-06",
+        "captured_at": "2026-09-20T19:39:40.496651",
+        "days": 14,
+        "spend": 46.22,
+        "sales": 149.97,
+        "acos": 30.82,
+        "roas": 3.245,
+        "impressions": 14792.0,
+        "clicks": 147.0,
+        "orders": 6.0,
+        "ctr": 0.994,
+        "cvr": 4.082,
+        "cpc": 0.314,
+        "n_campaigns": 89,
+        "n_keywords": 840
+      }
+    ],
+    "FR": [
+      {
+        "period_end": "2026-09-19",
+        "period_start": "2026-09-06",
+        "captured_at": "2026-09-20T19:39:29.437273",
+        "days": 14,
+        "spend": 98.16,
+        "sales": 257.06,
+        "acos": 38.19,
+        "roas": 2.619,
+        "impressions": 14602.0,
+        "clicks": 227.0,
+        "orders": 8.0,
+        "ctr": 1.555,
+        "cvr": 3.524,
+        "cpc": 0.432,
+        "n_campaigns": 20,
+        "n_keywords": 275
+      }
+    ],
+    "DE": [
+      {
+        "period_end": "2026-09-19",
+        "period_start": "2026-09-06",
+        "captured_at": "2026-09-20T19:39:13.954084",
+        "days": 14,
+        "spend": 4.89,
+        "sales": 39.99,
+        "acos": 12.23,
+        "roas": 8.178,
+        "impressions": 633.0,
+        "clicks": 12.0,
+        "orders": 1.0,
+        "ctr": 1.896,
+        "cvr": 8.333,
+        "cpc": 0.407,
+        "n_campaigns": 9,
+        "n_keywords": 48
+      }
+    ]
+  },
+  "generated_at": "2026-09-20T19:40:26.159635"
+}

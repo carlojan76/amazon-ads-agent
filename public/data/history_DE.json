@@ -1,0 +1,18 @@
+{
+  "period_end": "2026-09-19",
+  "period_start": "2026-09-06",
+  "captured_at": "2026-09-20T19:39:13.954084",
+  "days": 14,
+  "spend": 4.89,
+  "sales": 39.99,
+  "acos": 12.23,
+  "roas": 8.178,
+  "impressions": 633.0,
+  "clicks": 12.0,
+  "orders": 1.0,
+  "ctr": 1.896,
+  "cvr": 8.333,
+  "cpc": 0.407,
+  "n_campaigns": 9,
+  "n_keywords": 48
+}
