@@ -2,17 +2,18 @@
   "series": {
     "IT": [
       {
+        "marketplace": "IT",
         "period_end": "2026-09-19",
         "period_start": "2026-09-06",
-        "captured_at": "2026-09-20T19:39:40.496651",
+        "captured_at": "2026-09-20T19:49:23.344665",
         "days": 14,
         "spend": 46.22,
         "sales": 149.97,
         "acos": 30.82,
         "roas": 3.245,
-        "impressions": 14792.0,
-        "clicks": 147.0,
-        "orders": 6.0,
+        "impressions": 14792,
+        "clicks": 147,
+        "orders": 6,
         "ctr": 0.994,
         "cvr": 4.082,
         "cpc": 0.314,
@@ -22,17 +23,18 @@
     ],
     "FR": [
       {
+        "marketplace": "FR",
         "period_end": "2026-09-19",
         "period_start": "2026-09-06",
-        "captured_at": "2026-09-20T19:39:29.437273",
+        "captured_at": "2026-09-20T19:49:19.974338",
         "days": 14,
         "spend": 98.16,
         "sales": 257.06,
         "acos": 38.19,
         "roas": 2.619,
-        "impressions": 14602.0,
-        "clicks": 227.0,
-        "orders": 8.0,
+        "impressions": 14602,
+        "clicks": 227,
+        "orders": 8,
         "ctr": 1.555,
         "cvr": 3.524,
         "cpc": 0.432,
@@ -42,17 +44,18 @@
     ],
     "DE": [
       {
+        "marketplace": "DE",
         "period_end": "2026-09-19",
         "period_start": "2026-09-06",
-        "captured_at": "2026-09-20T19:39:13.954084",
+        "captured_at": "2026-09-20T19:48:58.898382",
         "days": 14,
         "spend": 4.89,
         "sales": 39.99,
         "acos": 12.23,
         "roas": 8.178,
-        "impressions": 633.0,
-        "clicks": 12.0,
-        "orders": 1.0,
+        "impressions": 633,
+        "clicks": 12,
+        "orders": 1,
         "ctr": 1.896,
         "cvr": 8.333,
         "cpc": 0.407,
@@ -61,5 +64,5 @@
       }
     ]
   },
-  "generated_at": "2026-09-20T19:40:26.159635"
+  "generated_at": "2026-09-20T19:49:54.000938"
 }
