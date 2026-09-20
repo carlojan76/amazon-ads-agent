@@ -108,8 +108,94 @@ export const deleteBidCap = (marketplace, scope, scopeId = "") =>
 
 // ---------------------------------------------------------------- Anthropic
 
-export const askAnthropic = (system, messages) =>
-  call("/api/anthropic", { method: "POST", body: { system, messages } });
+/**
+ * Chiama il Consulente attraverso il Worker.
+ *
+ * La risposta arriva in streaming (SSE) e viene ricomposta qui in un oggetto
+ * della stessa forma della risposta normale dell'API — { content, stop_reason }
+ * — cosi' chi chiama non deve sapere niente dello streaming.
+ *
+ * Lo streaming serve per un motivo pratico: Cloudflare chiude le connessioni
+ * dopo 100 secondi con l'errore 524, e un'analisi completa ci mette spesso di
+ * piu'. Con i byte che scorrono, il tetto non viene mai raggiunto.
+ *
+ * `onDelta`, se passato, riceve il testo man mano: utile per mostrare la
+ * risposta mentre si forma invece di far fissare uno spinner.
+ */
+export async function askAnthropic(system, messages, onDelta) {
+  const base = getApiBase();
+  if (!base) throw new NotConfiguredError();
+
+  const headers = { "Content-Type": "application/json" };
+  const token = getApiToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  let resp;
+  try {
+    resp = await fetch(`${base}/api/anthropic`, {
+      method: "POST",
+      headers,
+      credentials: "include",
+      body: JSON.stringify({ system, messages }),
+    });
+  } catch (err) {
+    throw new Error(`Non riesco a contattare il Worker. Dettaglio: ${err.message}`);
+  }
+
+  const ctype = resp.headers.get("Content-Type") || "";
+
+  // Errori e risposte non in streaming: JSON normale.
+  if (!resp.ok || !ctype.includes("text/event-stream")) {
+    let data = null;
+    try { data = await resp.json(); } catch { /* corpo non JSON */ }
+    const detail = (data && (data.error?.message || data.error || data.message))
+      || `HTTP ${resp.status}`;
+    if (resp.status === 401) throw new Error(`Worker: non autorizzato. Controlla il token. (${detail})`);
+    if (resp.status === 524) {
+      throw new Error("Il Worker ha superato il tempo massimo di Cloudflare (524). "
+        + "Se succede di continuo, abbassa ANTHROPIC_MAX_TOKENS in wrangler.toml.");
+    }
+    throw new Error(`Worker: ${detail}`);
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+  let stopReason = null;
+
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    // Un evento SSE finisce con una riga vuota, ma le righe `data:` si possono
+    // processare una per una: l'ultima riga incompleta resta nel buffer.
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const raw = line.slice(5).trim();
+      if (!raw || raw === "[DONE]") continue;
+
+      let ev;
+      try { ev = JSON.parse(raw); } catch { continue; }
+
+      if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") {
+        text += ev.delta.text;
+        if (onDelta) onDelta(text);
+      } else if (ev.type === "message_delta" && ev.delta?.stop_reason) {
+        stopReason = ev.delta.stop_reason;
+      } else if (ev.type === "error") {
+        throw new Error(ev.error?.message || "errore ricevuto durante lo streaming");
+      }
+    }
+  }
+
+  // Stessa forma della risposta non-streaming: chi chiama non cambia.
+  return { content: [{ type: "text", text }], stop_reason: stopReason };
+}
 
 // ---------------------------------------------------------------- GitHub
 

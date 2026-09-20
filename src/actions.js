@@ -447,6 +447,24 @@ parole nel report invece di riproporre la stessa azione.`;
 }
 
 /**
+ * Toglie il blocco <actions> dal testo da mostrare.
+ *
+ * Serve durante lo streaming: quel blocco e' JSON destinato alla macchina, e
+ * vederlo comparire carattere per carattere in coda al report e' solo rumore.
+ * Taglia anche il tag INCOMPLETO ("<act"), altrimenti farebbe capolino per
+ * una frazione di secondo a ogni pezzo che arriva.
+ *
+ * Un "<" qualsiasi nel testo (es. "ACoS < 25%") resta dov'e'.
+ */
+export const stripActionsTail = (t) => {
+  const s = t || "";
+  const i = s.indexOf("<actions>");
+  if (i !== -1) return s.slice(0, i).trimEnd();
+  const partial = /<(?:a(?:c(?:t(?:i(?:o(?:n(?:s)?)?)?)?)?)?)?$/.exec(s);
+  return partial ? s.slice(0, partial.index).trimEnd() : s;
+};
+
+/**
  * Estrae il blocco <actions> dal testo del modello.
  * Ritorna { actions, cleanText, warnings }.
  */

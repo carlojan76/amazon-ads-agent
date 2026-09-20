@@ -6,7 +6,7 @@ import FamilyPanel from "./FamilyPanel";
 import CampaignPlanner from "./CampaignPlanner";
 import {
   ACTIONS_PROMPT, actionsPromptWith, extractActionsFromText, validateAgainstData,
-  actionSignature, dedupeActions, EMPTY_CAPS,
+  actionSignature, dedupeActions, EMPTY_CAPS, stripActionsTail,
 } from "./actions";
 import { parseCSV, processJSON, processCSV } from "./parse";
 import * as api from "./api";
@@ -135,10 +135,19 @@ function WorkerSettings({ apiBase, apiToken, onBase, onToken, apiKey, onKey }) {
 function AiAdvisor({ metrics, sourceType, apiKey, caps, appliedSignatures, onActions, onGoToActions }) {
   const [advice, setAdvice] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState(null);
   const [question, setQuestion] = useState("");
   const [history, setHistory] = useState([]);
   const [lastResult, setLastResult] = useState(null); // { kept, rejected }
+  const adviceRef = useRef(null);
+
+  // Segue il testo mentre arriva. Senza, il riquadro resta fermo in cima
+  // mentre la risposta cresce fuori dalla vista.
+  useEffect(() => {
+    if (!streaming || !adviceRef.current) return;
+    adviceRef.current.scrollTop = adviceRef.current.scrollHeight;
+  }, [advice, streaming]);
 
   const buildContext = () => {
     const campSum = Object.values(metrics.campaigns)
@@ -239,7 +248,14 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
 
       if (viaWorker) {
         // La chiave sta sul Worker: il browser non la vede mai.
-        data = await api.askAnthropic(sys, messages);
+        // Il terzo parametro fa comparire il report mentre si scrive: su
+        // un'analisi da un minuto e mezzo cambia parecchio l'attesa.
+        setAdvice("");
+        setStreaming(true);
+        setLastResult(null);
+        data = await api.askAnthropic(sys, messages, (partial) => {
+          setAdvice(stripActionsTail(partial));
+        });
       } else {
         const resp = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
@@ -304,7 +320,7 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
       if (kept.length) onActions(kept.map((a) => ({ ...a, source: "ai" })));
     } catch (err) {
       setError(err.message);
-    } finally { setLoading(false); }
+    } finally { setLoading(false); setStreaming(false); }
   }, [metrics, history, apiKey, caps, appliedSignatures]); // eslint-disable-line
 
   const renderMarkdown = (text) => text.split("\n").map((line, i) => {
@@ -366,13 +382,28 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
         </div>
       ) : null}
 
-      {loading && (
+      {/* Lo spinner vale solo finche' non arriva il primo testo: da li' in poi
+          il report che cresce e' un indicatore di avanzamento migliore. */}
+      {loading && !advice && (
         <div style={{ padding: S.xxl, textAlign: "center" }}>
           <div style={{ width: 34, height: 34, border: `3px solid ${C.border}`, borderTopColor: C.accent, borderRadius: "50%", animation: "spin .7s linear infinite", margin: "0 auto 12px" }} />
           <div style={{ color: C.accent, fontWeight: 600, fontSize: T.body }}>Analisi in corso…</div>
           <div style={{ color: C.textDim, fontSize: T.micro, marginTop: 4 }}>
             {metrics.keywords.length} keyword · {Object.keys(metrics.campaigns).length} campagne · {(metrics.searchTerms || []).length} search term
           </div>
+        </div>
+      )}
+
+      {streaming && advice && (
+        <div style={{
+          padding: `${S.sm}px ${S.lg}px`, background: C.blueDim,
+          display: "flex", alignItems: "center", gap: S.sm, fontSize: T.micro, color: C.text,
+        }}>
+          <span style={{
+            width: 13, height: 13, border: `2px solid ${C.border}`, borderTopColor: C.accent,
+            borderRadius: "50%", animation: "spin .7s linear infinite", flexShrink: 0,
+          }} />
+          Il consulente sta scrivendo… le azioni applicabili compaiono alla fine.
         </div>
       )}
 
@@ -396,7 +427,15 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
               Nessuna azione applicabile: {lastResult.rejected.length} proposte facevano riferimento a ID non presenti nei dati e sono state scartate.
             </div>
           )}
-          <div style={{ padding: `${S.lg}px ${S.xl}px`, maxHeight: 520, overflowY: "auto" }}>{renderMarkdown(advice)}</div>
+          <div ref={adviceRef} style={{ padding: `${S.lg}px ${S.xl}px`, maxHeight: 520, overflowY: "auto" }}>
+            {renderMarkdown(advice)}
+            {streaming && (
+              <span style={{
+                display: "inline-block", width: 8, height: 15, background: C.accent,
+                verticalAlign: "text-bottom", animation: "blink 1s step-end infinite",
+              }} />
+            )}
+          </div>
           <div style={{ padding: `${S.md}px ${S.lg}px`, borderTop: `1px solid ${C.border}`, display: "flex", gap: S.sm }}>
             <input value={question} onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && question.trim()) { askAI(question.trim()); setQuestion(""); } }}

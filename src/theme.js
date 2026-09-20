@@ -83,6 +83,8 @@ export const GLOBAL_CSS = `
   ::-webkit-scrollbar-track { background: transparent; }
   input[type="checkbox"] { accent-color: ${C.accent}; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  /* Cursore lampeggiante in coda al testo che il Consulente sta scrivendo. */
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
   @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
