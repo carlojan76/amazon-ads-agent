@@ -15,7 +15,7 @@ import { parseNumber, parseCSV, processJSON, processCSV } from "../src/parse.js"
 import {
   extractActionsFromText, validateAgainstData, validateAction,
   normalizeAction, describeAction, capFor, clampToCap, overCapCount,
-  actionsPromptWith, EMPTY_CAPS,
+  actionsPromptWith, EMPTY_CAPS, stripActionsTail,
 } from "../src/actions.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -250,6 +250,30 @@ test("report keyword vuoto con keyword configurate -> segnalato", () => {
 test("nessuna keyword configurata -> nessun report mancante", () => {
   const vuoto = { campaigns: [], keywords: [], reports: {} };
   assert.equal(processJSON(vuoto).missingReports.length, 0);
+});
+
+console.log("\nStreaming: il blocco <actions> non deve mai apparire");
+test("toglie il blocco completo", () => {
+  assert.equal(stripActionsTail('Report.\n<actions>\n{"actions":[]}</actions>'), "Report.");
+});
+test("toglie il tag ancora incompleto", () => {
+  for (const frammento of ["<", "<a", "<act", "<action", "<actions"]) {
+    assert.equal(stripActionsTail(`Report.\n${frammento}`), "Report.", `fallito su "${frammento}"`);
+  }
+});
+test("un < nel testo resta dov'e'", () => {
+  assert.equal(stripActionsTail("ACoS < 25%"), "ACoS < 25%");
+});
+test("regge testo vuoto e null", () => {
+  assert.equal(stripActionsTail(""), "");
+  assert.equal(stripActionsTail(null), "");
+});
+test("nessun fotogramma dello stream mostra il tag", () => {
+  const finale = 'Analisi.\nACoS al 32% < soglia.\n<actions>\n{"actions":[{"type":"add_negative"}]}\n</actions>';
+  for (let i = 1; i <= finale.length; i++) {
+    const visibile = stripActionsTail(finale.slice(0, i));
+    assert.ok(!visibile.includes("<a"), `il tag e' comparso al carattere ${i}: ${JSON.stringify(visibile.slice(-20))}`);
+  }
 });
 
 console.log(`\n${passed} passati, ${failed} falliti\n`);
