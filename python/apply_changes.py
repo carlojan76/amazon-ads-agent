@@ -76,6 +76,7 @@ Note:
 """
 import argparse
 import json
+import os
 import sys
 import unicodedata
 from datetime import datetime
@@ -84,6 +85,8 @@ from pathlib import Path
 import requests
 
 from amazon_ads_api import AmazonAdsAPI, CONFIG
+
+import agent_api
 
 VND = {
     "keyword": "application/vnd.spKeyword.v3+json",
@@ -794,6 +797,71 @@ def check_guardrails(actions, g=None):
     return bad
 
 
+def check_bid_caps(actions, caps):
+    """Tetti economici sui bid. Ritorna la lista di violazioni.
+
+    Distinto da check_guardrails di proposito. I guardrail sono un limite
+    ASSOLUTO contro l'errore di battitura e si allentano con
+    --allow-large-changes; i tetti nascono dalla marginalita' dei prodotti e
+    NON si allentano da riga di comando. Se il bid massimo sostenibile su una
+    cuccia e' 0,45 EUR, non c'e' una circostanza in cui 1,20 EUR va bene.
+
+    Controlla anche i bid dentro create_campaign: e' la stessa strada
+    alternativa che i guardrail avevano gia' dovuto tappare.
+    """
+    if not caps or (caps.get("market") is None and not caps.get("campaigns")):
+        return []
+
+    bad = []
+    for i, a in enumerate(actions):
+        t = a.get("type")
+        cid = a.get("campaignId")
+
+        if t in ("update_bid", "add_keyword"):
+            field = "new_bid" if t == "update_bid" else "bid"
+            val = a.get(field)
+            if not isinstance(val, (int, float)):
+                continue
+            cap = agent_api.cap_for(caps, cid)
+            if cap is not None and float(val) > cap + 1e-9:
+                label = a.get("keyword") or a.get("keywordText") or "?"
+                bad.append(
+                    f"azione {i}: bid EUR {float(val):.2f} su '{label}' supera il tetto "
+                    f"EUR {cap:.2f} (campagna {cid or 'n/d'})"
+                )
+
+        elif t == "create_campaign":
+            # Una campagna nuova non ha ancora un campaignId: vale il tetto di
+            # mercato. E' il caso piu' esposto, perche' il blueprint si edita
+            # a mano nella UI prima di applicarlo.
+            cap = agent_api.cap_for(caps, None)
+            if cap is None:
+                continue
+            for j, grp in enumerate(a.get("adGroups", []) or []):
+                db = grp.get("defaultBid")
+                if isinstance(db, (int, float)) and float(db) > cap + 1e-9:
+                    bad.append(
+                        f"azione {i}.adGroup{j} ('{grp.get('name', '?')}'): bid base "
+                        f"EUR {float(db):.2f} supera il tetto di mercato EUR {cap:.2f}"
+                    )
+                for k in grp.get("keywords", []) or []:
+                    kb = k.get("bid")
+                    if isinstance(kb, (int, float)) and float(kb) > cap + 1e-9:
+                        bad.append(
+                            f"azione {i}.adGroup{j}: keyword '{k.get('keywordText', '?')}' "
+                            f"con bid EUR {float(kb):.2f} sopra il tetto EUR {cap:.2f}"
+                        )
+                for x in grp.get("autoTargets", []) or []:
+                    xb = x.get("bid")
+                    if isinstance(xb, (int, float)) and float(xb) > cap + 1e-9:
+                        bad.append(
+                            f"azione {i}.adGroup{j}: auto target "
+                            f"'{x.get('expressionType', '?')}' con bid EUR {float(xb):.2f} "
+                            f"sopra il tetto EUR {cap:.2f}"
+                        )
+    return bad
+
+
 def _guardrails_create(a, i, g):
     """Limiti di sicurezza DENTRO una create_campaign.
 
@@ -1167,6 +1235,11 @@ def main():
                     help="Disattiva i limiti su variazioni di bid/budget (sconsigliato)")
     ap.add_argument("--json-out", default="",
                     help="Scrive anteprima ed esito in un JSON strutturato (per la UI)")
+    ap.add_argument("--ignore-cap-errors", action="store_true",
+                    help="Procede anche se i tetti sui bid non sono leggibili dal Worker "
+                         "(NON disattiva i tetti che riesce a leggere)")
+    ap.add_argument("--no-ledger", action="store_true",
+                    help="Non registrare le azioni applicate sul Worker")
     args = ap.parse_args()
 
     with open(args.actions_file, encoding="utf-8") as f:
@@ -1233,6 +1306,34 @@ def main():
         dump_report()
         sys.exit(3)
 
+    # --- Tetti sui bid ------------------------------------------------------
+    # Falliscono CHIUSO: se il Worker e' configurato ma non risponde, si ferma
+    # qui invece di applicare bid non verificati. Un tetto che salta proprio
+    # quando il servizio e' giu' non protegge da niente.
+    caps = {"market": None, "campaigns": {}}
+    if agent_api.enabled():
+        try:
+            caps = agent_api.bid_caps(args.marketplace, strict=not args.ignore_cap_errors)
+            print(f"\nTetti sui bid: {agent_api.describe_caps(caps)}")
+        except agent_api.ApiError as e:
+            print(f"\nBLOCCATO: non riesco a leggere i tetti sui bid ({e}).")
+            print("   Rilancia con --ignore-cap-errors solo se sei consapevole "
+                  "che i bid non verranno verificati contro i tetti.")
+            report["errors"] = [f"tetti non leggibili: {e}"]
+            dump_report()
+            sys.exit(4)
+
+    cap_violations = check_bid_caps(actions, caps)
+    report["bid_caps"] = {"resolved": caps, "violations": cap_violations}
+    if cap_violations:
+        print("\nBLOCCATO dai tetti sui bid:")
+        for v in cap_violations:
+            print("   -", v)
+        print("\nI tetti non si scavalcano da riga di comando: abbassa i bid nel file, "
+              "oppure alza il tetto nella scheda Azioni della UI.")
+        dump_report()
+        sys.exit(5)
+
     n_create = sum(1 for a in actions if a["type"] == "create_campaign")
     print(f"\n{'=' * 60}")
     print(f"ANTEPRIMA — {len(actions)} azioni su {args.marketplace} ({n_create} nuove campagne)")
@@ -1294,6 +1395,31 @@ def main():
     log_name = f"apply_log_{args.marketplace}_{ts}.json"
     Path(log_name).write_text(json.dumps(log, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"\nLog salvato: {log_name}")
+
+    # --- Registro permanente delle azioni applicate -------------------------
+    # Due copie, di proposito. Il file finisce nel repo (sopravvive alla
+    # scadenza degli artefatti, si legge con git log, funziona anche senza
+    # Cloudflare); il Worker serve a interrogarlo per firma, che e' quello
+    # che serve a weekly_analysis e alla UI per non riproporre il gia' fatto.
+    confirmed = [e["action"] for e in outcomes]
+    if confirmed:
+        applied_dir = Path("..") / "applied" / args.marketplace
+        applied_dir.mkdir(parents=True, exist_ok=True)
+        applied_path = applied_dir / f"{ts}.json"
+        applied_path.write_text(json.dumps({
+            "marketplace": args.marketplace,
+            "applied_at": datetime.now().isoformat(),
+            "run_id": os.getenv("GITHUB_RUN_ID"),
+            "actions": confirmed,
+            "signatures": [agent_api.signature_of(a) for a in confirmed],
+        }, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
+        report["applied_file"] = str(applied_path)
+        print(f"Registro salvato: {applied_path}")
+
+        if agent_api.enabled() and not args.no_ledger:
+            res = agent_api.record_applied(args.marketplace, confirmed)
+            if res:
+                print(f"Registro sincronizzato sul Worker: {res.get('inserted', 0)} righe")
 
     # --- Rollback: come tornare indietro -----------------------------------
     rollback = build_rollback(outcomes, state, created)

@@ -23,6 +23,7 @@ from pathlib import Path
 # Import il fetcher (stesso folder)
 sys.path.insert(0, str(Path(__file__).parent))
 from amazon_ads_api import fetch_all_data, CONFIG
+import agent_api
 
 # ============================================================
 # CONFIG
@@ -42,6 +43,44 @@ EMAIL_TO = os.getenv("EMAIL_TO", "")
 # Marketplaces da analizzare (separati da virgola in env: "IT,FR,DE,ES")
 MARKETPLACES = os.getenv("MARKETPLACES", "IT,FR,DE,ES").split(",")
 DAYS = int(os.getenv("ANALYSIS_DAYS", "14"))
+
+# Quanto indietro guardare nel registro delle azioni applicate. Sotto le 4
+# settimane si rischia di riproporre cose fatte da poco; molto oltre si
+# impedisce di ritoccare un bid che nel frattempo e' cambiato di contesto.
+LEDGER_LOOKBACK_DAYS = int(os.getenv("LEDGER_LOOKBACK_DAYS", "28"))
+
+
+def _history_point(summary, data, days):
+    """Le dodici cifre che servono per il confronto settimana su settimana."""
+    meta = (data or {}).get("_meta", {}) or {}
+    windows = meta.get("report_windows") or []
+    start = windows[0][0] if windows and len(windows[0]) > 0 else None
+    end = windows[-1][-1] if windows and len(windows[-1]) > 0 else None
+
+    spend = float(summary.get("total_spend") or 0)
+    sales = float(summary.get("total_sales") or 0)
+    clicks = float(summary.get("total_clicks") or 0)
+    impressions = float(summary.get("total_impr") or 0)
+    orders = float(summary.get("total_orders") or 0)
+
+    return {
+        "period_end": end or datetime.now().date().isoformat(),
+        "period_start": start,
+        "captured_at": datetime.now().isoformat(),
+        "days": days,
+        "spend": round(spend, 2),
+        "sales": round(sales, 2),
+        "acos": round(spend / sales * 100, 2) if sales > 0 else 0.0,
+        "roas": round(sales / spend, 3) if spend > 0 else 0.0,
+        "impressions": impressions,
+        "clicks": clicks,
+        "orders": orders,
+        "ctr": round(clicks / impressions * 100, 3) if impressions > 0 else 0.0,
+        "cvr": round(orders / clicks * 100, 3) if clicks > 0 else 0.0,
+        "cpc": round(spend / clicks, 3) if clicks > 0 else 0.0,
+        "n_campaigns": len((data or {}).get("campaigns") or []),
+        "n_keywords": len((data or {}).get("keywords") or []),
+    }
 
 
 def _campaign_ended(c) -> bool:
@@ -411,7 +450,52 @@ def build_summary(data):
     }
 
 
-def build_claude_prompt(summary, marketplace, days):
+def _caps_block(caps):
+    """Sezione del prompt sui tetti. Vuota se non ne hai configurati."""
+    if not caps or (caps.get("market") is None and not caps.get("campaigns")):
+        return ""
+    righe = []
+    if caps.get("market") is not None:
+        righe.append(f"- Tetto generale di mercato: €{float(caps['market']):.2f}")
+    for cid, v in (caps.get("campaigns") or {}).items():
+        righe.append(f"- Campagna {cid}: tetto €{float(v):.2f} (prevale su quello di mercato)")
+    return f"""
+
+## ⛔ TETTI MASSIMI SUI BID (vincolanti)
+
+Nascono dalla marginalita' dei prodotti, non dai dati delle campagne: sopra
+questi importi il prodotto perde soldi anche quando l'ACoS sembra accettabile.
+Valgono sia per `update_bid` (new_bid) sia per `add_keyword` (bid).
+
+{chr(10).join(righe)}
+
+Se il calcolo che faresti porterebbe sopra il tetto, proponi il tetto stesso e
+scrivilo nel "reason". Se nemmeno al tetto l'azione ha senso, non generarla e
+spiegalo a parole nel report.
+"""
+
+
+def _applied_block(applied):
+    """Sezione del prompt con il gia'-fatto, per non farselo riproporre."""
+    if not applied:
+        return ""
+    righe = list(applied)[:120]
+    return f"""
+
+## ✅ GIA' APPLICATO DI RECENTE (non riproporre)
+
+Queste modifiche sono gia' state applicate sull'account negli ultimi
+{LEDGER_LOOKBACK_DAYS} giorni. Formato:
+`tipo|keywordId|campaignId|adGroupId|testo|matchType`
+
+{chr(10).join(righe)}
+
+Non rigenerarle. Se i dati suggeriscono che una di queste non ha funzionato,
+dillo a parole nel report invece di riproporre la stessa azione.
+"""
+
+
+def build_claude_prompt(summary, marketplace, days, caps=None, applied=None):
     """Costruisci il prompt per Claude basato sulle metriche."""
     camps = "\n".join([
         f"- [id:{c['campaignId']}] {c['name']}: Spend €{c['spend']:.2f}, Sales €{c['sales']:.2f}, ACoS {c['acos']:.1f}%, Orders {c['orders']:.0f}"
@@ -477,6 +561,7 @@ def build_claude_prompt(summary, marketplace, days):
 
     return f"""## Marketplace: {marketplace} | Periodo: ultimi {days} giorni
 ## Campagne: {summary.get('n_active', 0)} attive analizzate · {summary.get('n_paused', 0)} in pausa/archiviate ESCLUSE dai costi
+{_caps_block(caps)}{_applied_block(applied)}
 
 ## Metriche Generali (SOLO campagne attive)
 - Spesa: €{summary['total_spend']:.2f}
@@ -771,7 +856,7 @@ def send_email(html_body):
 import re
 
 
-def extract_actions(analysis_text, summary):
+def extract_actions(analysis_text, summary, caps=None, applied=None):
     """Estrae il blocco <actions>...</actions> dall'output di Claude,
     valida ogni azione contro gli ID reali del summary e restituisce
     (actions_json_dict, clean_text_without_block, warnings_list).
@@ -780,6 +865,12 @@ def extract_actions(analysis_text, summary):
     - manca un ID obbligatorio
     - l'ID non esiste tra quelli reali del summary (protezione anti-invenzione)
     - il tipo non è supportato dallo script apply_changes.py
+    - la stessa modifica risulta gia' applicata di recente (`applied`)
+
+    `caps` sono i tetti sui bid: i bid sopra soglia NON fanno scartare
+    l'azione, vengono ABBASSATI al tetto. Se il modello vede che una keyword
+    merita piu' spinta, l'informazione e' buona: quello che non va bene e'
+    l'importo, e il tetto e' proprio la risposta a quell'importo.
     """
     warnings = []
     match = re.search(r"<actions>(.*?)</actions>", analysis_text, re.DOTALL)
@@ -948,6 +1039,28 @@ def extract_actions(analysis_text, summary):
             else:
                 a["new_budget"] = round(max(MIN_BUDGET, float(a["new_budget"])), 2)
 
+        # --- Tetto economico sui bid ---------------------------------------
+        # Arriva dopo i limiti percentuali di sopra: quelli ancorano la
+        # variazione al bid reale, questo la ancora alla marginalita'.
+        if caps and t in ("update_bid", "add_keyword"):
+            field = "new_bid" if t == "update_bid" else "bid"
+            cid = str(a.get("campaignId") or "")
+            if not cid and t == "update_bid":
+                cid = str(kw_by_id.get(str(a.get("keywordId", "")), {}).get("campaignId") or "")
+            cap = agent_api.cap_for(caps, cid)
+            if cap is not None and isinstance(a.get(field), (int, float)) and float(a[field]) > cap:
+                warnings.append(
+                    f"azione {i} ({t}): bid {a[field]:.2f} sopra il tetto {cap:.2f}, ridotto al tetto")
+                a[field] = round(cap, 2)
+                if t == "update_bid" and abs(a["new_bid"] - float(a.get("old_bid") or 0)) < 0.01:
+                    warnings.append(f"azione {i}: al tetto il bid coincide con quello attuale, scartata")
+                    continue
+
+        # --- Gia' applicata di recente --------------------------------------
+        if applied and agent_api.signature_of(a) in applied:
+            warnings.append(f"azione {i} ({t}): gia' applicata di recente, scartata")
+            continue
+
         validated.append(a)
 
     return {"actions": validated}, clean_text, warnings
@@ -976,17 +1089,36 @@ def process_marketplace(mp, days):
         summary = build_summary(data)
         result["summary"] = summary
 
+        # Un mercato senza campagne non e' un errore: e' un mercato dove non
+        # fai advertising. Va detto e saltato, non pubblicato come dashboard
+        # tutta a zero con un'analisi che commenta il nulla.
+        if not (data.get("campaigns") or []):
+            log.append(f" {mp}: nessuna campagna sull'account, marketplace saltato.")
+            result["skipped"] = "nessuna campagna"
+            result["analysis"] = None
+            return result
+
+        # Tetti e registro: best effort, non devono far fallire l'analisi.
+        caps = agent_api.bid_caps(mp, strict=False) if agent_api.enabled() else None
+        applied = agent_api.applied_signatures(mp, since_days=LEDGER_LOOKBACK_DAYS)
+        if caps:
+            log.append(f" Tetti sui bid {mp}: {agent_api.describe_caps(caps)}")
+        if applied:
+            log.append(f" Registro {mp}: {len(applied)} azioni applicate negli ultimi "
+                       f"{LEDGER_LOOKBACK_DAYS} giorni, non verranno riproposte")
+
         log.append(
             f" Metriche {mp}: Spend {summary['total_spend']:.2f} | "
             f"Sales {summary['total_sales']:.2f} | ACoS {summary['acos']:.1f}%"
         )
         log.append(" Invio a Claude per analisi...")
 
-        prompt = build_claude_prompt(summary, mp, days)
+        prompt = build_claude_prompt(summary, mp, days, caps=caps, applied=applied)
         analysis = call_claude(prompt)
         log.append(f" Analisi {mp} completata ({len(analysis)} caratteri)")
 
-        actions_dict, clean_analysis, warns = extract_actions(analysis, summary)
+        actions_dict, clean_analysis, warns = extract_actions(
+            analysis, summary, caps=caps, applied=applied)
         for w in (warns or []):
             log.append(f"    actions: {w}")
         result["analysis"] = clean_analysis
@@ -1012,6 +1144,18 @@ def process_marketplace(mp, days):
             json.dumps(publish_payload, indent=2, ensure_ascii=False, default=str),
             encoding="utf-8",
         )
+
+        # --- Storico ---------------------------------------------------------
+        # Solo le metriche aggregate: il dump completo di IT pesa 460 KB, in un
+        # anno farebbe 24 MB nel repo per rispondere a una domanda che si
+        # esaurisce in dodici numeri.
+        point = _history_point(summary, data, days)
+        result["history_point"] = point
+        (latest_dir / f"history_{mp}.json").write_text(
+            json.dumps(point, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
+        if agent_api.enabled():
+            agent_api.record_history(mp, point)
+
         result["ok"] = True
     except Exception as e:
         log.append(f" Errore su {mp}: {e}")
@@ -1057,12 +1201,38 @@ def main():
         if r["ok"]:
             published_mps.append(mp)
 
+    skipped = {mp: r.get("skipped") for mp, r in results.items() if r.get("skipped")}
+    for mp, why in skipped.items():
+        print(f"    {mp} saltato: {why}")
+
     if published_mps:
-        index = {"marketplaces": published_mps, "generated_at": datetime.now().isoformat()}
+        index = {
+            "marketplaces": published_mps,
+            "skipped": skipped,
+            "generated_at": datetime.now().isoformat(),
+        }
         Path("reports/latest/index.json").write_text(
             json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8"
         )
         print(f"    Dati pubblicati per la UI online: {', '.join(published_mps)}")
+
+        # Serie storica consolidata per la UI. Se il Worker c'e' si prende la
+        # serie completa; se non c'e', almeno il punto di questo run, cosi' il
+        # grafico esiste comunque e si riempie settimana dopo settimana.
+        series = {}
+        for mp in published_mps:
+            points = agent_api.history(mp, limit=52) if agent_api.enabled() else []
+            if not points:
+                p = (results.get(mp) or {}).get("history_point")
+                points = [p] if p else []
+            if points:
+                series[mp] = points
+        if series:
+            Path("reports/latest/history.json").write_text(
+                json.dumps({"series": series, "generated_at": datetime.now().isoformat()},
+                           indent=2, ensure_ascii=False, default=str),
+                encoding="utf-8")
+            print(f"    Storico pubblicato: {', '.join(f'{k} ({len(v)})' for k, v in series.items())}")
 
     if not analyses:
         print(" Nessuna analisi prodotta, skip email")
