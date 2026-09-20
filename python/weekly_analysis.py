@@ -1196,6 +1196,14 @@ def main():
         r = results.get(mp)
         if not r:
             continue
+        # Un marketplace saltato non ha analisi: metterlo comunque in
+        # `analyses` con valore None faceva esplodere build_email_html, che
+        # su quel None chiama .split(). Il salto deve restare invisibile
+        # all'email, non diventare una sezione vuota.
+        if r.get("skipped"):
+            continue
+        if r.get("analysis") is None:
+            continue
         analyses[mp] = r["analysis"]
         summaries[mp] = r["summary"]
         if r["ok"]:
