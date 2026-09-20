@@ -1,1 +1,189 @@
+"""Test dei limiti di sicurezza di apply_changes.py.
 
+    cd python && python -m unittest discover tests -v
+    # oppure
+    cd python && python tests/test_guardrails.py
+
+I 29 smoke test JS coprono parse.js e actions.js, cioe' il codice che
+DISEGNA le proposte. Questi coprono il codice che le APPLICA: e' l'unico
+punto del progetto che puo' spostare soldi veri su un account Amazon, ed
+era quello senza rete.
+
+Nessuna dipendenza esterna, nessuna chiamata di rete: tutto gira su fixture.
+"""
+
+import os
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+# agent_api legge l'ambiente all'import: lo neutralizziamo, cosi' i test non
+# toccano mai un Worker vero nemmeno per sbaglio.
+os.environ.pop("AGENT_API_BASE", None)
+os.environ.pop("AGENT_API_TOKEN", None)
+
+import agent_api  # noqa: E402
+from apply_changes import (  # noqa: E402
+    GUARDRAILS, check_guardrails, check_bid_caps, normalize_actions, validate,
+)
+
+
+def bid(**kw):
+    a = {"type": "update_bid", "keywordId": "1", "keyword": "kw", "old_bid": 0.50, "new_bid": 0.55}
+    a.update(kw)
+    return a
+
+
+def budget(**kw):
+    a = {"type": "update_budget", "campaignId": "9", "campaign": "C", "old_budget": 10.0, "new_budget": 12.0}
+    a.update(kw)
+    return a
+
+
+class TestGuardrails(unittest.TestCase):
+    """Limiti assoluti: proteggono dall'errore di battitura."""
+
+    def test_bid_dentro_i_limiti_passa(self):
+        self.assertEqual(check_guardrails([bid()]), [])
+
+    def test_bid_sopra_il_massimo_assoluto(self):
+        # 45.00 invece di 0.45: il caso che i guardrail esistono per fermare.
+        v = check_guardrails([bid(new_bid=45.00)])
+        self.assertTrue(v, "un bid da 45 EUR deve essere bloccato")
+        self.assertIn("fuori dall'intervallo", v[0])
+
+    def test_bid_sotto_il_minimo(self):
+        self.assertTrue(check_guardrails([bid(new_bid=0.001)]))
+
+    def test_variazione_oltre_il_50_percento(self):
+        v = check_guardrails([bid(old_bid=0.50, new_bid=1.00)])
+        self.assertTrue(v)
+        self.assertIn("100%", v[0])
+
+    def test_variazione_esattamente_al_limite_passa(self):
+        self.assertEqual(check_guardrails([bid(old_bid=1.00, new_bid=1.50)]), [])
+
+    def test_budget_fuori_intervallo(self):
+        self.assertTrue(check_guardrails([budget(new_budget=500.0)]))
+        self.assertTrue(check_guardrails([budget(new_budget=0.50)]))
+
+    def test_troppe_azioni_in_un_run(self):
+        troppe = [bid(keywordId=str(i)) for i in range(GUARDRAILS["max_actions"] + 1)]
+        v = check_guardrails(troppe)
+        self.assertTrue(any("azioni in un solo run" in x for x in v))
+
+    def test_somma_budget_campagne_nuove(self):
+        """Quattro campagne da 90 EUR passano una per una, non insieme."""
+        quattro = [
+            {"type": "create_campaign", "campaign": {"dailyBudget": 90.0}, "adGroups": []}
+            for _ in range(4)
+        ]
+        v = check_guardrails(quattro)
+        self.assertTrue(any("sommano" in x for x in v),
+                        "il totale dei budget delle campagne nuove deve essere controllato")
+
+    def test_bid_dentro_create_campaign(self):
+        """Il blueprint e' editabile a mano: stessi limiti, altra strada."""
+        a = {
+            "type": "create_campaign",
+            "campaign": {"dailyBudget": 10.0},
+            "adGroups": [{
+                "name": "G", "defaultBid": 0.40,
+                "keywords": [{"keywordText": "x", "bid": 45.00}],
+                "autoTargets": [],
+            }],
+        }
+        v = check_guardrails([a])
+        self.assertTrue(any("45.00" in x for x in v))
+
+
+class TestBidCaps(unittest.TestCase):
+    """Tetti economici: proteggono dalla marginalita', non dal refuso."""
+
+    CAPS = {"market": 0.45, "campaigns": {"77": 0.30}}
+
+    def test_nessun_tetto_nessuna_violazione(self):
+        self.assertEqual(check_bid_caps([bid(new_bid=4.00)], None), [])
+        self.assertEqual(check_bid_caps([bid(new_bid=4.00)], {"market": None, "campaigns": {}}), [])
+
+    def test_bid_sotto_il_tetto_passa(self):
+        self.assertEqual(check_bid_caps([bid(new_bid=0.40, campaignId="9")], self.CAPS), [])
+
+    def test_bid_sopra_il_tetto_di_mercato(self):
+        v = check_bid_caps([bid(new_bid=0.80, campaignId="9")], self.CAPS)
+        self.assertTrue(v)
+        self.assertIn("0.45", v[0])
+
+    def test_tetto_di_campagna_prevale(self):
+        # 0.40 e' sotto il tetto di mercato (0.45) ma sopra quello della
+        # campagna 77 (0.30): deve essere bloccato.
+        v = check_bid_caps([bid(new_bid=0.40, campaignId="77")], self.CAPS)
+        self.assertTrue(v, "il tetto della campagna deve prevalere su quello di mercato")
+        self.assertIn("0.30", v[0])
+
+    def test_esattamente_al_tetto_passa(self):
+        self.assertEqual(check_bid_caps([bid(new_bid=0.45, campaignId="9")], self.CAPS), [])
+        self.assertEqual(check_bid_caps([bid(new_bid=0.30, campaignId="77")], self.CAPS), [])
+
+    def test_add_keyword_usa_il_campo_bid(self):
+        a = {"type": "add_keyword", "campaignId": "77", "adGroupId": "5",
+             "keywordText": "x", "matchType": "EXACT", "bid": 0.50}
+        self.assertTrue(check_bid_caps([a], self.CAPS))
+
+    def test_create_campaign_usa_il_tetto_di_mercato(self):
+        """Una campagna nuova non ha ancora un campaignId: vale il mercato."""
+        a = {
+            "type": "create_campaign",
+            "campaign": {"dailyBudget": 10.0},
+            "adGroups": [{
+                "name": "G", "defaultBid": 0.90,
+                "keywords": [{"keywordText": "x", "bid": 0.20}],
+                "autoTargets": [{"expressionType": "QUERY_HIGH_REL_MATCHES", "bid": 1.10}],
+            }],
+        }
+        v = check_bid_caps([a], self.CAPS)
+        self.assertEqual(len(v), 2, f"attese 2 violazioni (defaultBid e autoTarget), trovate: {v}")
+
+    def test_tetto_non_si_aggira_con_allow_large_changes(self):
+        """check_bid_caps non guarda i flag: e' voluto.
+
+        --allow-large-changes allenta i guardrail assoluti, che sono una
+        protezione dal refuso. I tetti nascono dal margine del prodotto: non
+        esiste una circostanza in cui superarli "consapevolmente" va bene.
+        """
+        self.assertTrue(check_bid_caps([bid(new_bid=2.00)], self.CAPS))
+
+
+class TestCapResolution(unittest.TestCase):
+    def test_cap_for(self):
+        caps = {"market": 0.50, "campaigns": {"1": 0.20}}
+        self.assertEqual(agent_api.cap_for(caps, "1"), 0.20)
+        self.assertEqual(agent_api.cap_for(caps, "2"), 0.50)
+        self.assertEqual(agent_api.cap_for(caps, None), 0.50)
+        self.assertIsNone(agent_api.cap_for({"market": None, "campaigns": {}}, "1"))
+        self.assertIsNone(agent_api.cap_for(None, "1"))
+
+    def test_signature_stabile(self):
+        """La firma deve combaciare con actionSignature() in src/actions.js."""
+        a = {"type": "add_negative", "campaignId": "1", "adGroupId": "2",
+             "keywordText": "  Gratis  ", "matchType": "NEGATIVE_EXACT"}
+        self.assertEqual(agent_api.signature_of(a), "add_negative||1|2|gratis|NEGATIVE_EXACT")
+
+    def test_api_disattivata_senza_base_url(self):
+        self.assertFalse(agent_api.enabled())
+        self.assertEqual(agent_api.applied_signatures("IT"), set())
+        self.assertEqual(agent_api.bid_caps("IT"), {"market": None, "campaigns": {}})
+
+
+class TestNormalizeAndValidate(unittest.TestCase):
+    def test_validate_scarta_tipo_sconosciuto(self):
+        self.assertTrue(validate([{"type": "lancia_missile"}]))
+
+    def test_normalize_non_esplode_su_input_vuoto(self):
+        self.assertEqual(normalize_actions([]), [])
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
