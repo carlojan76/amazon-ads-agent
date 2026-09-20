@@ -14,7 +14,8 @@ import { dirname, join } from "node:path";
 import { parseNumber, parseCSV, processJSON, processCSV } from "../src/parse.js";
 import {
   extractActionsFromText, validateAgainstData, validateAction,
-  normalizeAction, describeAction,
+  normalizeAction, describeAction, capFor, clampToCap, overCapCount,
+  actionsPromptWith, EMPTY_CAPS,
 } from "../src/actions.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -99,6 +100,156 @@ test("variazione oltre il 50% -> avviso", () => {
 test("keyword senza ID -> non applicabile", () => {
   const { errors } = validateAction(normalizeAction({ type: "pause_keyword" }));
   assert.ok(errors.length > 0);
+});
+
+
+// ---------------------------------------------------------------------------
+// Tetti sui bid
+// ---------------------------------------------------------------------------
+console.log("\nTetti sui bid");
+
+const caps = { market: 0.45, campaigns: { "77": 0.30 } };
+
+test("il tetto di campagna prevale su quello di mercato", () => {
+  assert.equal(capFor(caps, "77"), 0.30);
+  assert.equal(capFor(caps, "1"), 0.45);
+  assert.equal(capFor(caps, null), 0.45);
+});
+test("nessun tetto configurato -> null", () => {
+  assert.equal(capFor(EMPTY_CAPS, "1"), null);
+  assert.equal(capFor(null, "1"), null);
+});
+test("clampToCap abbassa il bid al tetto", () => {
+  const a = clampToCap({ type: "update_bid", campaignId: "1", old_bid: 0.4, new_bid: 1.2 }, caps);
+  assert.equal(a.new_bid, 0.45);
+  assert.equal(a._capped_from, 1.2);
+});
+test("clampToCap non tocca un bid gia' sotto il tetto", () => {
+  const orig = { type: "update_bid", campaignId: "1", old_bid: 0.4, new_bid: 0.44 };
+  assert.equal(clampToCap(orig, caps), orig);
+});
+test("clampToCap agisce sul campo giusto per add_keyword", () => {
+  const a = clampToCap({ type: "add_keyword", campaignId: "77", bid: 0.9 }, caps);
+  assert.equal(a.bid, 0.30);
+});
+test("clampToCap arrotonda per difetto, mai sopra il tetto", () => {
+  const a = clampToCap({ type: "update_bid", campaignId: "1", new_bid: 2 }, { market: 0.339, campaigns: {} });
+  assert.ok(a.new_bid <= 0.339, `${a.new_bid} deve restare sotto il tetto`);
+});
+test("overCapCount conta le azioni fuori tetto", () => {
+  const list = [
+    { type: "update_bid", campaignId: "1", new_bid: 1.0 },
+    { type: "update_bid", campaignId: "1", new_bid: 0.2 },
+    { type: "add_negative", campaignId: "1", keywordText: "x" },
+  ];
+  assert.equal(overCapCount(list, caps), 1);
+});
+test("bid sopra il tetto -> errore in validateAction", () => {
+  const { errors } = validateAction(
+    normalizeAction({ type: "update_bid", keywordId: "7", old_bid: 0.4, new_bid: 0.9 }),
+    { caps });
+  assert.ok(errors.some((e) => e.includes("tetto")), errors.join("; "));
+});
+test("senza tetti il comportamento resta quello di prima", () => {
+  const a = normalizeAction({ type: "update_bid", keywordId: "7", old_bid: 0.4, new_bid: 0.5 });
+  assert.equal(validateAction(a).errors.length, 0);
+  assert.equal(validateAction(a, { caps: EMPTY_CAPS }).errors.length, 0);
+});
+
+// ---------------------------------------------------------------------------
+// validateAgainstData: tetti, negative esistenti, registro
+// ---------------------------------------------------------------------------
+console.log("\nFiltri sulle azioni proposte");
+
+test("una proposta fuori tetto viene ADEGUATA, non scartata", () => {
+  const proposte = [normalizeAction({ type: "update_bid", keywordId: "7", old_bid: 0.42, new_bid: 1.50 })];
+  const r = validateAgainstData(proposte, ms, { caps: { market: 0.60, campaigns: {} } });
+  assert.equal(r.kept.length, 1, "l'azione deve restare");
+  assert.equal(r.kept[0].new_bid, 0.60);
+  assert.equal(r.kept[0]._capped_from, 1.50);
+});
+test("se al tetto il bid non cambia, l'azione viene scartata", () => {
+  const proposte = [normalizeAction({ type: "update_bid", keywordId: "7", old_bid: 0.42, new_bid: 1.50 })];
+  const r = validateAgainstData(proposte, ms, { caps: { market: 0.42, campaigns: {} } });
+  assert.equal(r.kept.length, 0);
+  assert.ok(r.rejected[0].why.includes("coincide"));
+});
+test("il campaignId viene dedotto dalla keyword per il tetto di campagna", () => {
+  // La keyword 7 sta nella campagna 1: il tetto di quella campagna deve valere
+  // anche se l'azione non porta il campaignId.
+  const proposte = [normalizeAction({ type: "update_bid", keywordId: "7", old_bid: 0.42, new_bid: 1.50 })];
+  const r = validateAgainstData(proposte, ms, { caps: { market: 2.0, campaigns: { "1": 0.50 } } });
+  assert.equal(r.kept[0].new_bid, 0.50);
+});
+test("scarta una negativa gia' presente sulla campagna", () => {
+  const conNeg = {
+    ...ms,
+    negativeKeywords: [{ campaignId: "1", keywordText: "Gratis", matchType: "NEGATIVE_EXACT" }],
+  };
+  const proposte = [normalizeAction({
+    type: "add_negative", campaignId: "1", keywordText: "gratis", matchType: "NEGATIVE_EXACT",
+  })];
+  const r = validateAgainstData(proposte, conNeg);
+  assert.equal(r.kept.length, 0);
+  assert.ok(r.rejected[0].why.includes("gia'"));
+});
+test("una negativa nuova passa", () => {
+  const conNeg = {
+    ...ms,
+    negativeKeywords: [{ campaignId: "1", keywordText: "gratis", matchType: "NEGATIVE_EXACT" }],
+  };
+  const proposte = [normalizeAction({
+    type: "add_negative", campaignId: "1", keywordText: "usato", matchType: "NEGATIVE_EXACT",
+  })];
+  assert.equal(validateAgainstData(proposte, conNeg).kept.length, 1);
+});
+test("scarta un'azione gia' nel registro", () => {
+  const proposte = [normalizeAction({
+    type: "add_negative", campaignId: "1", keywordText: "gratis", matchType: "NEGATIVE_EXACT",
+  })];
+  const sigs = new Set(["add_negative||1||gratis|NEGATIVE_EXACT"]);
+  const r = validateAgainstData(proposte, ms, { appliedSignatures: sigs });
+  assert.equal(r.kept.length, 0);
+  assert.ok(r.rejected[0].why.includes("registro"));
+});
+test("la firma JS combacia con quella Python/Worker", () => {
+  // agent_api.signature_of e signatureOf nel Worker producono questa stringa.
+  const sig = [
+    "add_negative", "", "1", "2", "gratis", "NEGATIVE_EXACT",
+  ].join("|");
+  assert.equal(sig, "add_negative||1|2|gratis|NEGATIVE_EXACT");
+});
+
+console.log("\nPrompt con tetti e registro");
+test("il prompt include i tetti quando ci sono", () => {
+  const p = actionsPromptWith(caps, []);
+  assert.ok(p.includes("TETTI MASSIMI"));
+  assert.ok(p.includes("0.45"));
+  assert.ok(p.includes("0.30"));
+});
+test("senza tetti il prompt resta quello base", () => {
+  const p = actionsPromptWith(EMPTY_CAPS, []);
+  assert.ok(!p.includes("TETTI MASSIMI"));
+});
+test("il prompt elenca il gia' applicato", () => {
+  const p = actionsPromptWith(EMPTY_CAPS, new Set(["add_negative||1||gratis|NEGATIVE_EXACT"]));
+  assert.ok(p.includes("GIA' APPLICATO"));
+});
+
+console.log("\nReport mancanti");
+test("report keyword vuoto con keyword configurate -> segnalato", () => {
+  const senzaReportKw = {
+    campaigns: [{ campaignId: "1", name: "C", state: "ENABLED", budget: 10 }],
+    keywords: [{ keywordId: "7", campaignId: "1", adGroupId: "9", bid: 0.4, state: "ENABLED" }],
+    reports: { campaigns: [{ campaignId: "1", cost: 3 }], keywords: [] },
+  };
+  const mm = processJSON(senzaReportKw);
+  assert.ok(mm.hasPerformance, "c'e' comunque qualche riga di report");
+  assert.ok(mm.missingReports.includes("keywords"), "il report keyword mancante va segnalato");
+});
+test("nessuna keyword configurata -> nessun report mancante", () => {
+  const vuoto = { campaigns: [], keywords: [], reports: {} };
+  assert.equal(processJSON(vuoto).missingReports.length, 0);
 });
 
 console.log(`\n${passed} passati, ${failed} falliti\n`);
