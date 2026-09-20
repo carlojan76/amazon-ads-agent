@@ -187,3 +187,64 @@ class TestNormalizeAndValidate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestNegativeRidondanti(unittest.TestCase):
+    """La coppia PHRASE+EXACT sullo stesso testo fa fallire il batch.
+
+    Caso reale del 20/09: 'borsa da viaggio per cani' proposta sia in frase
+    sia in esatta sullo stesso ad group. Amazon ha rifiutato la seconda con
+    "Keyword is invalid" e l'intero invio di 7 negative e' risultato fallito,
+    trascinando in rosso un run in cui 16 modifiche su 17 erano passate.
+    """
+
+    def _neg(self, testo, match, camp="1", ag="9"):
+        return {"type": "add_negative", "campaignId": camp, "adGroupId": ag,
+                "keywordText": testo, "matchType": match}
+
+    def test_toglie_la_esatta_coperta_dalla_frase(self):
+        azioni = [
+            self._neg("borsa da viaggio per cani", "NEGATIVE_PHRASE"),
+            self._neg("borsa da viaggio per cani", "NEGATIVE_EXACT"),
+        ]
+        fixes = normalize_actions(azioni)
+        self.assertEqual(len(azioni), 1)
+        self.assertEqual(azioni[0]["matchType"], "NEGATIVE_PHRASE")
+        self.assertTrue(any("rimossa" in f for f in fixes))
+
+    def test_il_confronto_ignora_maiuscole_e_spazi(self):
+        azioni = [
+            self._neg("borsa da viaggio", "NEGATIVE_PHRASE"),
+            self._neg("  Borsa Da Viaggio  ", "NEGATIVE_EXACT"),
+        ]
+        normalize_actions(azioni)
+        self.assertEqual(len(azioni), 1)
+
+    def test_ad_group_diversi_restano_entrambe(self):
+        azioni = [
+            self._neg("x", "NEGATIVE_PHRASE", ag="A"),
+            self._neg("x", "NEGATIVE_EXACT", ag="B"),
+        ]
+        normalize_actions(azioni)
+        self.assertEqual(len(azioni), 2, "ambiti diversi: nessuna delle due e' ridondante")
+
+    def test_campagne_diverse_restano_entrambe(self):
+        azioni = [
+            self._neg("x", "NEGATIVE_PHRASE", camp="1"),
+            self._neg("x", "NEGATIVE_EXACT", camp="2"),
+        ]
+        normalize_actions(azioni)
+        self.assertEqual(len(azioni), 2)
+
+    def test_senza_frase_la_esatta_resta(self):
+        azioni = [self._neg("x", "NEGATIVE_EXACT")]
+        normalize_actions(azioni)
+        self.assertEqual(len(azioni), 1)
+
+    def test_testi_diversi_restano(self):
+        azioni = [
+            self._neg("borsa cane", "NEGATIVE_PHRASE"),
+            self._neg("cuccia gatto", "NEGATIVE_EXACT"),
+        ]
+        normalize_actions(azioni)
+        self.assertEqual(len(azioni), 2)
