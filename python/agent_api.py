@@ -31,6 +31,16 @@ API_BASE = (os.getenv("AGENT_API_BASE") or "").rstrip("/")
 API_TOKEN = os.getenv("AGENT_API_TOKEN") or ""
 TIMEOUT = int(os.getenv("AGENT_API_TIMEOUT", "20"))
 
+# Cloudflare blocca in blocco lo User-Agent di default di urllib
+# ("Python-urllib/3.12") con l'errore 1010, browser_signature_banned: la
+# richiesta non arriva nemmeno al Worker, viene fermata prima sul bordo.
+# Serve una stringa nostra. Si puo' cambiare da ambiente se un giorno
+# anche questa finisse in una lista.
+USER_AGENT = os.getenv(
+    "AGENT_API_USER_AGENT",
+    "amazon-ads-agent/1.0 (+https://github.com/carlojan76/amazon-ads-agent)",
+)
+
 
 class ApiError(RuntimeError):
     pass
@@ -51,7 +61,7 @@ def _call(path, method="GET", body=None, query=None):
             url += "?" + urllib.parse.urlencode(clean)
 
     data = None
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json", "User-Agent": USER_AGENT}
     if API_TOKEN:
         headers["Authorization"] = f"Bearer {API_TOKEN}"
     if body is not None:
@@ -64,8 +74,16 @@ def _call(path, method="GET", body=None, query=None):
             raw = resp.read().decode("utf-8")
             return json.loads(raw) if raw else {}
     except urllib.error.HTTPError as e:
-        detail = e.read().decode("utf-8", "replace")[:400]
-        raise ApiError(f"{method} {path} -> HTTP {e.code}: {detail}") from e
+        detail = e.read().decode("utf-8", "replace")
+        # L'errore 1010 arriva da Cloudflare, non dal Worker, ed e' un muro
+        # di JSON che non dice niente a chi legge il log. Traducilo.
+        if e.code == 403 and "error_1010" in detail:
+            raise ApiError(
+                f"{method} {path} -> Cloudflare ha bloccato la richiesta prima del Worker "
+                f"(errore 1010, User-Agent non gradito). User-Agent inviato: '{USER_AGENT}'. "
+                "Cambialo con la variabile AGENT_API_USER_AGENT."
+            ) from e
+        raise ApiError(f"{method} {path} -> HTTP {e.code}: {detail[:400]}") from e
     except Exception as e:  # rete, DNS, timeout
         raise ApiError(f"{method} {path} -> {e}") from e
 
