@@ -9,7 +9,7 @@ compatibility_date = "2026-09-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "amazon-ads"
-database_id = "METTI-QUI-L-ID-CHE-TI-DA-WRANGLER"
+database_id = "ec8d0305-0632-4c94-b98e-c2de8bf439b0"
 
 [vars]
 # Origini ammesse per CORS, separate da virgola. Deve combaciare ESATTAMENTE
