@@ -42,6 +42,18 @@ on:
         required: false
         default: false
 
+permissions:
+  contents: write
+
+# Lock per marketplace. Due dispatch ravvicinati (due schede aperte, doppio
+# click, o un retry impaziente) applicavano DUE VOLTE le stesse variazioni:
+# su un update_bid significa due salti in cascata, ognuno "dentro" il limite
+# del +-50% preso da solo. cancel-in-progress resta false: un run a meta'
+# strada non va interrotto, va aspettato.
+concurrency:
+  group: apply-actions-${{ github.event.inputs.marketplace }}
+  cancel-in-progress: false
+
 jobs:
   apply:
     runs-on: ubuntu-latest
@@ -85,6 +97,8 @@ jobs:
           AMAZON_ADS_CLIENT_ID: ${{ secrets.AMAZON_ADS_CLIENT_ID }}
           AMAZON_ADS_CLIENT_SECRET: ${{ secrets.AMAZON_ADS_CLIENT_SECRET }}
           AMAZON_ADS_REFRESH_TOKEN: ${{ secrets.AMAZON_ADS_REFRESH_TOKEN }}
+          AGENT_API_BASE: ${{ secrets.AGENT_API_BASE }}
+          AGENT_API_TOKEN: ${{ secrets.AGENT_API_TOKEN }}
         run: |
           cd python
           python apply_changes.py actions_input.json \
@@ -108,6 +122,14 @@ jobs:
               for g in d["guardrails"]:
                   print(f"- {g}")
               print()
+          caps = d.get("bid_caps") or {}
+          if caps.get("violations"):
+              print("### Bloccato dai tetti sui bid\n")
+              for v in caps["violations"]:
+                  print(f"- {v}")
+              print()
+          elif caps.get("resolved", {}).get("market") is not None:
+              print(f"Tetto di mercato attivo: EUR {caps['resolved']['market']:.2f}\n")
           if d.get("fixes"):
               print("### Correzioni automatiche\n")
               for f in d["fixes"]:
@@ -130,11 +152,48 @@ jobs:
           AMAZON_ADS_CLIENT_ID: ${{ secrets.AMAZON_ADS_CLIENT_ID }}
           AMAZON_ADS_CLIENT_SECRET: ${{ secrets.AMAZON_ADS_CLIENT_SECRET }}
           AMAZON_ADS_REFRESH_TOKEN: ${{ secrets.AMAZON_ADS_REFRESH_TOKEN }}
+          AGENT_API_BASE: ${{ secrets.AGENT_API_BASE }}
+          AGENT_API_TOKEN: ${{ secrets.AGENT_API_TOKEN }}
         run: |
           cd python
           python apply_changes.py actions_input.json \
             --marketplace ${{ github.event.inputs.marketplace }} \
             --yes --json-out applied.json
+
+      - name: 🗂️ Committa il registro delle azioni applicate
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          # apply_changes.py scrive applied/<MP>/<timestamp>.json con le sole
+          # azioni CONFERMATE dall'API. Prima l'unica traccia era applied.json
+          # fra gli artefatti del run, che scade dopo 90 giorni: passato quel
+          # termine non restava modo di sapere cosa era stato applicato, ne'
+          # per la weekly analysis ne' per te.
+          if [ -z "$(ls -A applied 2>/dev/null)" ]; then
+            echo "Nessuna azione confermata: niente da registrare."
+            exit 0
+          fi
+          git config user.name "amazon-ads-bot"
+          git config user.email "actions@github.com"
+          git add -f applied
+          if git diff --cached --quiet; then
+            echo "Registro invariato."
+            exit 0
+          fi
+          git commit -m "registro: azioni applicate su ${{ github.event.inputs.marketplace }} [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "Registro pubblicato al tentativo $i."
+              exit 0
+            fi
+            sleep $((i * 5))
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" || {
+              echo "Rebase fallito: il registro resta fra gli artefatti."
+              exit 0
+            }
+          done
+          # Il registro e' importante ma non deve far fallire un'applicazione
+          # gia' andata a buon fine su Amazon: resta negli artefatti.
+          echo "Push del registro non riuscito: i file restano fra gli artefatti."
 
       - name: ↩️ Come annullare
         if: ${{ always() && github.event.inputs.dry_run != 'true' }}
@@ -169,5 +228,6 @@ jobs:
             python/rollback_*.json
             python/preview.json
             python/applied.json
+            applied/**/*.json
           retention-days: 90
           if-no-files-found: ignore

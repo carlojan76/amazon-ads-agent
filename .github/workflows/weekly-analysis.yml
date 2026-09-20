@@ -17,6 +17,14 @@ on:
 permissions:
   contents: write
 
+# Un dispatch manuale lanciato mentre gira quello schedulato faceva partire due
+# analisi in parallelo sugli stessi marketplace: doppia spesa di token e due
+# commit che si contendono lo stesso file. Si accoda invece di sovrapporsi
+# (cancel-in-progress: false — non si butta via un run da 45 minuti).
+concurrency:
+  group: weekly-analysis
+  cancel-in-progress: false
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
@@ -59,6 +67,13 @@ jobs:
           # Report API v3 spesso richiedono 15-25 min: 600s erano troppo pochi
           # e facevano tornare dati VUOTI (tutti zero) per timeout.
           REPORT_MAX_WAIT: "1800"
+
+          # Worker Cloudflare: registro delle azioni applicate, storico,
+          # tetti sui bid. Se i secret non ci sono, lo script continua
+          # esattamente come prima.
+          AGENT_API_BASE: ${{ secrets.AGENT_API_BASE }}
+          AGENT_API_TOKEN: ${{ secrets.AGENT_API_TOKEN }}
+          LEDGER_LOOKBACK_DAYS: "28"
         run: |
           cd python
           python -u weekly_analysis.py
@@ -87,7 +102,27 @@ jobs:
           git add public/data
           if git diff --cached --quiet; then
             echo "Nessuna modifica ai dati pubblicati, skip commit."
-          else
-            git commit -m "chore: aggiorna dati campagne per la UI online"
-            git push
+            exit 0
           fi
+          git commit -m "chore: aggiorna dati campagne per la UI online"
+
+          # Push con rebase e ritentativi.
+          #
+          # Prima era un `git push` secco. Se nel frattempo un altro workflow
+          # aveva committato (fetch-search-query-performance, build-listing),
+          # il push moriva con non-fast-forward: ed essendo l'ultimo step,
+          # si perdeva la pubblicazione dei dati DOPO 45 minuti di report.
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "Push riuscito al tentativo $i."
+              exit 0
+            fi
+            echo "Push fallito (tentativo $i), riallineo e riprovo..."
+            sleep $((i * 5))
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" || {
+              echo "Rebase fallito: mi fermo senza forzare."
+              exit 1
+            }
+          done
+          echo "Push non riuscito dopo 5 tentativi."
+          exit 1

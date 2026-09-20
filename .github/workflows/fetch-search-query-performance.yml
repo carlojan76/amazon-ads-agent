@@ -119,8 +119,23 @@ jobs:
           git add public/data/SQP_*.json
           if git diff --cached --quiet; then
             echo "Nessuna modifica ai dati pubblicati, skip commit."
-          else
-            git commit -m "chore: aggiorna Search Query Performance per la UI online"
-            git pull --rebase --autostash || true
-            git push
+            exit 0
           fi
+          git commit -m "chore: aggiorna Search Query Performance per la UI online"
+
+          # `|| true` sul rebase mascherava il fallimento e lasciava morire il
+          # push subito dopo, senza spiegazione. Meglio ritentare davvero.
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "Push riuscito al tentativo $i."
+              exit 0
+            fi
+            echo "Push fallito (tentativo $i), riallineo e riprovo..."
+            sleep $((i * 5))
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" || {
+              echo "Rebase fallito: mi fermo senza forzare."
+              exit 1
+            }
+          done
+          echo "Push non riuscito dopo 5 tentativi."
+          exit 1
