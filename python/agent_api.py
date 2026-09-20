@@ -1,0 +1,217 @@
+"""Client Python del Worker Cloudflare (registro azioni, storico, tetti bid).
+
+Usato da weekly_analysis.py e apply_changes.py. Tutto passa da due variabili
+d'ambiente:
+
+    AGENT_API_BASE   https://amazon-ads-agent-api.<tuo-subdominio>.workers.dev
+    AGENT_API_TOKEN  lo stesso valore messo con `wrangler secret put API_TOKEN`
+
+Se AGENT_API_BASE non e' impostata il modulo si disattiva in silenzio e tutto
+continua a funzionare come prima: il repo resta utilizzabile senza Cloudflare.
+
+Due politiche diverse in caso di errore, ed e' voluto:
+
+  - registro e storico sono BEST EFFORT. Se il Worker non risponde si logga e
+    si va avanti: non vale la pena far fallire un'analisi da 45 minuti perche'
+    un insert non e' passato.
+
+  - i tetti sui bid FALLISCONO CHIUSO. Se hai configurato il Worker e non si
+    riesce a leggere i tetti, apply_changes.py si ferma invece di applicare
+    bid non verificati. Un tetto che salta proprio quando serve non e' un
+    tetto. Si aggira con --ignore-cap-errors, consapevolmente.
+"""
+
+import json
+import os
+import urllib.error
+import urllib.parse
+import urllib.request
+
+API_BASE = (os.getenv("AGENT_API_BASE") or "").rstrip("/")
+API_TOKEN = os.getenv("AGENT_API_TOKEN") or ""
+TIMEOUT = int(os.getenv("AGENT_API_TIMEOUT", "20"))
+
+
+class ApiError(RuntimeError):
+    pass
+
+
+def enabled() -> bool:
+    return bool(API_BASE)
+
+
+def _call(path, method="GET", body=None, query=None):
+    if not API_BASE:
+        raise ApiError("AGENT_API_BASE non impostata")
+
+    url = API_BASE + path
+    if query:
+        clean = {k: v for k, v in query.items() if v not in (None, "")}
+        if clean:
+            url += "?" + urllib.parse.urlencode(clean)
+
+    data = None
+    headers = {"Accept": "application/json"}
+    if API_TOKEN:
+        headers["Authorization"] = f"Bearer {API_TOKEN}"
+    if body is not None:
+        data = json.dumps(body, ensure_ascii=False, default=str).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+
+    req = urllib.request.Request(url, data=data, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+            raw = resp.read().decode("utf-8")
+            return json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode("utf-8", "replace")[:400]
+        raise ApiError(f"{method} {path} -> HTTP {e.code}: {detail}") from e
+    except Exception as e:  # rete, DNS, timeout
+        raise ApiError(f"{method} {path} -> {e}") from e
+
+
+# ---------------------------------------------------------------- firme
+
+def signature_of(a: dict) -> str:
+    """Stessa firma di actionSignature() in src/actions.js e signatureOf() nel Worker.
+
+    Se cambi l'ordine dei campi in uno dei tre, cambialo in tutti e tre:
+    e' l'uguaglianza su cui si regge il confronto proposto/gia'-applicato.
+    """
+    return "|".join([
+        str(a.get("type") or ""),
+        str(a.get("keywordId") or ""),
+        str(a.get("campaignId") or ""),
+        str(a.get("adGroupId") or ""),
+        str(a.get("keywordText") or "").strip().lower(),
+        str(a.get("matchType") or ""),
+    ])
+
+
+# ---------------------------------------------------------------- registro
+
+def record_applied(marketplace, actions, run_id=None, run_url=None, applied_at=None):
+    """Registra le azioni CONFERMATE dall'API. Best effort: non solleva."""
+    if not enabled() or not actions:
+        return None
+    try:
+        return _call("/api/applied", "POST", {
+            "marketplace": marketplace,
+            "actions": actions,
+            "run_id": run_id or os.getenv("GITHUB_RUN_ID"),
+            "run_url": run_url or _github_run_url(),
+            "applied_at": applied_at,
+        })
+    except ApiError as e:
+        print(f"   [registro] insert non riuscito: {e}")
+        return None
+
+
+def applied_signatures(marketplace, since_days=28):
+    """Firme gia' applicate di recente. Best effort: in caso d'errore set vuoto."""
+    if not enabled():
+        return set()
+    try:
+        r = _call("/api/applied", query={"marketplace": marketplace, "since_days": since_days})
+        return set(r.get("signatures") or [])
+    except ApiError as e:
+        print(f"   [registro] lettura non riuscita: {e}")
+        return set()
+
+
+def applied_recent(marketplace, since_days=28):
+    """Righe complete, per poterle mostrare nel prompt con data e valore."""
+    if not enabled():
+        return []
+    try:
+        r = _call("/api/applied", query={"marketplace": marketplace, "since_days": since_days})
+        return r.get("actions") or []
+    except ApiError as e:
+        print(f"   [registro] lettura non riuscita: {e}")
+        return []
+
+
+def _github_run_url():
+    server = os.getenv("GITHUB_SERVER_URL")
+    repo = os.getenv("GITHUB_REPOSITORY")
+    run = os.getenv("GITHUB_RUN_ID")
+    if server and repo and run:
+        return f"{server}/{repo}/actions/runs/{run}"
+    return None
+
+
+# ---------------------------------------------------------------- storico
+
+def record_history(marketplace, point):
+    """Salva un punto dello storico. Best effort: non solleva."""
+    if not enabled():
+        return None
+    try:
+        payload = dict(point)
+        payload["marketplace"] = marketplace
+        return _call("/api/history", "POST", payload)
+    except ApiError as e:
+        print(f"   [storico] insert non riuscito: {e}")
+        return None
+
+
+def history(marketplace, limit=52):
+    if not enabled():
+        return []
+    try:
+        return (_call("/api/history", query={"marketplace": marketplace, "limit": limit}) or {}).get("points", [])
+    except ApiError as e:
+        print(f"   [storico] lettura non riuscita: {e}")
+        return []
+
+
+# ---------------------------------------------------------------- tetti bid
+
+def bid_caps(marketplace, strict=True):
+    """Ritorna {"market": float|None, "campaigns": {campaignId: float}}.
+
+    strict=True (default quando il Worker e' configurato) rilancia l'errore:
+    meglio bloccare che applicare bid non verificati. Vedi il docstring in cima.
+    """
+    empty = {"market": None, "campaigns": {}}
+    if not enabled():
+        return empty
+    try:
+        r = _call("/api/bid-caps", query={"marketplace": marketplace}) or {}
+    except ApiError as e:
+        if strict:
+            raise
+        print(f"   [tetti bid] lettura non riuscita, procedo senza tetti: {e}")
+        return empty
+    return {
+        "market": r.get("market_cap"),
+        "campaigns": {
+            str(c.get("scope_id")): float(c.get("max_bid"))
+            for c in (r.get("campaign_caps") or [])
+            if c.get("scope_id") and c.get("max_bid") is not None
+        },
+    }
+
+
+def cap_for(caps, campaign_id=None):
+    """Tetto applicabile: la campagna vince sul mercato. None = nessun tetto."""
+    if not caps:
+        return None
+    cid = str(campaign_id or "")
+    if cid and cid in (caps.get("campaigns") or {}):
+        return caps["campaigns"][cid]
+    m = caps.get("market")
+    return float(m) if m is not None else None
+
+
+def describe_caps(caps):
+    """Riga leggibile per i log e per il prompt."""
+    if not caps or (caps.get("market") is None and not caps.get("campaigns")):
+        return "nessun tetto configurato"
+    parts = []
+    if caps.get("market") is not None:
+        parts.append(f"mercato EUR {float(caps['market']):.2f}")
+    n = len(caps.get("campaigns") or {})
+    if n:
+        parts.append(f"{n} campagn{'a' if n == 1 else 'e'} con tetto specifico")
+    return ", ".join(parts)
