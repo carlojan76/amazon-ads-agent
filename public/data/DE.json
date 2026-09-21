@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "fetched_at": "2026-09-20T19:55:11.745919",
+    "fetched_at": "2026-09-21T13:55:06.515101",
     "profile_id": "2593537292052861",
     "marketplace": "DE",
     "days": 14,
@@ -13,8 +13,8 @@
     "days_requested": 14,
     "report_windows": [
       [
-        "2026-09-06",
-        "2026-09-19"
+        "2026-09-07",
+        "2026-09-20"
       ]
     ]
   },
@@ -1028,12 +1028,12 @@
     "campaigns": [
       {
         "purchases7d": 1,
-        "costPerClick": 0.4075,
+        "costPerClick": 0.3764,
         "campaignId": 131473497025172,
-        "spend": 4.89,
+        "spend": 5.27,
         "campaignStatus": "ENABLED",
-        "clicks": 12,
-        "impressions": 633,
+        "clicks": 14,
+        "impressions": 837,
         "sales7d": 39.99,
         "campaignName": "Borsa AMZ AU",
         "campaignBudgetAmount": 3.0,
@@ -1054,6 +1054,36 @@
         "searchTerm": "b07n64csnh",
         "spend": 0.74,
         "clicks": 2,
+        "keyword": "substitutes",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.19,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 2,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "b08zxvyxlc",
+        "spend": 0.19,
+        "clicks": 1,
+        "keyword": "substitutes",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.19,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 7,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "b0b634jhfv",
+        "spend": 0.19,
+        "clicks": 1,
         "keyword": "substitutes",
         "unitsSoldClicks7d": 0
       },
@@ -1157,7 +1187,7 @@
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 131473497025172,
         "clicks": 1,
-        "impressions": 32,
+        "impressions": 72,
         "keyword": "loose-match",
         "sales7d": 39.99,
         "adGroupId": 218311782608849,
@@ -1171,7 +1201,7 @@
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 131473497025172,
         "clicks": 2,
-        "impressions": 224,
+        "impressions": 264,
         "keyword": "close-match",
         "sales7d": 0,
         "adGroupId": 218311782608849,
@@ -1179,13 +1209,13 @@
       },
       {
         "purchases7d": 0,
-        "cost": 3.57,
-        "costPerClick": 0.3967,
+        "cost": 3.95,
+        "costPerClick": 0.3591,
         "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 131473497025172,
-        "clicks": 9,
-        "impressions": 377,
+        "clicks": 11,
+        "impressions": 501,
         "keyword": "substitutes",
         "sales7d": 0,
         "adGroupId": 218311782608849,
@@ -1195,20 +1225,20 @@
     "products": [
       {
         "purchases7d": 1,
-        "cost": 4.89,
+        "cost": 5.27,
         "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
         "campaignId": 131473497025172,
         "advertisedAsin": "B0H8Y9NXJW",
-        "clicks": 12,
+        "clicks": 14,
         "advertisedSku": "49-7EQL-RUS8",
-        "impressions": 633,
+        "impressions": 837,
         "sales7d": 39.99,
         "adGroupId": 218311782608849,
         "unitsSoldClicks7d": 1
       }
     ]
   },
-  "analysis": "# 📊 Stato Generale\n\nIl marketplace DE mostra performance eccellenti su volumi ancora molto ridotti: un solo ordine generato dalla campagna attiva \"Borsa AMZ AU\" con ACoS del 12.2% e ROAS di 8.18x, ben al di sotto della soglia target del 25%. Il problema principale è la scala: 633 impression e 12 click in 14 giorni sono volumi minimi, e la maggior parte della spesa (€3.13 su €4.89) è andata su search term ASIN (prodotti concorrenti) senza conversioni. Il search term organico \"hundereisetasche\" ha già convertito a ACoS 1% — segnale fortissimo da sfruttare subito.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Negativizzare i 3 search term ASIN spreconi**\n- **Azione**: Aggiungere come NEGATIVE_EXACT nell'ad group 218311782608849 i termini \"b0bhyy15qn\", \"b07n64csnh\", \"b0fh65w7v5\"\n- **Motivo**: Sono ASIN di competitor — €3.13 spesi (64% del budget totale), 8 click, ZERO ordini. Il traffico su ASIN altrui converte raramente su prodotti propri.\n- **Impatto stimato**: Recupero immediato di ~€3/settimana da ridirigere su traffico qualificato; ACoS complessivo migliorato.\n\n**2. Creare una campagna MANUAL EXACT su \"hundereisetasche\"**\n- **Azione**: Poiché l'unico ad group disponibile (218311782608849) è AUTO e non accetta keyword positive, creare una nuova campagna MANUAL con ad group dedicato all'ASIN B0H8Y9NXJW e aggiungere \"hundereisetasche\" in match EXACT con bid €0.44 (CPC storico del termine).\n- **Motivo**: Questo search term ha generato l'unico ordine del periodo con ACoS 1% — è il miglior segnale di acquisto disponibile. Non capitalizzarlo è un'opportunità persa ogni giorno.\n- **Impatto stimato**: Se cattura anche solo 2-3 ordini/settimana con ACoS <15%, potrebbe triplicare le vendite DE senza aumentare la spesa.\n\n**3. Alzare il budget giornaliero della campagna AUTO per sostenere il test**\n- **Azione**: Verificare il budget giornaliero attuale di [id:131473497025172] — se è sotto €1.50/giorno, portarlo almeno a €2.00/giorno.\n- **Motivo**: Con 633 impression in 14 giorni (~45/giorno) la campagna è quasi invisibile. Liberare budget consente all'algoritmo AUTO di scoprire altri search term validi come \"hundereisetasche\".\n- **Impatto stimato**: Più dati di scoperta, potenzialmente 3-5 nuovi search term qualificati nelle prossime 2 settimane.\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n| Search Term | Match Type Suggerito | Motivo |\n|---|---|---|\n| b0bhyy15qn | NEGATIVE_EXACT | ASIN competitor, €1.76 spesi, 0 ordini |\n| b07n64csnh | NEGATIVE_EXACT | ASIN competitor, €0.74 spesi, 0 ordini |\n| b0fh65w7v5 | NEGATIVE_EXACT | ASIN competitor, €0.63 spesi, 0 ordini |\n\n> ⚠️ Solo 3 search term spreconi identificati nel periodo. La lista è corta perché il volume è ancora molto basso.\n\n---\n\n### 🔁 Search Terms Vincenti → Nuove Keyword\n\n| Search Term | Ordini | ACoS | CPC | Azione |\n|---|---|---|---|---|\n| **hundereisetasche** | 1 | 1% | €0.44 | `add_keyword` EXACT — MA solo in campagna MANUAL (non AUTO) |\n\n> ⚡ **Leva di crescita principale**: \"hundereisetasche\" è il termine d'oro di questo marketplace. Creare una campagna MANUAL EXACT dedicata è la priorità assoluta. Non è possibile farlo via script sull'ad group AUTO esistente — serve creazione manuale dalla console Ads.\n\n---\n\n# 🟢 Keywords da Scalare\n\n**Nessuna keyword manuale attiva nel periodo** — la campagna è interamente AUTO.\n\n- Nessuna keyword-idea recuperabile da campagne in pausa (nessuna campagna pausata presente).\n- **Unica keyword da attivare**: \"hundereisetasche\" in EXACT, come descritto sopra, in una nuova campagna MANUAL da creare manualmente su Seller Central / Ads Console per ASIN B0H8Y9NXJW.\n\n---\n\n# 💡 Quick Wins\n\n1. **Segmenta la campagna AUTO per tipo di targeting**: Valuta di creare targeting separati (close match, loose match, substitutes, complements) invece di un'unica AUTO generica — così puoi abbassare il bid sui \"substitutes\" (dove escono gli ASIN competitor) e alzarlo sul \"close match\" (dove probabilmente è uscito \"hundereisetasche\").\n\n2. **Aggiungi varianti di \"hundereisetasche\" nella campagna MANUAL futura**: Termini correlati da testare in BROAD/PHRASE: \"hunde reisetasche\", \"hundetasche reise\", \"reisetasche hund\". Volume DE potenzialmente interessante per prodotti pet travel.\n\n3. **Monitora la campagna AUTO post-negativizzazione**: Dopo aver rimosso i 3 ASIN, l'algoritmo troverà nuovi search term. Rivedi tra 7 giorni per intercettare nuovi spreconi o nuovi vincitori.\n\n4. **Verifica il prezzo €39.99 vs competitor DE**: Con un solo ordine non è possibile trarre conclusioni, ma il CVR (1 ordine / 12 click = 8.3%) è buono. Assicurati che il prezzo sia competitivo per mantenere questa conversion rate.\n\n5. **Imposta un alert su ACoS**: Con budget così ridotti, anche 1-2 click sprecati spostano molto l'ACoS. Imposta soglia alert al 30% per intervenire tempestivamente.\n\n---",
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace DE mostra una performance eccellente in termini di efficienza: ACoS al 13.2% e ROAS 7.59x su un singolo ordine. Il volume è però ancora molto basso (837 impressioni, 14 click, 1 ordine in 14 giorni), il che rende le metriche statisticamente fragili. Il principale problema non è l'efficienza ma la **scala**: il budget/traffico è insufficiente per costruire dati solidi. Il search term \"hundereisetasche\" è un segnale d'oro da sfruttare immediatamente.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Creare una campagna MANUAL EXACT per catturare \"hundereisetasche\"**\n- **Azione**: Il search term \"hundereisetasche\" ha generato 1 ordine con ACoS 1% e CPC €0.44 dalla campagna AUTO. Poiché l'unico ad group attivo è AUTO (218311782608849) e le keyword positive non sono accettate nelle AUTO, è necessario creare **manualmente una nuova campagna MANUAL** con ad group dedicato all'ASIN B0H8Y9NXJW, e aggiungere \"hundereisetasche\" in EXACT match con bid €0.44–0.50.\n- **Motivo**: ACoS 1% = termine quasi gratuito che converte. Lasciarlo solo nella AUTO significa pagarlo a caso senza controllo sul bid.\n- **Impatto stimato**: Cattura diretta del traffico più qualificato trovato finora; potenziale raddoppio ordini a costo minimo.\n\n**2. Negativizzare i 3 search term ASIN spreconi nella campagna AUTO**\n- **Azione**: Aggiungere come NEGATIVE EXACT nella campagna 131473497025172 / ad group 218311782608849 i termini: `b0bhyy15qn`, `b07n64csnh`, `b0fh65w7v5` (tutti ASIN di competitor che hanno bruciato €3.13 senza ordini).\n- **Motivo**: €3.13 spesi su 8 click verso ASIN concorrenti = spreco puro. Sono attivati dalla keyword broad \"substitutes\".\n- **Impatto stimato**: Risparmio ~€3/14gg, budget rediretto verso traffico reale.\n\n**3. Valutare aumento budget campagna AUTO**\n- **Azione**: Se la campagna AUTO va in budget cap durante il giorno, aumentare il budget del 30–50% (da verificare nel pannello Amazon).\n- **Motivo**: Con solo 837 impressioni in 14 giorni il volume è estremamente basso. Un ACoS 13.2% giustifica tranquillamente più spesa.\n- **Impatto stimato**: Più impressioni, più chance di intercettare altri termini come \"hundereisetasche\".\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n| Search Term | Campagna/AdGroup | Spesa | Motivo | Match Type |\n|---|---|---|---|---|\n| `b0bhyy15qn` | 131473497025172 / 218311782608849 | €1.76 | ASIN competitor, 0 ordini | NEGATIVE_EXACT |\n| `b07n64csnh` | 131473497025172 / 218311782608849 | €0.74 | ASIN competitor, 0 ordini | NEGATIVE_EXACT |\n| `b0fh65w7v5` | 131473497025172 / 218311782608849 | €0.63 | ASIN competitor, 0 ordini | NEGATIVE_EXACT |\n\n> ⚠️ **Search Term Vincente → Nuova Keyword:**\n> - `\"hundereisetasche\"` → 1 ordine, ACoS 1%, CPC €0.44. **Promuovere a keyword EXACT in una nuova campagna MANUAL** (non può essere aggiunto all'AUTO via API). Azione: creare campagna manuale per ASIN B0H8Y9NXJW con bid €0.44.\n\n---\n\n# 🟢 Keywords da Scalare\n\n- **Nessuna keyword manuale attiva al momento** da scalare direttamente (la campagna è solo AUTO).\n- **Azione prioritaria**: Una volta creata la campagna MANUAL con \"hundereisetasche\" EXACT, monitorare per 7–10 giorni. Se ACoS rimane < 20%, aumentare il bid del 20–25% per scalare impressioni.\n- **Nessuna keyword da campagne in pausa** disponibile come suggerimento.\n\n---\n\n# 💡 Quick Wins\n\n1. **Aggiungere \"hundereisetasche\" anche in PHRASE** nella campagna manual (oltre a EXACT): intercetta varianti come \"hundereisetasche klein\", \"hundereisetasche mit rollen\" ecc. Bid iniziale €0.35.\n\n2. **Verificare la keyword \"substitutes\"** nella AUTO: sta generando solo traffico verso ASIN competitor. Valutare se metterla in pausa o abbassarne il bid al minimo (€0.02), visto che non sembra portare traffico pertinente al prodotto.\n\n3. **Analizzare gli altri search term della AUTO** (quelli non mostrati qui perché sotto soglia): scaricare il report search term completo da Seller Central e identificare altri termini pertinenti da promuovere a EXACT.\n\n4. **Ottimizzare la listing per \"hundereisetasche\"**: se questo termine converte così bene, assicurarsi che sia presente nel titolo, bullet points e backend keywords della listing DE per migliorare anche il ranking organico.\n\n5. **Impostare un alert di budget**: con €5.27 spesi in 14 giorni il budget giornaliero è ~€0.37/giorno — probabilmente troppo basso. Controllare se la campagna si ferma ogni giorno per budget esaurito.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n> ⚠️ Nota: Il search term vincente \"hundereisetasche\" NON può essere aggiunto via `add_keyword` all'ad group AUTO 218311782608849 (le keyword positive vengono rifiutate dalle campagne AUTO). **Creare manualmente una campagna MANUAL da Seller Central** per ASIN B0H8Y9NXJW con questo termine in EXACT match, bid €0.44.",
   "actions": {
     "actions": [
       {
@@ -1234,5 +1264,5 @@
       }
     ]
   },
-  "generated_at": "2026-09-20T19:55:52.351022"
+  "generated_at": "2026-09-21T13:55:44.579589"
 }
