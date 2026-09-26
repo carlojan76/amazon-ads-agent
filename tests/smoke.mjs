@@ -16,7 +16,9 @@ import {
   extractActionsFromText, validateAgainstData, validateAction,
   normalizeAction, describeAction, capFor, clampToCap, overCapCount,
   actionsPromptWith, EMPTY_CAPS, stripActionsTail,
+  MIN_CLICKS_PER_DAY, budgetDerivedCap, capInfo, explainCap,
 } from "../src/actions.js";
+import { checkBlueprint } from "../src/blueprintCheck.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let passed = 0, failed = 0;
@@ -274,6 +276,118 @@ test("nessun fotogramma dello stream mostra il tag", () => {
     const visibile = stripActionsTail(finale.slice(0, i));
     assert.ok(!visibile.includes("<a"), `il tag e' comparso al carattere ${i}: ${JSON.stringify(visibile.slice(-20))}`);
   }
+});
+
+
+// ---------------------------------------------------------------------------
+// Coerenza bid/budget: il secondo vincolo
+// ---------------------------------------------------------------------------
+console.log("\nCoerenza bid/budget");
+
+test("il budget impone un tetto: 3 EUR / 10 clic = 0,30", () => {
+  assert.equal(budgetDerivedCap(3, 10), 0.30);
+  assert.equal(budgetDerivedCap(8, 10), 0.80);
+  assert.equal(budgetDerivedCap(1.5, 10), 0.15);
+});
+test("arrotonda per difetto, mai sopra", () => {
+  // 3.99/10 = 0.399 -> 0.39, non 0.40
+  assert.equal(budgetDerivedCap(3.99, 10), 0.39);
+});
+test("budget assente o assurdo -> nessun tetto", () => {
+  assert.equal(budgetDerivedCap(0, 10), null);
+  assert.equal(budgetDerivedCap(-5, 10), null);
+  assert.equal(budgetDerivedCap(undefined, 10), null);
+});
+test("clic minimi configurabili", () => {
+  assert.equal(budgetDerivedCap(3, 5), 0.60);
+  assert.equal(budgetDerivedCap(3, 20), 0.15);
+});
+
+console.log("\nIl tetto effettivo e' il piu' stretto dei due");
+const capsB = { market: 0.35, campaigns: {}, budgets: { "1": 3, "2": 20 }, minClicks: 10 };
+
+test("con budget basso lega il budget", () => {
+  const info = capInfo(capsB, "1");
+  assert.equal(info.cap, 0.30);
+  assert.equal(info.source, "budget");
+});
+test("con budget alto lega il margine", () => {
+  const info = capInfo(capsB, "2");
+  assert.equal(info.cap, 0.35);
+  assert.equal(info.source, "margine");
+});
+test("campagna senza budget noto: vale solo il margine", () => {
+  const info = capInfo(capsB, "999");
+  assert.equal(info.cap, 0.35);
+  assert.equal(info.source, "margine");
+});
+test("budgetOverride per le campagne che non esistono ancora", () => {
+  const info = capInfo(capsB, null, 2);
+  assert.equal(info.cap, 0.20, "2 EUR / 10 clic");
+  assert.equal(info.source, "budget");
+});
+test("il tetto di campagna prevale, ma il budget puo' stringerlo ancora", () => {
+  const caps = { market: 1.0, campaigns: { "1": 0.50 }, budgets: { "1": 3 }, minClicks: 10 };
+  const info = capInfo(caps, "1");
+  assert.equal(info.cap, 0.30, "0.30 dal budget batte 0.50 dal margine");
+  assert.equal(info.source, "budget");
+});
+test("explainCap dice quale leva muovere", () => {
+  assert.ok(explainCap(capInfo(capsB, "1")).includes("budget"));
+  assert.ok(explainCap(capInfo(capsB, "2")).includes("margine"));
+});
+test("le azioni vengono adeguate al tetto piu' stretto", () => {
+  const proposte = [normalizeAction({ type: "update_bid", keywordId: "7", old_bid: 0.10, new_bid: 0.50 })];
+  const caps = { market: 0.35, campaigns: {}, budgets: { "1": 3 }, minClicks: 10 };
+  const r = validateAgainstData(proposte, ms, { caps });
+  assert.equal(r.kept.length, 1);
+  assert.equal(r.kept[0].new_bid, 0.30, "la keyword 7 sta nella campagna 1, budget 3 EUR");
+});
+
+console.log("\nBlueprint: il caso reale delle campagne squalo");
+const squalo = (budget, base, kwBid) => ({
+  type: "create_campaign",
+  campaign: { name: "SP-Squalo", targetingType: "MANUAL", dailyBudget: budget,
+    biddingStrategy: "LEGACY_FOR_SALES", state: "PAUSED" },
+  adGroups: [{ name: "AG-exact", defaultBid: base, products: [{ asin: "B0X" }],
+    keywords: [{ keywordText: "cuccetta per gatti", matchType: "EXACT", bid: kwBid }],
+    negatives: [], autoTargets: [] }],
+});
+
+test("budget 3 con bid 0,40 e 0,80 -> bloccato, e spiega perche'", () => {
+  const r = checkBlueprint([squalo(3, 0.40, 0.80)], { minClicks: 10 });
+  assert.ok(r.errors.length >= 2, `attesi almeno 2 errori, trovati ${r.errors.length}`);
+  assert.ok(r.errors.some((e) => e.includes("0.30")), "deve indicare il bid corretto");
+  assert.ok(r.errors.some((e) => e.includes("alza il budget")), "deve indicare l'altra leva");
+});
+test("stesso budget con bid coerenti -> passa", () => {
+  const r = checkBlueprint([squalo(3, 0.28, 0.30)], { minClicks: 10 });
+  assert.equal(r.errors.length, 0, r.errors.join("; "));
+});
+test("il bid al tetto esatto passa", () => {
+  const r = checkBlueprint([squalo(3, 0.30, 0.30)], { minClicks: 10 });
+  assert.equal(r.errors.length, 0, r.errors.join("; "));
+});
+test("alzare il budget sblocca gli stessi bid", () => {
+  const r = checkBlueprint([squalo(8, 0.40, 0.80)], { minClicks: 10 });
+  assert.equal(r.errors.length, 0, r.errors.join("; "));
+});
+test("il tetto da margine vale in aggiunta", () => {
+  const caps = { market: 0.35, campaigns: {}, budgets: {}, minClicks: 10 };
+  const r = checkBlueprint([squalo(8, 0.40, 0.80)], { caps, minClicks: 10 });
+  assert.ok(r.errors.some((e) => e.includes("tetto di mercato")), r.errors.join("; "));
+});
+test("senza tetto da margine il vincolo di budget resta attivo", () => {
+  const r = checkBlueprint([squalo(3, 0.50, 0.50)], { caps: null, minClicks: 10 });
+  assert.ok(r.errors.length > 0, "il budget non ha bisogno del Worker");
+});
+test("anche gli auto target sono controllati", () => {
+  const a = squalo(3, 0.20, 0.20);
+  a.campaign.targetingType = "AUTO";
+  a.adGroups[0].keywords = [];
+  a.adGroups[0].autoTargets = [{ expressionType: "QUERY_HIGH_REL_MATCHES", bid: 0.75 }];
+  const r = checkBlueprint([a], { minClicks: 10 });
+  assert.ok(r.errors.some((e) => e.includes("auto target")), r.errors.join("; "));
 });
 
 console.log(`\n${passed} passati, ${failed} falliti\n`);
