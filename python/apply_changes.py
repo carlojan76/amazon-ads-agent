@@ -76,6 +76,7 @@ Note:
 """
 import argparse
 import json
+import math
 import os
 import sys
 import unicodedata
@@ -844,6 +845,74 @@ def check_guardrails(actions, g=None):
     return bad
 
 
+def check_budget_coherence(actions, min_clicks=10, budgets=None):
+    """Coerenza fra bid e budget giornaliero. Ritorna la lista di violazioni.
+
+    E' il secondo vincolo economico, distinto dal tetto sul margine e piu'
+    elementare: una campagna da 3 EUR/giorno con bid a 0,80 compra quattro
+    clic e poi tace fino a mezzanotte. Non raccoglie dati, non e' presente
+    nelle ore buone, e per rientrare dovrebbe convertire quasi al primo clic.
+
+    Regola: bid massimo = dailyBudget / min_clicks.
+
+    Per create_campaign il budget sta nel blueprint. Per le azioni su
+    campagne esistenti serve `budgets` ({campaignId: dailyBudget}), che
+    arriva dallo stato letto prima dell'invio: senza, il controllo su quelle
+    azioni viene saltato invece di indovinare.
+
+    Il messaggio dice sempre QUALE leva muovere: se lega il budget, abbassare
+    il bid e' solo una delle due risposte, e spesso non quella giusta.
+    """
+    bad = []
+    budgets = budgets or {}
+    n = int(min_clicks) or 10
+
+    def limite(budget):
+        return math.floor((float(budget) / n) * 100) / 100
+
+    def controlla(dove, valore, etichetta, budget, nome):
+        if not isinstance(valore, (int, float)) or not budget:
+            return
+        cap = limite(budget)
+        if float(valore) <= cap + 1e-9:
+            return
+        bad.append(
+            f"{dove}: {etichetta} EUR {float(valore):.2f} incoerente col budget di "
+            f"'{nome}' (EUR {float(budget):.2f}/giorno) — sopra EUR {cap:.2f} la campagna "
+            f"compra meno di {n} clic al giorno. Abbassa il bid a {cap:.2f}, "
+            f"oppure porta il budget a EUR {float(valore) * n:.2f}/giorno."
+        )
+
+    for i, a in enumerate(actions):
+        t = a.get("type")
+
+        if t == "create_campaign":
+            c = a.get("campaign", {}) or {}
+            budget = c.get("dailyBudget")
+            nome = c.get("name") or f"azione {i}"
+            for j, grp in enumerate(a.get("adGroups", []) or []):
+                dove = f"azione {i}.adGroup{j} ('{grp.get('name', '?')}')"
+                controlla(dove, grp.get("defaultBid"), "bid base", budget, nome)
+                for k in grp.get("keywords", []) or []:
+                    controlla(f"azione {i}.adGroup{j}", k.get("bid"),
+                              f"keyword '{k.get('keywordText', '?')}'", budget, nome)
+                for x in grp.get("autoTargets", []) or []:
+                    controlla(f"azione {i}.adGroup{j}", x.get("bid"),
+                              f"auto target '{x.get('expressionType', '?')}'", budget, nome)
+
+        elif t in ("update_bid", "add_keyword"):
+            cid = str(a.get("campaignId") or "")
+            budget = budgets.get(cid)
+            if not budget:
+                continue
+            field = "new_bid" if t == "update_bid" else "bid"
+            etichetta = a.get("keyword") or a.get("keywordText") or "?"
+            controlla(f"azione {i}", a.get(field), f"bid su '{etichetta}'",
+                      budget, a.get("campaign") or cid)
+
+    return bad
+
+
 def check_bid_caps(actions, caps):
     """Tetti economici sui bid. Ritorna la lista di violazioni.
 
@@ -1371,13 +1440,39 @@ def main():
             sys.exit(4)
 
     cap_violations = check_bid_caps(actions, caps)
-    report["bid_caps"] = {"resolved": caps, "violations": cap_violations}
-    if cap_violations:
-        print("\nBLOCCATO dai tetti sui bid:")
-        for v in cap_violations:
-            print("   -", v)
-        print("\nI tetti non si scavalcano da riga di comando: abbassa i bid nel file, "
-              "oppure alza il tetto nella scheda Azioni della UI.")
+
+    # --- Coerenza bid/budget ------------------------------------------------
+    # Vincolo distinto dal tetto sul margine, e indipendente dal Worker: per
+    # le campagne nuove il budget e' nel blueprint, per quelle esistenti lo
+    # prendiamo dallo stato appena letto.
+    min_clicks = agent_api.min_clicks_per_day(args.marketplace)
+    budgets = {}
+    for c in (state or {}).get("campaigns", {}).values() if isinstance(state, dict) else []:
+        cid = str(c.get("campaignId") or "")
+        b = _campaign_budget(c)
+        if cid and b:
+            budgets[cid] = b
+    coherence = check_budget_coherence(actions, min_clicks=min_clicks, budgets=budgets)
+
+    report["bid_caps"] = {
+        "resolved": caps,
+        "violations": cap_violations,
+        "min_clicks_per_day": min_clicks,
+        "coherence_violations": coherence,
+    }
+
+    if cap_violations or coherence:
+        if cap_violations:
+            print("\nBLOCCATO dai tetti sui bid (margine):")
+            for v in cap_violations:
+                print("   -", v)
+        if coherence:
+            print(f"\nBLOCCATO dalla coerenza bid/budget (minimo {min_clicks} clic al giorno):")
+            for v in coherence:
+                print("   -", v)
+        print("\nQuesti limiti non si scavalcano da riga di comando. Abbassa i bid, "
+              "alza il budget della campagna, oppure — se e' il margine a legare — "
+              "alza il tetto nella scheda Azioni della UI.")
         dump_report()
         sys.exit(5)
 

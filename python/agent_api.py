@@ -211,6 +211,33 @@ def bid_caps(marketplace, strict=True):
     }
 
 
+def min_clicks_per_day(marketplace, default=10):
+    """Clic minimi al giorno sotto cui una campagna non ha senso.
+
+    Dieci non e' un numero magico: e' l'ordine di grandezza sotto cui il
+    budget si esaurisce in poche ore, i dati non bastano a decidere niente,
+    e servirebbe un tasso di conversione irreale per rientrare.
+
+    Si cambia per mercato dalle impostazioni sul Worker. Senza Worker vale il
+    default, che e' sufficiente perche' il vincolo si calcola dal budget e non
+    ha bisogno di nessun servizio esterno.
+    """
+    env = os.getenv("MIN_CLICKS_PER_DAY")
+    if env:
+        try:
+            return max(1, int(env))
+        except ValueError:
+            pass
+    if not enabled():
+        return default
+    try:
+        r = _call("/api/settings", query={"marketplace": marketplace}) or {}
+        v = (r.get("settings") or {}).get("min_clicks_per_day")
+        return max(1, int(v)) if v else default
+    except (ApiError, TypeError, ValueError):
+        return default
+
+
 def cap_for(caps, campaign_id=None):
     """Tetto applicabile: la campagna vince sul mercato. None = nessun tetto."""
     if not caps:

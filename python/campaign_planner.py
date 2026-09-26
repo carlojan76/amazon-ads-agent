@@ -40,7 +40,10 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).parent))
 from amazon_ads_api import fetch_all_data, AmazonAdsAPI, CONFIG  # noqa: E402
-from apply_changes import validate, normalize_actions, check_guardrails  # riusa validazione+normalizzazione+limiti del blueprint  # noqa: E402
+from apply_changes import (  # riusa validazione+normalizzazione+limiti del blueprint  # noqa: E402
+    validate, normalize_actions, check_guardrails, check_bid_caps, check_budget_coherence,
+)
+import agent_api  # noqa: E402
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-sonnet-4-6"
@@ -370,7 +373,8 @@ def _existing_block(seed):
 
 
 def build_planner_prompt(seed, recs, listing_text, reviews_text, marketplace, budget,
-                         target_acos, extra_kw, child_note, structure="auto", sqp_md=""):
+                         target_acos, extra_kw, child_note, structure="auto", sqp_md="",
+                         caps=None, min_clicks=10):
     fam = ", ".join(seed["family_asins"])
     sku_map = ", ".join(f"{a}->{s}" for a, s in seed["asin_sku"].items()) or "(nessuno SKU noto dallo storico ads)"
 
@@ -400,6 +404,14 @@ def build_planner_prompt(seed, recs, listing_text, reviews_text, marketplace, bu
     reviews_block = f"\n## Estratti di recensioni (per long-tail e pain point)\n{reviews_text.strip()[:2500]}" if reviews_text.strip() else ""
     sqp_block = f"\n## [Fonte 3] {sqp_md.strip()}" if sqp_md.strip() else ""
     extra_line = f'\nKEYWORD FORNITE A MANO: {extra_kw}' if extra_kw else ""
+    # Tetto da margine, quando l'utente ne ha impostato uno sul mercato.
+    cap_line = ""
+    if caps and caps.get("market") is not None:
+        cap_line = (
+            f"\n  * TETTO DA MARGINE su questo mercato: {loc['valuta']} "
+            f"{float(caps['market']):.2f}. Vale INSIEME al rapporto qui sopra: "
+            f"il limite vero e' il piu' basso dei due."
+        )
     child_line = f'\nNOTA SUI CHILD: {child_note}' if child_note else ""
     avg_cpc = seed["avg_cpc"] or 0.40
     loc = _locale(marketplace)
@@ -474,6 +486,16 @@ Regole su queste campagne:
   PHRASE/BROAD con bid piu' bassi. AUTO con bid conservativi.
 - Genera 3-6 negative di partenza da search term sprecati e da termini fuori
   intento evidenti nel listing/recensioni.
+- COERENZA BID/BUDGET — il vincolo che sbaglia piu' spesso chi pianifica:
+  una campagna deve poter comprare almeno {min_clicks} clic al giorno, altrimenti
+  esaurisce il budget in poche ore, non raccoglie dati utili e per rientrare
+  dovrebbe convertire quasi al primo clic.
+  * Per OGNI campagna: bid massimo = dailyBudget / {min_clicks}.
+    Con {loc["valuta"]} 3.00/giorno nessun bid puo' superare {loc["valuta"]} 0.30.
+    Con {loc["valuta"]} 8.00/giorno il massimo e' {loc["valuta"]} 0.80.
+  * Vale per defaultBid, bid delle keyword e bid degli auto target.
+  * Se una keyword merita davvero di piu', dalle una campagna con piu' budget:
+    NON alzare il bid oltre il rapporto. Un guardrail blocca il piano.{cap_line}
 - LIMITI NUMERICI (li applica un guardrail dopo di te: fuori da questi
   intervalli il piano viene BLOCCATO e va rifatto a mano):
   * ogni bid (defaultBid, bid keyword, bid auto target): tra 0.02 e 5.00
@@ -690,10 +712,20 @@ def main():
               f"(passate al modello per evitare doppioni)", flush=True)
 
     print(f"Struttura richiesta: {args.structure}", flush=True)
+
+    # Tetti sui bid: il modello deve conoscerli PRIMA di scrivere il piano.
+    # Correggerlo dopo con un guardrail funziona, ma vuol dire buttare via
+    # un piano intero per un rapporto bid/budget che si poteva imporre subito.
+    caps = agent_api.bid_caps(args.marketplace, strict=False) if agent_api.enabled() else None
+    min_clicks = agent_api.min_clicks_per_day(args.marketplace)
+    print(f"Coerenza bid/budget: almeno {min_clicks} clic al giorno per campagna", flush=True)
+    if caps and caps.get("market") is not None:
+        print(f"Tetto da margine: EUR {float(caps['market']):.2f}", flush=True)
+
     prompt = build_planner_prompt(
         seed, recs, listing_text, reviews_text, args.marketplace, args.budget,
         args.target_acos, args.seed_keywords.strip(), args.child_note.strip(),
-        structure=args.structure, sqp_md=sqp_md,
+        structure=args.structure, sqp_md=sqp_md, caps=caps, min_clicks=min_clicks,
     )
     print(f"Invio a Claude ({len(prompt)} caratteri)...", flush=True)
     text = call_claude(prompt)
