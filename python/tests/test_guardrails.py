@@ -26,7 +26,8 @@ os.environ.pop("AGENT_API_TOKEN", None)
 
 import agent_api  # noqa: E402
 from apply_changes import (  # noqa: E402
-    GUARDRAILS, check_guardrails, check_bid_caps, normalize_actions, validate,
+    GUARDRAILS, check_guardrails, check_bid_caps, check_budget_coherence,
+    normalize_actions, validate,
 )
 
 
@@ -248,3 +249,70 @@ class TestNegativeRidondanti(unittest.TestCase):
         ]
         normalize_actions(azioni)
         self.assertEqual(len(azioni), 2)
+
+
+class TestCoerenzaBudget(unittest.TestCase):
+    """Bid e budget devono stare in rapporto.
+
+    Caso reale del 26/09: campagne 'squalo' con budget 3 EUR/giorno e bid a
+    0,40 e 0,80. A quei bid la campagna compra quattro clic e poi tace fino a
+    mezzanotte: non raccoglie dati, non e' presente nelle ore buone, e per
+    rientrare dovrebbe convertire quasi al primo clic.
+    """
+
+    def _camp(self, budget, base, kw_bid=None, auto_bid=None):
+        grp = {"name": "AG-exact", "defaultBid": base,
+               "products": [{"asin": "B0X"}], "keywords": [], "autoTargets": []}
+        if kw_bid is not None:
+            grp["keywords"] = [{"keywordText": "cuccetta per gatti",
+                                "matchType": "EXACT", "bid": kw_bid}]
+        if auto_bid is not None:
+            grp["autoTargets"] = [{"expressionType": "QUERY_HIGH_REL_MATCHES", "bid": auto_bid}]
+        return {"type": "create_campaign",
+                "campaign": {"name": "SP-Squalo", "dailyBudget": budget},
+                "adGroups": [grp]}
+
+    def test_il_caso_reale_viene_bloccato(self):
+        v = check_budget_coherence([self._camp(3, 0.40, 0.80)], min_clicks=10)
+        self.assertEqual(len(v), 2, f"bid base e keyword, trovate: {v}")
+        self.assertTrue(any("0.30" in x for x in v), "deve dire qual e' il bid giusto")
+        self.assertTrue(any("porta il budget" in x for x in v), "deve dire l'altra leva")
+
+    def test_bid_coerenti_passano(self):
+        self.assertEqual(check_budget_coherence([self._camp(3, 0.28, 0.30)], min_clicks=10), [])
+
+    def test_al_tetto_esatto_passa(self):
+        self.assertEqual(check_budget_coherence([self._camp(3, 0.30, 0.30)], min_clicks=10), [])
+
+    def test_alzare_il_budget_sblocca(self):
+        self.assertEqual(check_budget_coherence([self._camp(8, 0.40, 0.80)], min_clicks=10), [])
+
+    def test_auto_target_controllati(self):
+        v = check_budget_coherence([self._camp(3, 0.20, None, 0.75)], min_clicks=10)
+        self.assertTrue(any("auto target" in x for x in v), v)
+
+    def test_clic_minimi_configurabili(self):
+        # Con 5 clic minimi, 3 EUR consentono 0,60: gli stessi bid passano.
+        self.assertEqual(check_budget_coherence([self._camp(3, 0.40, 0.50)], min_clicks=5), [])
+        self.assertTrue(check_budget_coherence([self._camp(3, 0.40, 0.50)], min_clicks=20))
+
+    def test_azioni_su_campagne_esistenti(self):
+        """Per update_bid serve il budget letto dall'account."""
+        azioni = [{"type": "update_bid", "keywordId": "1", "campaignId": "77",
+                   "keyword": "kw", "old_bid": 0.20, "new_bid": 0.50}]
+        # Senza budget noto non si indovina: nessuna violazione.
+        self.assertEqual(check_budget_coherence(azioni, min_clicks=10), [])
+        # Con il budget, il vincolo scatta.
+        v = check_budget_coherence(azioni, min_clicks=10, budgets={"77": 2.0})
+        self.assertTrue(v, "2 EUR / 10 clic = 0,20: un bid da 0,50 e' incoerente")
+        self.assertIn("0.20", v[0])
+
+    def test_budget_mancante_non_esplode(self):
+        self.assertEqual(check_budget_coherence([self._camp(0, 0.40)], min_clicks=10), [])
+        self.assertEqual(check_budget_coherence([{"type": "update_bid"}], min_clicks=10), [])
+
+    def test_indipendente_dal_tetto_da_margine(self):
+        """I due vincoli sono separati: questo non ha bisogno del Worker."""
+        azioni = [self._camp(3, 0.40)]
+        self.assertEqual(check_bid_caps(azioni, None), [], "nessun tetto da margine")
+        self.assertTrue(check_budget_coherence(azioni, min_clicks=10), "ma il budget lega comunque")
