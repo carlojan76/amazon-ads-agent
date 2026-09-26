@@ -282,10 +282,24 @@ async function getBidCaps(url, env) {
   const res = await env.DB.prepare(sql).bind(...(mp ? [mp] : [])).all();
   const rows = res.results || [];
   const market = rows.find((r) => r.scope === "market");
+
+  // I clic minimi viaggiano insieme ai tetti: chi legge i tetti ha sempre
+  // bisogno anche di questo per calcolare il limite effettivo, e una chiamata
+  // sola evita che i due valori arrivino disallineati.
+  let minClicks = DEFAULT_SETTINGS.min_clicks_per_day;
+  if (mp) {
+    const row = await env.DB.prepare(
+      "SELECT value FROM settings WHERE marketplace = ? AND key = 'min_clicks_per_day'",
+    ).bind(mp).first();
+    const n = row ? Number(row.value) : NaN;
+    if (Number.isFinite(n)) minClicks = n;
+  }
+
   return {
     marketplace: mp || null,
     market_cap: market ? market.max_bid : null,
     campaign_caps: rows.filter((r) => r.scope === "campaign"),
+    min_clicks_per_day: minClicks,
     caps: rows,
   };
 }
@@ -323,6 +337,53 @@ async function deleteBidCap(url, env) {
     "DELETE FROM bid_caps WHERE marketplace = ? AND scope = ? AND scope_id = ?",
   ).bind(mp, scope, scopeId).run();
   return { ok: true };
+}
+
+// ---------------------------------------------------------------- impostazioni
+
+const DEFAULT_SETTINGS = {
+  // Clic minimi al giorno per campagna. Da qui discende il tetto implicito
+  // sui bid: budget giornaliero / questo numero.
+  min_clicks_per_day: 10,
+};
+
+async function getSettings(url, env) {
+  const mp = (url.searchParams.get("marketplace") || "").toUpperCase();
+  const res = await env.DB.prepare(
+    "SELECT key, value FROM settings WHERE marketplace = ?",
+  ).bind(mp).all();
+
+  const settings = { ...DEFAULT_SETTINGS };
+  for (const row of res.results || []) {
+    const n = Number(row.value);
+    settings[row.key] = Number.isFinite(n) ? n : row.value;
+  }
+  return { marketplace: mp || null, settings, defaults: DEFAULT_SETTINGS };
+}
+
+async function putSetting(request, env) {
+  const b = await request.json();
+  const mp = String(b.marketplace || "").toUpperCase();
+  const key = String(b.key || "").trim();
+  if (!mp) throw new Error("marketplace mancante");
+  if (!(key in DEFAULT_SETTINGS)) {
+    throw new Error(`impostazione "${key}" non riconosciuta (ammesse: ${Object.keys(DEFAULT_SETTINGS).join(", ")})`);
+  }
+  if (key === "min_clicks_per_day") {
+    const n = Number(b.value);
+    // Sotto 3 il vincolo non vincola piu' niente; sopra 100 il bid massimo
+    // diventa cosi' basso da non competere per nessuna posizione.
+    if (!Number.isInteger(n) || n < 3 || n > 100) {
+      throw new Error("min_clicks_per_day deve essere un intero fra 3 e 100");
+    }
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO settings (marketplace, key, value, updated_at) VALUES (?, ?, ?, ?)
+     ON CONFLICT(marketplace, key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+  ).bind(mp, key, String(b.value), nowIso()).run();
+
+  return { ok: true, marketplace: mp, key, value: b.value };
 }
 
 // ---------------------------------------------------------------- proxy Anthropic
@@ -431,9 +492,25 @@ async function githubGet(url, env) {
   } else if (kind === "file") {
     const path = url.searchParams.get("path") || "";
     if (!path || path.includes("..")) throw new Error("path non valido");
-    target = `${base}/contents/${path.split("/").map(encodeURIComponent).join("/")}`;
+    const ref = url.searchParams.get("ref") || "main";
+    // `t` rompe la cache: la Contents API di GitHub e' notoriamente pigra, e
+    // senza questo la UI rilegge il file vecchio subito dopo un workflow.
+    target = `${base}/contents/${path.split("/").map(encodeURIComponent).join("/")}`
+      + `?ref=${encodeURIComponent(ref)}&t=${Date.now()}`;
+  } else if (kind === "commits") {
+    // Serve a capire se un workflow ha davvero committato qualcosa di nuovo:
+    // la Commits API e' sempre fresca, la Contents API no.
+    const path = url.searchParams.get("path") || "";
+    if (!path || path.includes("..")) throw new Error("path non valido");
+    const ref = url.searchParams.get("ref") || "main";
+    target = `${base}/commits?path=${encodeURIComponent(path)}`
+      + `&sha=${encodeURIComponent(ref)}&per_page=1&t=${Date.now()}`;
+  } else if (kind === "workflow") {
+    const workflow = url.searchParams.get("workflow") || "";
+    assertWorkflowAllowed(env, workflow);
+    target = `${base}/actions/workflows/${workflow}`;
   } else {
-    throw new Error(`kind "${kind}" non supportato (runs | run | file)`);
+    throw new Error(`kind "${kind}" non supportato (runs | run | file | commits | workflow)`);
   }
   if (!env.GITHUB_TOKEN) throw new Error("GITHUB_TOKEN non configurato sul Worker");
 
@@ -483,6 +560,9 @@ export default {
       if (path === "/api/bid-caps" && m === "GET") return json(await getBidCaps(url, env), 200, request, env);
       if (path === "/api/bid-caps" && (m === "PUT" || m === "POST")) return json(await putBidCap(request, env), 200, request, env);
       if (path === "/api/bid-caps" && m === "DELETE") return json(await deleteBidCap(url, env), 200, request, env);
+
+      if (path === "/api/settings" && m === "GET") return json(await getSettings(url, env), 200, request, env);
+      if (path === "/api/settings" && (m === "PUT" || m === "POST")) return json(await putSetting(request, env), 200, request, env);
 
       if (path === "/api/anthropic" && m === "POST") {
         const res = await proxyAnthropic(request, env);
