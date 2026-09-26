@@ -138,6 +138,33 @@ await t("POST + upsert sulla stessa finestra", async () => {
   if (d.points[1].spend !== 120) throw new Error("upsert non ha aggiornato: " + d.points[1].spend);
 });
 
+console.log("\nWorker: impostazioni");
+await t("default se non impostato niente", async () => {
+  const d = await (await call("/api/settings?marketplace=IT")).json();
+  if (d.settings.min_clicks_per_day !== 10) throw new Error(JSON.stringify(d.settings));
+});
+await t("PUT e rilettura", async () => {
+  await call("/api/settings", { method: "PUT", body: { marketplace: "IT", key: "min_clicks_per_day", value: 15 } });
+  const d = await (await call("/api/settings?marketplace=IT")).json();
+  if (d.settings.min_clicks_per_day !== 15) throw new Error(JSON.stringify(d.settings));
+});
+await t("i tetti riportano i clic minimi, per non disallinearsi", async () => {
+  const d = await (await call("/api/bid-caps?marketplace=IT")).json();
+  if (d.min_clicks_per_day !== 15) throw new Error("min_clicks_per_day = " + d.min_clicks_per_day);
+});
+await t("valore fuori scala rifiutato", async () => {
+  const r = await call("/api/settings", { method: "PUT", body: { marketplace: "IT", key: "min_clicks_per_day", value: 1 } });
+  if (r.status !== 400) throw new Error("status " + r.status);
+});
+await t("chiave sconosciuta rifiutata", async () => {
+  const r = await call("/api/settings", { method: "PUT", body: { marketplace: "IT", key: "pippo", value: 1 } });
+  if (r.status !== 400) throw new Error("status " + r.status);
+});
+await t("un altro mercato non eredita l'impostazione", async () => {
+  const d = await (await call("/api/settings?marketplace=FR")).json();
+  if (d.settings.min_clicks_per_day !== 10) throw new Error(JSON.stringify(d.settings));
+});
+
 console.log("\nWorker: proxy");
 await t("workflow non in elenco -> rifiutato", async () => {
   const r = await call("/api/github/dispatch", { method: "POST", body: { workflow: "pericoloso.yml", inputs: {} } });
