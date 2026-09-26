@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "fetched_at": "2026-09-21T13:55:06.515101",
+    "fetched_at": "2026-09-26T14:47:51.528132",
     "profile_id": "2593537292052861",
     "marketplace": "DE",
     "days": 14,
@@ -13,8 +13,8 @@
     "days_requested": 14,
     "report_windows": [
       [
-        "2026-09-07",
-        "2026-09-20"
+        "2026-09-12",
+        "2026-09-25"
       ]
     ]
   },
@@ -1028,12 +1028,12 @@
     "campaigns": [
       {
         "purchases7d": 1,
-        "costPerClick": 0.3764,
+        "costPerClick": 0.4087,
         "campaignId": 131473497025172,
-        "spend": 5.27,
+        "spend": 12.67,
         "campaignStatus": "ENABLED",
-        "clicks": 14,
-        "impressions": 837,
+        "clicks": 31,
+        "impressions": 1549,
         "sales7d": 39.99,
         "campaignName": "Borsa AMZ AU",
         "campaignBudgetAmount": 3.0,
@@ -1093,12 +1093,42 @@
         "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 131473497025172,
-        "impressions": 23,
+        "impressions": 30,
         "sales7d": 0,
         "adGroupId": 218311782608849,
         "searchTerm": "b0bhyy15qn",
-        "spend": 1.76,
-        "clicks": 4,
+        "spend": 2.2,
+        "clicks": 5,
+        "keyword": "substitutes",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.44,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 66,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "b0bkz3tdqd",
+        "spend": 0.88,
+        "clicks": 2,
+        "keyword": "substitutes",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.44,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 2,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "b0fh64p69d",
+        "spend": 0.44,
+        "clicks": 1,
         "keyword": "substitutes",
         "unitsSoldClicks7d": 0
       },
@@ -1133,19 +1163,109 @@
         "unitsSoldClicks7d": 0
       },
       {
+        "purchases7d": 0,
+        "costPerClick": 0.44,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 1,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "ein reisetasche für hunde",
+        "spend": 0.44,
+        "clicks": 1,
+        "keyword": "close-match",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.44,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 2,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "hund ausflug",
+        "spend": 0.44,
+        "clicks": 1,
+        "keyword": "close-match",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.44,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 2,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "hund reisetasche",
+        "spend": 0.44,
+        "clicks": 1,
+        "keyword": "close-match",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.4367,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 16,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "hunde reisetasche",
+        "spend": 1.31,
+        "clicks": 3,
+        "keyword": "loose-match",
+        "unitsSoldClicks7d": 0
+      },
+      {
         "purchases7d": 1,
         "costPerClick": 0.44,
         "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 131473497025172,
-        "impressions": 3,
+        "impressions": 10,
         "sales7d": 39.99,
         "adGroupId": 218311782608849,
         "searchTerm": "hundereisetasche",
-        "spend": 0.44,
-        "clicks": 1,
+        "spend": 0.88,
+        "clicks": 2,
         "keyword": "loose-match",
         "unitsSoldClicks7d": 1
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.37,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 2,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "hundetasche mit fell",
+        "spend": 0.37,
+        "clicks": 1,
+        "keyword": "loose-match",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.44,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 1,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "reisen mit katzen",
+        "spend": 0.44,
+        "clicks": 1,
+        "keyword": "close-match",
+        "unitsSoldClicks7d": 0
       },
       {
         "purchases7d": 0,
@@ -1168,26 +1288,71 @@
         "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 131473497025172,
-        "impressions": 3,
+        "impressions": 7,
         "sales7d": 0,
         "adGroupId": 218311782608849,
         "searchTerm": "reisetasche hund",
         "spend": 0.44,
         "clicks": 1,
+        "keyword": "loose-match",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.44,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 9,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "reisetasche hund",
+        "spend": 0.88,
+        "clicks": 2,
         "keyword": "close-match",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.44,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 3,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "rosa napf",
+        "spend": 0.44,
+        "clicks": 1,
+        "keyword": "close-match",
+        "unitsSoldClicks7d": 0
+      },
+      {
+        "purchases7d": 0,
+        "costPerClick": 0.44,
+        "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
+        "matchType": "TARGETING_EXPRESSION_PREDEFINED",
+        "campaignId": 131473497025172,
+        "impressions": 1,
+        "sales7d": 0,
+        "adGroupId": 218311782608849,
+        "searchTerm": "tragetasche für kleine hunde bis 5kg",
+        "spend": 0.44,
+        "clicks": 1,
+        "keyword": "loose-match",
         "unitsSoldClicks7d": 0
       }
     ],
     "targeting": [
       {
         "purchases7d": 1,
-        "cost": 0.44,
-        "costPerClick": 0.44,
+        "cost": 3.44,
+        "costPerClick": 0.43,
         "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 131473497025172,
-        "clicks": 1,
-        "impressions": 72,
+        "clicks": 8,
+        "impressions": 333,
         "keyword": "loose-match",
         "sales7d": 39.99,
         "adGroupId": 218311782608849,
@@ -1195,13 +1360,13 @@
       },
       {
         "purchases7d": 0,
-        "cost": 0.88,
+        "cost": 3.52,
         "costPerClick": 0.44,
         "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 131473497025172,
-        "clicks": 2,
-        "impressions": 264,
+        "clicks": 8,
+        "impressions": 377,
         "keyword": "close-match",
         "sales7d": 0,
         "adGroupId": 218311782608849,
@@ -1209,13 +1374,13 @@
       },
       {
         "purchases7d": 0,
-        "cost": 3.95,
-        "costPerClick": 0.3591,
+        "cost": 5.71,
+        "costPerClick": 0.3807,
         "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
         "matchType": "TARGETING_EXPRESSION_PREDEFINED",
         "campaignId": 131473497025172,
-        "clicks": 11,
-        "impressions": 501,
+        "clicks": 15,
+        "impressions": 839,
         "keyword": "substitutes",
         "sales7d": 0,
         "adGroupId": 218311782608849,
@@ -1225,20 +1390,20 @@
     "products": [
       {
         "purchases7d": 1,
-        "cost": 5.27,
+        "cost": 12.67,
         "adGroupName": "Gruppo di annunci - 09/09/2026 20:52:50.557",
         "campaignId": 131473497025172,
         "advertisedAsin": "B0H8Y9NXJW",
-        "clicks": 14,
+        "clicks": 31,
         "advertisedSku": "49-7EQL-RUS8",
-        "impressions": 837,
+        "impressions": 1549,
         "sales7d": 39.99,
         "adGroupId": 218311782608849,
         "unitsSoldClicks7d": 1
       }
     ]
   },
-  "analysis": "# 📊 Stato Generale\n\nIl marketplace DE mostra una performance eccellente in termini di efficienza: ACoS al 13.2% e ROAS 7.59x su un singolo ordine. Il volume è però ancora molto basso (837 impressioni, 14 click, 1 ordine in 14 giorni), il che rende le metriche statisticamente fragili. Il principale problema non è l'efficienza ma la **scala**: il budget/traffico è insufficiente per costruire dati solidi. Il search term \"hundereisetasche\" è un segnale d'oro da sfruttare immediatamente.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Creare una campagna MANUAL EXACT per catturare \"hundereisetasche\"**\n- **Azione**: Il search term \"hundereisetasche\" ha generato 1 ordine con ACoS 1% e CPC €0.44 dalla campagna AUTO. Poiché l'unico ad group attivo è AUTO (218311782608849) e le keyword positive non sono accettate nelle AUTO, è necessario creare **manualmente una nuova campagna MANUAL** con ad group dedicato all'ASIN B0H8Y9NXJW, e aggiungere \"hundereisetasche\" in EXACT match con bid €0.44–0.50.\n- **Motivo**: ACoS 1% = termine quasi gratuito che converte. Lasciarlo solo nella AUTO significa pagarlo a caso senza controllo sul bid.\n- **Impatto stimato**: Cattura diretta del traffico più qualificato trovato finora; potenziale raddoppio ordini a costo minimo.\n\n**2. Negativizzare i 3 search term ASIN spreconi nella campagna AUTO**\n- **Azione**: Aggiungere come NEGATIVE EXACT nella campagna 131473497025172 / ad group 218311782608849 i termini: `b0bhyy15qn`, `b07n64csnh`, `b0fh65w7v5` (tutti ASIN di competitor che hanno bruciato €3.13 senza ordini).\n- **Motivo**: €3.13 spesi su 8 click verso ASIN concorrenti = spreco puro. Sono attivati dalla keyword broad \"substitutes\".\n- **Impatto stimato**: Risparmio ~€3/14gg, budget rediretto verso traffico reale.\n\n**3. Valutare aumento budget campagna AUTO**\n- **Azione**: Se la campagna AUTO va in budget cap durante il giorno, aumentare il budget del 30–50% (da verificare nel pannello Amazon).\n- **Motivo**: Con solo 837 impressioni in 14 giorni il volume è estremamente basso. Un ACoS 13.2% giustifica tranquillamente più spesa.\n- **Impatto stimato**: Più impressioni, più chance di intercettare altri termini come \"hundereisetasche\".\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n| Search Term | Campagna/AdGroup | Spesa | Motivo | Match Type |\n|---|---|---|---|---|\n| `b0bhyy15qn` | 131473497025172 / 218311782608849 | €1.76 | ASIN competitor, 0 ordini | NEGATIVE_EXACT |\n| `b07n64csnh` | 131473497025172 / 218311782608849 | €0.74 | ASIN competitor, 0 ordini | NEGATIVE_EXACT |\n| `b0fh65w7v5` | 131473497025172 / 218311782608849 | €0.63 | ASIN competitor, 0 ordini | NEGATIVE_EXACT |\n\n> ⚠️ **Search Term Vincente → Nuova Keyword:**\n> - `\"hundereisetasche\"` → 1 ordine, ACoS 1%, CPC €0.44. **Promuovere a keyword EXACT in una nuova campagna MANUAL** (non può essere aggiunto all'AUTO via API). Azione: creare campagna manuale per ASIN B0H8Y9NXJW con bid €0.44.\n\n---\n\n# 🟢 Keywords da Scalare\n\n- **Nessuna keyword manuale attiva al momento** da scalare direttamente (la campagna è solo AUTO).\n- **Azione prioritaria**: Una volta creata la campagna MANUAL con \"hundereisetasche\" EXACT, monitorare per 7–10 giorni. Se ACoS rimane < 20%, aumentare il bid del 20–25% per scalare impressioni.\n- **Nessuna keyword da campagne in pausa** disponibile come suggerimento.\n\n---\n\n# 💡 Quick Wins\n\n1. **Aggiungere \"hundereisetasche\" anche in PHRASE** nella campagna manual (oltre a EXACT): intercetta varianti come \"hundereisetasche klein\", \"hundereisetasche mit rollen\" ecc. Bid iniziale €0.35.\n\n2. **Verificare la keyword \"substitutes\"** nella AUTO: sta generando solo traffico verso ASIN competitor. Valutare se metterla in pausa o abbassarne il bid al minimo (€0.02), visto che non sembra portare traffico pertinente al prodotto.\n\n3. **Analizzare gli altri search term della AUTO** (quelli non mostrati qui perché sotto soglia): scaricare il report search term completo da Seller Central e identificare altri termini pertinenti da promuovere a EXACT.\n\n4. **Ottimizzare la listing per \"hundereisetasche\"**: se questo termine converte così bene, assicurarsi che sia presente nel titolo, bullet points e backend keywords della listing DE per migliorare anche il ranking organico.\n\n5. **Impostare un alert di budget**: con €5.27 spesi in 14 giorni il budget giornaliero è ~€0.37/giorno — probabilmente troppo basso. Controllare se la campagna si ferma ogni giorno per budget esaurito.\n\n---\n\n# 🤖 AZIONI ESEGUIBILI (formato JSON)\n\n> ⚠️ Nota: Il search term vincente \"hundereisetasche\" NON può essere aggiunto via `add_keyword` all'ad group AUTO 218311782608849 (le keyword positive vengono rifiutate dalle campagne AUTO). **Creare manualmente una campagna MANUAL da Seller Central** per ASIN B0H8Y9NXJW con questo termine in EXACT match, bid €0.44.",
+  "analysis": "# 📊 Stato Generale\n\nIl marketplace DE mostra performance complessivamente positive con un ACoS del 31.7% e ROAS di 3.16x su un'unica campagna AUTO attiva. Il volume è ancora molto basso (1 solo ordine, 31 click in 14 giorni) e la campagna sta generando traffico dispersivo verso search term non pertinenti (competitor ASIN, termini tedeschi generici). Il margine di ottimizzazione è alto: i search term spreconi pesano €6.64 su €12.67 di spesa totale, ovvero oltre il 52% del budget bruciato senza conversioni.\n\n---\n\n# 🔴 Azioni Urgenti (Top 3)\n\n**1. Negativizzare i 4 ASIN competitor che appaiono come search term**\n- **Azione**: Aggiungere come `NEGATIVE_EXACT` nell'ad group 218311782608849 i termini: `b0bhyy15qn`, `b0bkz3tdqd`, `b07n64csnh`, `b0fh65w7v5`\n- **Motivo**: Sono ASIN di competitor triggherati dalla targeting \"substitutes\". Hanno generato €4.45 di spesa (35% del totale) con 11 click e ZERO ordini. Il traffico su pagine competitor non converte mai.\n- **Impatto stimato**: Risparmio immediato di ~€4.45/14gg, riduzione ACoS strutturale\n\n**2. Negativizzare i search term tedeschi generici non convertenti**\n- **Azione**: Aggiungere `NEGATIVE_PHRASE` per \"hunde reisetasche\" e `NEGATIVE_EXACT` per \"reisetasche hund\" nell'ad group 218311782608849\n- **Motivo**: €2.19 spesi, 5 click, zero ordini. Termini generici per borsa da viaggio per cani che non portano all'acquisto del prodotto specifico.\n- **Impatto stimato**: Risparmio ~€2.19/14gg, budget reindirizzato verso traffico qualificato\n\n**3. Creare una campagna MANUAL EXACT per catturare \"hundereisetasche\"**\n- **Azione**: Creare una nuova campagna MANUAL (o ad group manual) e aggiungere \"hundereisetasche\" come keyword EXACT con bid €0.44\n- **Motivo**: Questo search term ha generato l'UNICO ordine con ACoS del 2% e CPC €0.44 — è il termine più performante in assoluto. Essendo in campagna AUTO non può ricevere una keyword positiva via API, ma va promosso manualmente.\n- **Impatto stimato**: Controllo diretto sul termine migliore, possibilità di scalare le impression e duplicare le vendite con budget dedicato\n\n---\n\n# 🚫 Search Terms da Negativizzare\n\n| Search Term | Match Type Negativo | Motivazione |\n|---|---|---|\n| `b0bhyy15qn` | NEGATIVE_EXACT | ASIN competitor, €2.20, 0 ordini |\n| `b0bkz3tdqd` | NEGATIVE_EXACT | ASIN competitor, €0.88, 0 ordini |\n| `b07n64csnh` | NEGATIVE_EXACT | ASIN competitor, €0.74, 0 ordini |\n| `b0fh65w7v5` | NEGATIVE_EXACT | ASIN competitor, €0.63, 0 ordini |\n| `hunde reisetasche` | NEGATIVE_PHRASE | Generico, €1.31, 0 ordini |\n| `reisetasche hund` | NEGATIVE_EXACT | Generico, €0.88, 0 ordini |\n\n### 🌱 Search Term Vincente → Nuova Keyword\n\n| Search Term | Ordini | ACoS | Azione |\n|---|---|---|---|\n| `hundereisetasche` | 1 | 2% | **`add_keyword` EXACT bid €0.44** — ma richiede campagna MANUAL (vedi nota sotto) |\n\n> ⚠️ **Nota**: L'ad group disponibile per B0H8Y9NXJW è SOLO AUTO (218311782608849). L'API rifiuta keyword positive in campagne AUTO. **Azione manuale richiesta**: creare una campagna MANUAL EXACT in Seller Central con keyword \"hundereisetasche\", bid €0.44, budget €5-10/giorno.\n\n---\n\n# 🟢 Keywords da Scalare\n\nNessuna keyword ATTIVA con ACoS eccellente da scalare (la campagna è AUTO, non ha keyword manuali esposte).\n\n**Opportunità di recupero da campagne in pausa**: Nessuna segnalata nei dati.\n\n**Azione raccomandata**: Una volta create le negative, monitorare se \"hundereisetasche\" continua a performare nella AUTO, poi replicare in MANUAL con budget dedicato.\n\n---\n\n# 💡 Quick Wins\n\n1. **Aumentare il budget giornaliero della campagna AUTO dopo le negative**: Togliendo i 6 search term spreconi, il budget si concentrerà su traffico più qualificato. Se il budget è limitato, un aumento del 20-30% dopo la pulizia può accelerare la raccolta dati utili.\n\n2. **Analizzare il prodotto \"Borsa AMZ AU\"**: Il nome campagna suggerisce targeting Australia (\"AU\") su marketplace DE — verificare che le impostazioni geografiche e il titolo/listing siano ottimizzati per il mercato tedesco, altrimenti l'algoritmo fatica a capire il prodotto.\n\n3. **Monitorare \"hundereisetasche\" nella AUTO**: Dopo le negative, questo termine dovrebbe ricevere più budget proporzionalmente. Tracciarlo nella prossima settimana per confermare la replica delle conversioni prima di investire in una campagna MANUAL dedicata.\n\n4. **Valutare bid adjustment della campagna AUTO**: Con ACoS target ideale intorno al 20-25%, e attuale al 31.7%, una leggera riduzione del bid base della AUTO (–10%) potrebbe abbassare il CPC medio senza perdere il traffico su \"hundereisetasche\" (che ha CPC basso €0.44).\n\n5. **Raccogliere più dati**: Con solo 1 ordine in 14 giorni il campione è statisticamente insufficiente. Le azioni di questa settimana (negative) sono conservative e a rischio zero — evitare modifiche aggressive fino ad avere almeno 5-10 ordini.\n\n---",
   "actions": {
     "actions": [
       {
@@ -1246,6 +1411,13 @@
         "campaignId": "131473497025172",
         "adGroupId": "218311782608849",
         "keywordText": "b0bhyy15qn",
+        "matchType": "NEGATIVE_EXACT"
+      },
+      {
+        "type": "add_negative",
+        "campaignId": "131473497025172",
+        "adGroupId": "218311782608849",
+        "keywordText": "b0bkz3tdqd",
         "matchType": "NEGATIVE_EXACT"
       },
       {
@@ -1261,8 +1433,22 @@
         "adGroupId": "218311782608849",
         "keywordText": "b0fh65w7v5",
         "matchType": "NEGATIVE_EXACT"
+      },
+      {
+        "type": "add_negative",
+        "campaignId": "131473497025172",
+        "adGroupId": "218311782608849",
+        "keywordText": "hunde reisetasche",
+        "matchType": "NEGATIVE_PHRASE"
+      },
+      {
+        "type": "add_negative",
+        "campaignId": "131473497025172",
+        "adGroupId": "218311782608849",
+        "keywordText": "reisetasche hund",
+        "matchType": "NEGATIVE_EXACT"
       }
     ]
   },
-  "generated_at": "2026-09-21T13:55:44.579589"
+  "generated_at": "2026-09-26T14:48:33.045376"
 }
