@@ -69,26 +69,107 @@ export const ACTION_TYPES = {
 export const GROUP_ORDER = ["Tagliare gli sprechi", "Far crescere", "Ottimizzare i bid", "Budget e campagne"];
 
 // ---------------------------------------------------------------------------
-// Tetti sui bid
+// Tetti sui bid: DUE vincoli, non uno
 //
 // GUARDRAILS.maxBid e' un limite ASSOLUTO contro l'errore di battitura (5.00
-// invece di 0.50). Non dice niente sulla marginalita': su un prodotto che
-// rende 3 EUR a pezzo un bid da 1,20 EUR e' dentro i guardrail e fuori dal
-// buon senso. I tetti qui sotto sono il secondo livello, quello economico.
+// invece di 0.50) e non sa niente ne' di margini ne' di budget.
 //
-// Forma: { market: number|null, campaigns: { [campaignId]: number } }
-// Il tetto di campagna vince su quello di mercato.
+// Sopra ci sono due vincoli economici, che rispondono a due domande diverse:
+//
+//   1. MARGINE — quanto puo' valere un clic per questo prodotto?
+//      E' il tetto che imposti a mano, per mercato o per campagna.
+//
+//   2. BUDGET — quanti clic servono perche' la campagna abbia senso?
+//      Una campagna da 3 EUR/giorno con bid a 0,80 compra quattro clic e poi
+//      tace fino a mezzanotte: non raccoglie dati, non e' presente nelle ore
+//      buone, e per andare in pari deve convertire quasi al primo clic.
+//      Il tetto implicito e' budget / clic-minimi-al-giorno.
+//
+// Il tetto EFFETTIVO e' il piu' stretto dei due. Tenerli separati serve a
+// dire quale leva muovere: se lega il budget, alzare il bid non e' la
+// risposta — alzare il budget lo e'.
+//
+// Forma: {
+//   market:     number|null,                 tetto da margine, per mercato
+//   campaigns:  { [campaignId]: number },     tetto da margine, per campagna
+//   budgets:    { [campaignId]: number },     budget giornaliero noto
+//   minClicks:  number,                       clic minimi al giorno
+// }
 // ---------------------------------------------------------------------------
 
-export const EMPTY_CAPS = { market: null, campaigns: {} };
+/**
+ * Clic al giorno sotto i quali una campagna non ha senso.
+ *
+ * Dieci non e' un numero magico: e' l'ordine di grandezza sotto cui il budget
+ * si esaurisce in poche ore, i dati non bastano a decidere niente, e servirebbe
+ * un tasso di conversione irreale per rientrare. Si cambia per mercato dalle
+ * impostazioni; questo e' il valore di partenza.
+ */
+export const MIN_CLICKS_PER_DAY = 10;
 
-/** Tetto applicabile a un'azione. null = nessun tetto configurato. */
-export function capFor(caps, campaignId) {
-  if (!caps) return null;
+export const EMPTY_CAPS = { market: null, campaigns: {}, budgets: {}, minClicks: MIN_CLICKS_PER_DAY };
+
+/** Tetto implicito nel budget: quanto puoi offrire per clic e restare in piedi. */
+export function budgetDerivedCap(dailyBudget, minClicks = MIN_CLICKS_PER_DAY) {
+  const b = Number(dailyBudget);
+  const n = Number(minClicks) || MIN_CLICKS_PER_DAY;
+  if (!Number.isFinite(b) || b <= 0 || n <= 0) return null;
+  return Math.floor((b / n) * 100) / 100;
+}
+
+/**
+ * Tetto effettivo e vincolo che lo determina.
+ *
+ * `budgetOverride` serve alle campagne che non esistono ancora: il planner
+ * passa il budget scritto nel blueprint, visto che non c'e' un campaignId da
+ * cui risalire.
+ *
+ * @returns {{ cap: number|null, source: "margine"|"budget"|"entrambi"|null,
+ *             marginCap: number|null, budgetCap: number|null, budget: number|null }}
+ */
+export function capInfo(caps, campaignId, budgetOverride) {
+  const empty = { cap: null, source: null, marginCap: null, budgetCap: null, budget: null };
+  if (!caps) return empty;
+
   const cid = String(campaignId || "");
   const perCamp = caps.campaigns || {};
-  if (cid && Number.isFinite(perCamp[cid])) return perCamp[cid];
-  return Number.isFinite(caps.market) ? caps.market : null;
+  const marginCap = cid && Number.isFinite(perCamp[cid])
+    ? perCamp[cid]
+    : (Number.isFinite(caps.market) ? caps.market : null);
+
+  const budget = Number.isFinite(budgetOverride)
+    ? budgetOverride
+    : (cid && Number.isFinite((caps.budgets || {})[cid]) ? caps.budgets[cid] : null);
+  const budgetCap = budget === null ? null : budgetDerivedCap(budget, caps.minClicks);
+
+  if (marginCap === null && budgetCap === null) return empty;
+  if (budgetCap === null) return { cap: marginCap, source: "margine", marginCap, budgetCap, budget };
+  if (marginCap === null) return { cap: budgetCap, source: "budget", marginCap, budgetCap, budget };
+
+  const cap = Math.min(marginCap, budgetCap);
+  const source = Math.abs(marginCap - budgetCap) < 0.005
+    ? "entrambi"
+    : (cap === budgetCap ? "budget" : "margine");
+  return { cap, source, marginCap, budgetCap, budget };
+}
+
+/** Tetto applicabile a un'azione. null = nessun tetto configurato. */
+export function capFor(caps, campaignId, budgetOverride) {
+  return capInfo(caps, campaignId, budgetOverride).cap;
+}
+
+/** Frase leggibile sul perche' il tetto e' quello. */
+export function explainCap(info) {
+  if (!info || info.cap === null) return "nessun tetto";
+  const eur = (v) => `€${Number(v).toFixed(2)}`;
+  if (info.source === "budget") {
+    return `${eur(info.cap)} — lo impone il budget di ${eur(info.budget)}/giorno`
+      + `: sopra, la campagna compra meno di ${MIN_CLICKS_PER_DAY} clic al giorno`;
+  }
+  if (info.source === "entrambi") {
+    return `${eur(info.cap)} — margine e budget portano allo stesso limite`;
+  }
+  return `${eur(info.cap)} — lo impone il margine che hai impostato`;
 }
 
 /** Il campo bid rilevante per il tipo di azione. */
@@ -168,16 +249,17 @@ export function validateAction(a, ctx) {
   // Tetto economico: errore, non avviso. Il senso della funzione e' impedire
   // che una proposta sopra soglia venga applicata per distrazione, quindi la
   // checkbox deve restare disabilitata finche' non si adegua il valore.
-  const cap = capFor(ctx?.caps, a.campaignId);
+  const info = capInfo(ctx?.caps, a.campaignId);
   const bidField = bidFieldOf(a);
-  if (cap !== null && bidField && typeof a[bidField] === "number" && a[bidField] > cap) {
-    const scope = a.campaignId && Number.isFinite(ctx?.caps?.campaigns?.[String(a.campaignId)])
-      ? "di questa campagna"
-      : "di mercato";
-    errors.push(
-      `Bid €${a[bidField].toFixed(2)} sopra il tetto ${scope} di €${cap.toFixed(2)}. `
-      + "Abbassalo o alza il tetto nelle impostazioni.",
-    );
+  if (info.cap !== null && bidField && typeof a[bidField] === "number" && a[bidField] > info.cap) {
+    // Il messaggio dice QUALE leva muovere: se lega il budget, alzare il
+    // tetto sul margine non serve a niente.
+    const rimedio = info.source === "budget"
+      ? `Il budget della campagna e' €${info.budget.toFixed(2)}/giorno: a questo bid comprerebbe `
+        + `meno di ${ctx?.caps?.minClicks || MIN_CLICKS_PER_DAY} clic al giorno. `
+        + "Abbassa il bid, oppure alza il budget."
+      : "Abbassalo, oppure alza il tetto nelle impostazioni.";
+    errors.push(`Bid €${a[bidField].toFixed(2)} sopra il tetto di €${info.cap.toFixed(2)}. ${rimedio}`);
   }
 
   switch (a.type) {
@@ -405,27 +487,47 @@ Esempio di formato (solo JSON dentro il blocco):
 export function actionsPromptWith(caps, appliedSignatures) {
   let out = ACTIONS_PROMPT;
 
-  const hasCaps = caps && (Number.isFinite(caps.market) || Object.keys(caps.campaigns || {}).length);
+  const budgets = (caps && caps.budgets) || {};
+  const minClicks = (caps && caps.minClicks) || MIN_CLICKS_PER_DAY;
+  const hasCaps = caps && (Number.isFinite(caps.market)
+    || Object.keys(caps.campaigns || {}).length
+    || Object.keys(budgets).length);
+
   if (hasCaps) {
     const lines = [];
     if (Number.isFinite(caps.market)) {
-      lines.push(`- Tetto generale di mercato: €${caps.market.toFixed(2)}. Nessun bid proposto puo' superarlo.`);
+      lines.push(`- Tetto di mercato (da margine): €${caps.market.toFixed(2)}`);
     }
     for (const [cid, v] of Object.entries(caps.campaigns || {})) {
-      lines.push(`- Campagna ${cid}: tetto €${Number(v).toFixed(2)} (prevale su quello di mercato).`);
+      lines.push(`- Campagna ${cid}, tetto da margine: €${Number(v).toFixed(2)}`);
+    }
+    // Il tetto effettivo per campagna: e' quello che conta davvero.
+    for (const [cid, b] of Object.entries(budgets)) {
+      const info = capInfo(caps, cid);
+      if (info.cap === null) continue;
+      lines.push(
+        `- Campagna ${cid}: budget €${Number(b).toFixed(2)}/giorno -> TETTO EFFETTIVO `
+        + `€${info.cap.toFixed(2)} (lo impone ${info.source})`,
+      );
     }
     out += `
 
 # TETTI MASSIMI SUI BID (vincolanti)
 
-Questi tetti nascono dalla marginalita' dei prodotti, non dai dati delle campagne: un bid
-sopra soglia fa perdere soldi anche quando l'ACoS sembra accettabile. Valgono sia per
-update_bid (new_bid) sia per add_keyword (bid).
+Il tetto e' il piu' stretto di DUE vincoli, e vale sia per update_bid (new_bid) sia per
+add_keyword (bid):
+
+1. MARGINE — quanto un clic puo' valere per quel prodotto. E' il numero impostato a mano.
+2. BUDGET — una campagna deve poter comprare almeno ${minClicks} clic al giorno, altrimenti
+   esaurisce il budget in poche ore, non raccoglie dati utili e per rientrare dovrebbe
+   convertire quasi al primo clic. Quindi: bid massimo = budget giornaliero / ${minClicks}.
 
 ${lines.join("\n")}
 
 Se il calcolo che faresti porterebbe sopra il tetto, proponi il tetto stesso e dillo nel
-"reason". Se anche il tetto non basta a rendere sensata l'azione, non generarla.`;
+"reason". Se e' il BUDGET a legare e pensi che la keyword meriti di piu', NON alzare il
+bid: proponi semmai un update_budget e spiegalo. Se nemmeno al tetto l'azione ha senso,
+non generarla.`;
   }
 
   const sigs = appliedSignatures instanceof Set ? [...appliedSignatures] : (appliedSignatures || []);

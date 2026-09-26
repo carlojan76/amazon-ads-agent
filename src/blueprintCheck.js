@@ -10,6 +10,8 @@
 // REGOLA: se cambi una soglia o un controllo di la', cambialo anche qui (stesso
 // patto che vale tra check_quality.py e qualityCheck.js).
 
+import { MIN_CLICKS_PER_DAY, capInfo } from "./actions.js";
+
 export const GUARDRAILS = {
   min_bid: 0.02,
   max_bid: 5.0,
@@ -103,6 +105,82 @@ function validateCreate(a, i, errors) {
 }
 
 // ---------------------------------------------------------------- guardrail
+/**
+ * Coerenza fra bid e budget dentro una campagna nuova.
+ *
+ * E' un vincolo diverso dal tetto sul margine, e piu' elementare: una
+ * campagna da 3 EUR/giorno con bid a 0,80 compra quattro clic e poi tace
+ * fino a mezzanotte. Non raccoglie dati, non e' presente nelle ore buone, e
+ * per rientrare dovrebbe convertire quasi al primo clic.
+ *
+ * Qui il budget e' scritto nel blueprint stesso, quindi il controllo si fa
+ * senza sapere niente dell'account — ed e' proprio nel momento in cui stai
+ * disegnando la campagna che conviene saperlo.
+ */
+function coherenceCreate(a, i, minClicks) {
+  const bad = [];
+  const c = a.campaign || {};
+  const budget = Number(c.dailyBudget || 0);
+  if (!isNum(budget) || budget <= 0) return bad;
+
+  const cap = Math.floor((budget / minClicks) * 100) / 100;
+  const nome = c.name || `azione ${i}`;
+  const perche = `con ${budget.toFixed(2)} EUR/giorno un bid sopra ${cap.toFixed(2)} `
+    + `compra meno di ${minClicks} clic al giorno`;
+
+  const segnala = (dove, valore, etichetta) => {
+    if (!isNum(valore) || valore <= cap) return;
+    bad.push(
+      `${dove}: ${etichetta} EUR ${valore.toFixed(2)} incoerente col budget di '${nome}' — `
+      + `${perche}. Abbassa il bid a ${cap.toFixed(2)}, oppure alza il budget a `
+      + `${(valore * minClicks).toFixed(2)} EUR/giorno.`,
+    );
+  };
+
+  (a.adGroups || []).forEach((grp, j) => {
+    const dove = `azione ${i}.adGroup${j} ('${grp.name || "?"}')`;
+    segnala(dove, grp.defaultBid, "bid base");
+    for (const k of grp.keywords || []) {
+      segnala(`azione ${i}.adGroup${j}`, k.bid, `keyword '${k.keywordText || "?"}'`);
+    }
+    for (const x of grp.autoTargets || []) {
+      segnala(`azione ${i}.adGroup${j}`, x.bid, `auto target '${x.expressionType || "?"}'`);
+    }
+  });
+  return bad;
+}
+
+/**
+ * Tetto da margine applicato al blueprint.
+ *
+ * Una campagna nuova non ha ancora un campaignId, quindi puo' ricadere solo
+ * sul tetto di mercato. E' un limite noto: il tetto per campagna si imposta
+ * dopo, quando la campagna esiste.
+ */
+function marginCreate(a, i, caps) {
+  const bad = [];
+  if (!caps) return bad;
+  const budget = Number((a.campaign || {}).dailyBudget || 0);
+  const info = capInfo(caps, null, budget > 0 ? budget : undefined);
+  if (info.marginCap === null) return bad;
+  const cap = info.marginCap;
+
+  const segnala = (dove, valore, etichetta) => {
+    if (!isNum(valore) || valore <= cap) return;
+    bad.push(`${dove}: ${etichetta} EUR ${valore.toFixed(2)} supera il tetto di mercato EUR ${cap.toFixed(2)}`);
+  };
+  (a.adGroups || []).forEach((grp, j) => {
+    segnala(`azione ${i}.adGroup${j} ('${grp.name || "?"}')`, grp.defaultBid, "bid base");
+    for (const k of grp.keywords || []) {
+      segnala(`azione ${i}.adGroup${j}`, k.bid, `keyword '${k.keywordText || "?"}'`);
+    }
+    for (const x of grp.autoTargets || []) {
+      segnala(`azione ${i}.adGroup${j}`, x.bid, `auto target '${x.expressionType || "?"}'`);
+    }
+  });
+  return bad;
+}
+
 function guardrailsCreate(a, i, g) {
   const bad = [];
   const c = a.campaign || {};
@@ -138,7 +216,7 @@ function guardrailsCreate(a, i, g) {
  *   warnings = da guardare ma non bloccanti (es. campagne che partono ENABLED)
  *   stats    = numeri per il riepilogo mostrato prima di creare
  */
-export function checkBlueprint(actions, { budgetRequested = null } = {}) {
+export function checkBlueprint(actions, { budgetRequested = null, caps = null, minClicks = MIN_CLICKS_PER_DAY } = {}) {
   const errors = [];
   const warnings = [];
   const list = Array.isArray(actions) ? actions : [];
@@ -157,6 +235,10 @@ export function checkBlueprint(actions, { budgetRequested = null } = {}) {
     if (a.type === "create_campaign") {
       validateCreate(a, i, errors);
       errors.push(...guardrailsCreate(a, i, GUARDRAILS));
+      // Coerenza col budget: sempre, perche' il budget sta nel blueprint.
+      errors.push(...coherenceCreate(a, i, minClicks));
+      // Tetto da margine: solo se ne hai configurato uno.
+      errors.push(...marginCreate(a, i, caps));
     }
   });
 

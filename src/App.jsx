@@ -6,7 +6,8 @@ import FamilyPanel from "./FamilyPanel";
 import CampaignPlanner from "./CampaignPlanner";
 import {
   ACTIONS_PROMPT, actionsPromptWith, extractActionsFromText, validateAgainstData,
-  actionSignature, dedupeActions, EMPTY_CAPS, stripActionsTail,
+  actionSignature, dedupeActions, EMPTY_CAPS, stripActionsTail, describeAction,
+  MIN_CLICKS_PER_DAY,
 } from "./actions";
 import { parseCSV, processJSON, processCSV } from "./parse";
 import * as api from "./api";
@@ -132,7 +133,7 @@ function WorkerSettings({ apiBase, apiToken, onBase, onToken, apiKey, onKey }) {
 
 // ---------------------------------------------------------------- AI Advisor
 
-function AiAdvisor({ metrics, sourceType, apiKey, caps, appliedSignatures, onActions, onGoToActions }) {
+function AiAdvisor({ metrics, sourceType, apiKey, caps, appliedSignatures, pendingActions, onActions, onGoToActions }) {
   const [advice, setAdvice] = useState(null);
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
@@ -192,6 +193,31 @@ function AiAdvisor({ metrics, sourceType, apiKey, caps, appliedSignatures, onAct
           .map((p) => `- ASIN ${p.asin} (${p.sku || "N/D"}, agId:${p.adGroupId || "?"}): ${eur(p.spend)} spesa, ${eur(p.sales)} vendite, ${p.orders} ordini`).join("\n")
       : "";
 
+    // L'analisi settimanale e' gia' nel file: passargliela evita che il
+    // Consulente rifaccia da zero un lavoro gia' fatto sugli stessi numeri, e
+    // gli permette di partire da li' invece di ripetere le stesse conclusioni
+    // con parole diverse.
+    const weeklySection = metrics.weeklyAnalysis
+      ? `\n## Analisi settimanale gia' prodotta${metrics.generatedAt ? ` il ${new Date(metrics.generatedAt).toLocaleDateString("it-IT")}` : ""}\n\n`
+        + `Questo report e' stato scritto automaticamente sugli STESSI dati che vedi sopra.\n`
+        + `Non ripeterlo. Parti da qui: correggilo dove i numeri lo smentiscono, approfondisci\n`
+        + `quello che ha lasciato in sospeso, e concentrati su cio' che non ha guardato.\n\n`
+        + `---\n${metrics.weeklyAnalysis.slice(0, 5000)}\n---`
+      : "";
+
+    // Le azioni gia' in elenco: senza questo il Consulente le ripropone quasi
+    // tutte, e il deduplico per firma non le assorbe se cambia il valore.
+    const pending = pendingActions || [];
+    const proposedSection = pending.length
+      ? `\n## Azioni gia' in elenco (${pending.length})\n\n`
+        + `Sono gia' pronte da applicare nella scheda Azioni. NON rigenerarle.\n`
+        + `Se pensi che una vada cambiata, dillo a parole nel report invece di riproporla.\n\n`
+        + pending.slice(0, 40).map((a) => {
+          const d = describeAction(a);
+          return `- [${a.type}] ${d.title} — ${d.detail}`;
+        }).join("\n")
+      : "";
+
     return `## Metriche generali
 - Spesa ${eur(metrics.totalSpend)} | Vendite ${eur(metrics.totalSales)} | ACoS ${metrics.acos.toFixed(1)}% | ROAS ${(metrics.totalSpend > 0 ? metrics.totalSales / metrics.totalSpend : 0).toFixed(2)}x
 - Impression ${metrics.totalImpress.toLocaleString("it-IT")} | Click ${metrics.totalClicks.toLocaleString("it-IT")} | CTR ${metrics.ctr.toFixed(2)}% | CVR ${metrics.cvr.toFixed(1)}% | CPC ${eur(metrics.cpc)} | Ordini ${metrics.totalOrders}
@@ -207,7 +233,7 @@ ${topKw || "N/D"}
 ${waste || "Nessuna"}
 
 ## Keyword con ACoS sotto il 25%
-${best || "Nessuna"}${stSection}${negSection}${prodSection}`;
+${best || "Nessuna"}${stSection}${negSection}${prodSection}${weeklySection}${proposedSection}`;
   };
 
   const askAI = useCallback(async (customQ) => {
@@ -227,6 +253,11 @@ Analizza i dati e dai consigli CONCRETI e applicabili, in italiano.
 Per ogni consiglio indica: azione esatta, motivo con il dato che la sostiene, impatto atteso in euro.
 
 Categorie: 🔴 negativizzare · 🟢 scalare · 🟡 bid · 🔵 match type · 📊 struttura · 🔍 search term · 💡 quick win.
+
+Se nei dati trovi un'analisi settimanale gia' prodotta, il tuo compito NON e' rifarla:
+parti da quella, verificala contro i numeri, dì apertamente dove sbaglia o dove si e'
+fermata troppo presto, e aggiungi quello che non ha guardato. Un report che ripete le
+stesse conclusioni con parole diverse non serve a niente.
 
 Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiutano.`;
 
@@ -321,7 +352,7 @@ Sii diretto e operativo, niente teoria generica. Usa tabelle markdown dove aiuta
     } catch (err) {
       setError(err.message);
     } finally { setLoading(false); setStreaming(false); }
-  }, [metrics, history, apiKey, caps, appliedSignatures]); // eslint-disable-line
+  }, [metrics, history, apiKey, caps, appliedSignatures, pendingActions]); // eslint-disable-line
 
   const renderMarkdown = (text) => text.split("\n").map((line, i) => {
     if (line.startsWith("###")) return <h4 key={i} style={{ color: C.accent, margin: "16px 0 6px", fontSize: T.body, fontWeight: 700 }}>{line.replace(/^###\s*/, "")}</h4>;
@@ -496,7 +527,19 @@ export default function App() {
   // esattamente come prima.
   const currentMp = metrics?.meta?.marketplace || "";
   useEffect(() => {
-    if (!currentMp || !api.isConfigured()) { setCaps(EMPTY_CAPS); setAppliedSignatures(new Set()); return; }
+    // I budget delle campagne arrivano dai dati caricati, non dal Worker: il
+    // vincolo bid/budget deve valere anche senza Cloudflare configurato.
+    const budgets = Object.fromEntries(
+      Object.values(metrics?.campaigns || {})
+        .filter((c) => c.campaignId && Number(c.budget) > 0)
+        .map((c) => [String(c.campaignId), Number(c.budget)]),
+    );
+
+    if (!currentMp || !api.isConfigured()) {
+      setCaps({ ...EMPTY_CAPS, budgets });
+      setAppliedSignatures(new Set());
+      return;
+    }
     let alive = true;
     api.fetchBidCaps(currentMp)
       .then((r) => {
@@ -506,14 +549,16 @@ export default function App() {
           campaigns: Object.fromEntries(
             (r?.campaign_caps || []).map((c) => [String(c.scope_id), Number(c.max_bid)]),
           ),
+          budgets,
+          minClicks: Number(r?.min_clicks_per_day) || MIN_CLICKS_PER_DAY,
         });
       })
-      .catch(() => alive && setCaps(EMPTY_CAPS));
+      .catch(() => alive && setCaps({ ...EMPTY_CAPS, budgets }));
     api.fetchAppliedSignatures(currentMp, 28)
       .then((r) => alive && setAppliedSignatures(r.signatures))
       .catch(() => alive && setAppliedSignatures(new Set()));
     return () => { alive = false; };
-  }, [currentMp, apiBase, apiToken]);
+  }, [currentMp, apiBase, apiToken, metrics]);
 
   const resetForNewData = () => { setAiActions([]); setTab("overview"); setParseError(null); };
 
@@ -954,7 +999,7 @@ export default function App() {
         {/* Consulente */}
         {tab === "ai" && (
           <AiAdvisor metrics={metrics} sourceType={sourceType} apiKey={apiKey}
-            caps={caps} appliedSignatures={appliedSignatures}
+            caps={caps} appliedSignatures={appliedSignatures} pendingActions={allProposed}
             onActions={addAiActions} onGoToActions={() => setTab("actions")} />
         )}
 

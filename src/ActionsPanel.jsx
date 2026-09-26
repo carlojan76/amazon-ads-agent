@@ -4,7 +4,8 @@ import {
   ACTION_TYPES, GROUP_ORDER, KW_MATCH, NEG_MATCH, GUARDRAILS,
   normalizeAction, validateAction, isValidAction, describeAction,
   editableField, estimatedSaving, toPayload, actionSignature, dedupeActions,
-  EMPTY_CAPS, capFor, clampToCap, overCapCount,
+  EMPTY_CAPS, capFor, capInfo, explainCap, clampToCap, overCapCount,
+  MIN_CLICKS_PER_DAY, budgetDerivedCap,
 } from "./actions";
 import * as api from "./api";
 import {
@@ -163,6 +164,7 @@ function Row({ action, caps, onToggle, onEdit, onRemove }) {
 function BidCapsPanel({ marketplace, campaigns, caps, onCapsChange }) {
   const [open, setOpen] = useState(false);
   const [marketDraft, setMarketDraft] = useState("");
+  const [clicksDraft, setClicksDraft] = useState("");
   const [campDraft, setCampDraft] = useState({ id: "", value: "" });
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
@@ -170,6 +172,9 @@ function BidCapsPanel({ marketplace, campaigns, caps, onCapsChange }) {
   useEffect(() => {
     setMarketDraft(Number.isFinite(caps?.market) ? String(caps.market) : "");
   }, [caps?.market]);
+  useEffect(() => {
+    setClicksDraft(String(caps?.minClicks || MIN_CLICKS_PER_DAY));
+  }, [caps?.minClicks]);
 
   const configured = api.isConfigured();
   const campList = Object.entries(caps?.campaigns || {});
@@ -178,8 +183,10 @@ function BidCapsPanel({ marketplace, campaigns, caps, onCapsChange }) {
   const reload = async () => {
     const r = await api.fetchBidCaps(marketplace);
     onCapsChange?.({
+      ...caps,
       market: Number.isFinite(r?.market_cap) ? r.market_cap : null,
       campaigns: Object.fromEntries((r?.campaign_caps || []).map((c) => [String(c.scope_id), Number(c.max_bid)])),
+      minClicks: Number(r?.min_clicks_per_day) || MIN_CLICKS_PER_DAY,
     });
   };
 
@@ -193,10 +200,11 @@ function BidCapsPanel({ marketplace, campaigns, caps, onCapsChange }) {
   const summary = !configured
     ? "Worker non configurato"
     : Number.isFinite(caps?.market) || campList.length
-      ? [Number.isFinite(caps?.market) ? `mercato €${caps.market.toFixed(2)}` : null,
-        campList.length ? `${campList.length} campagn${campList.length === 1 ? "a" : "e"}` : null]
+      ? [Number.isFinite(caps?.market) ? `margine €${caps.market.toFixed(2)}` : null,
+        campList.length ? `${campList.length} campagn${campList.length === 1 ? "a" : "e"}` : null,
+        `min ${caps?.minClicks || MIN_CLICKS_PER_DAY} clic/giorno`]
         .filter(Boolean).join(" · ")
-      : "nessun tetto impostato";
+      : `nessun tetto da margine · min ${caps?.minClicks || MIN_CLICKS_PER_DAY} clic/giorno`;
 
   return (
     <div style={{ ...card, padding: S.lg, marginBottom: S.md }}>
@@ -216,15 +224,54 @@ function BidCapsPanel({ marketplace, campaigns, caps, onCapsChange }) {
         <div style={{ marginTop: S.lg }}>
           {!configured ? (
             <div style={{ fontSize: T.small, color: C.yellow, lineHeight: 1.6 }}>
-              I tetti sono salvati sul Worker Cloudflare, cosi' valgono anche per la weekly
-              analysis e per lo script che applica le modifiche — non solo per questo browser.
-              Configura l'indirizzo del Worker nelle impostazioni (⚙ in alto) per usarli.
+              Il tetto da <strong>margine</strong> e i clic minimi sono salvati sul Worker
+              Cloudflare, così valgono anche per la weekly analysis e per lo script che
+              applica le modifiche — non solo per questo browser. Configura l'indirizzo del
+              Worker nelle impostazioni (⚙ in alto) per usarli.
+              <br /><br />
+              Il vincolo <strong>bid/budget</strong> invece è già attivo: si calcola dal
+              budget delle campagne e non ha bisogno di nessun servizio esterno.
             </div>
           ) : (
             <>
+              <div style={{
+                border: `1px solid ${C.border}`, borderRadius: R.md,
+                padding: S.md, marginBottom: S.lg, background: C.bg,
+              }}>
+                <div style={{ fontSize: T.small, fontWeight: 600, color: C.text, marginBottom: 4 }}>
+                  Clic minimi al giorno
+                </div>
+                <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.sm, lineHeight: 1.6 }}>
+                  Il secondo vincolo, e spesso il più stringente. Una campagna deve potersi
+                  permettere almeno questo numero di clic al giorno: sotto, il budget finisce
+                  in poche ore, non raccoglie dati utili e per rientrare dovrebbe convertire
+                  quasi al primo clic. Da qui esce un tetto implicito:
+                  {" "}<strong>budget ÷ clic minimi</strong>.
+                </div>
+                <div style={{ display: "flex", gap: S.sm, alignItems: "center", flexWrap: "wrap" }}>
+                  <input type="number" step="1" min="3" max="100" value={clicksDraft}
+                    onChange={(e) => setClicksDraft(e.target.value)}
+                    aria-label="Clic minimi al giorno"
+                    style={{ ...input, width: 90, fontFamily: F.mono }} />
+                  <button disabled={busy || !clicksDraft}
+                    onClick={() => run(
+                      () => api.saveSetting(marketplace, "min_clicks_per_day", parseInt(clicksDraft, 10)),
+                      "Clic minimi aggiornati.",
+                    )}
+                    style={button("primary", { small: true, disabled: busy || !clicksDraft })}>Salva</button>
+                  <span style={{ fontSize: T.micro, color: C.textMuted }}>
+                    {Number(clicksDraft) > 0 && (
+                      <>con un budget di €3,00/giorno il bid massimo diventa €{(3 / Number(clicksDraft)).toFixed(2)}</>
+                    )}
+                  </span>
+                </div>
+              </div>
+
               <div style={{ fontSize: T.micro, color: C.textDim, marginBottom: S.sm, lineHeight: 1.6 }}>
-                Bid massimo sostenibile per questo mercato. Le proposte sopra soglia non vengono
-                scartate: vengono abbassate al tetto e segnate con l'etichetta “al tetto”.
+                <strong>Tetto da margine.</strong> Quanto può valere un clic per questi prodotti.
+                Vale insieme al vincolo di budget: il limite vero è il più basso dei due.
+                Le proposte sopra soglia non vengono scartate — vengono abbassate al tetto e
+                segnate con l'etichetta “al tetto”.
               </div>
               <div style={{ display: "flex", gap: S.sm, alignItems: "center", flexWrap: "wrap", marginBottom: S.lg }}>
                 <span style={{ fontSize: T.small, color: C.textMuted, minWidth: 130 }}>Tetto di mercato</span>

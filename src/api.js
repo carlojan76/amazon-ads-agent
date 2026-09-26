@@ -106,6 +106,14 @@ export const saveBidCap = (payload) =>
 export const deleteBidCap = (marketplace, scope, scopeId = "") =>
   call("/api/bid-caps", { method: "DELETE", query: { marketplace, scope, scope_id: scopeId } });
 
+// ---------------------------------------------------------------- impostazioni
+
+export const fetchSettings = (marketplace) =>
+  call("/api/settings", { query: { marketplace } });
+
+export const saveSetting = (marketplace, key, value) =>
+  call("/api/settings", { method: "PUT", body: { marketplace, key, value } });
+
 // ---------------------------------------------------------------- Anthropic
 
 /**
@@ -208,13 +216,24 @@ export const ghRuns = (workflow, perPage = 5) =>
 export const ghRun = (id) =>
   call("/api/github", { query: { kind: "run", id } });
 
-/** Ritorna { json, text } come getRepoFileContents, ma senza PAT nel browser. */
-export const ghFile = async (path) => {
-  const r = await call("/api/github", { query: { kind: "file", path } });
+export const ghWorkflow = (workflow) =>
+  call("/api/github", { query: { kind: "workflow", workflow } });
+
+/** Ritorna { json, text, sha } come getRepoFileContents, ma senza PAT nel browser. */
+export const ghFile = async (path, ref = "main") => {
+  const r = await call("/api/github", { query: { kind: "file", path, ref } });
   const text = r?.decoded || "";
   let parsed = null;
   try { parsed = JSON.parse(text); } catch { /* non e' JSON */ }
   return { json: parsed, text, sha: r?.sha || "" };
+};
+
+/** Ultimo commit che ha toccato un path, o null. */
+export const ghLatestCommit = async (path, ref = "main") => {
+  const r = await call("/api/github", { query: { kind: "commits", path, ref } });
+  if (!Array.isArray(r) || !r.length) return null;
+  const c = r[0];
+  return { sha: c.sha, date: c.commit?.author?.date, message: c.commit?.message };
 };
 
 export const health = () => call("/api/health");

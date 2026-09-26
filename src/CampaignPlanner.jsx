@@ -6,6 +6,8 @@ import {
   getLatestCommitForPath, latestRunId, waitForNewRun, followRun,
 } from "./github";
 import { checkBlueprint } from "./blueprintCheck";
+import { MIN_CLICKS_PER_DAY, capInfo, explainCap, EMPTY_CAPS } from "./actions";
+import * as api from "./api";
 
 const MARKETPLACES = ["IT", "FR", "DE", "ES", "UK", "NL", "SE", "PL", "BE", "IE"];
 const KW_MATCH = ["EXACT", "PHRASE", "BROAD"];
@@ -76,13 +78,41 @@ function renderMd(text) {
 }
 
 // ---- editor del blueprint --------------------------------------------------
-function BlueprintEditor({ actions, setActions }) {
+/**
+ * Porta tutti i bid di una campagna dentro il tetto, arrotondando al
+ * centesimo per difetto. Tocca bid base, keyword e auto target.
+ */
+function clampCampaignBids(a, cap) {
+  const out = structuredClone(a);
+  const giu = (v) => (typeof v === "number" && v > cap ? Math.floor(cap * 100) / 100 : v);
+  for (const g of out.adGroups || []) {
+    g.defaultBid = giu(g.defaultBid);
+    for (const k of g.keywords || []) k.bid = giu(k.bid);
+    for (const x of g.autoTargets || []) x.bid = giu(x.bid);
+  }
+  return out;
+}
+
+/** Quanti bid di una campagna stanno sopra il tetto. */
+function countOverCap(a, cap) {
+  let n = 0;
+  const sopra = (v) => typeof v === "number" && v > cap;
+  for (const g of a.adGroups || []) {
+    if (sopra(g.defaultBid)) n++;
+    for (const k of g.keywords || []) if (sopra(k.bid)) n++;
+    for (const x of g.autoTargets || []) if (sopra(x.bid)) n++;
+  }
+  return n;
+}
+
+function BlueprintEditor({ actions, setActions, caps }) {
   const upd = (ci, fn) => setActions(actions.map((a, i) => (i === ci ? fn(structuredClone(a)) : a)));
   const removeCampaign = ci => setActions(actions.filter((_, i) => i !== ci));
 
   const addCampaign = () => setActions([...actions, {
     type: "create_campaign",
     campaign: { name: "", targetingType: "MANUAL", dailyBudget: 4, biddingStrategy: "LEGACY_FOR_SALES", state: "PAUSED" },
+    // Bid iniziale coerente col budget iniziale: 4 EUR / 10 clic = 0,40.
     adGroups: [{ name: "AG-1", defaultBid: 0.4, products: [{ sku: "", asin: "" }], keywords: [], negatives: [] }],
   }]);
 
@@ -99,6 +129,11 @@ function BlueprintEditor({ actions, setActions }) {
         const c = a.campaign || {};
         const isAuto = (c.targetingType || "MANUAL") === "AUTO";
         const willSpendNow = c.state === "ENABLED";
+        // Tetto effettivo: ricalcolato a ogni battuta sul campo budget, perche'
+        // il budget e' meta' del vincolo. Una campagna nuova non ha campaignId,
+        // quindi il tetto da margine puo' essere solo quello di mercato.
+        const info = capInfo(caps, null, Number(c.dailyBudget) > 0 ? Number(c.dailyBudget) : undefined);
+        const nOver = info.cap === null ? 0 : countOverCap(a, info.cap);
         return (
           <div key={ci} style={{ background: C.surface, border: `1px solid ${willSpendNow ? C.red : C.accent}`, borderRadius: 10, padding: 14, marginBottom: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -134,8 +169,36 @@ function BlueprintEditor({ actions, setActions }) {
               </div>
             )}
 
+            {info.cap !== null && (
+              <div style={{
+                background: C.bg, border: `1px solid ${nOver ? C.red : C.border}`,
+                borderRadius: 7, padding: "8px 10px", margin: "4px 0 10px",
+                display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
+              }}>
+                <div style={{ flex: 1, minWidth: 240 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: nOver ? C.red : C.green }}>
+                    Bid massimo: {explainCap(info)}
+                  </div>
+                  <div style={{ fontSize: 10, color: C.textDim, marginTop: 3, lineHeight: 1.5 }}>
+                    {info.budgetCap !== null && (
+                      <>budget €{Number(info.budget).toFixed(2)} ÷ {caps?.minClicks || MIN_CLICKS_PER_DAY} clic = €{info.budgetCap.toFixed(2)}</>
+                    )}
+                    {info.marginCap !== null && info.budgetCap !== null && " · "}
+                    {info.marginCap !== null && <>margine = €{info.marginCap.toFixed(2)}</>}
+                  </div>
+                </div>
+                {nOver > 0 && (
+                  <button
+                    onClick={() => upd(ci, () => clampCampaignBids(a, info.cap))}
+                    style={{ ...btnGhost(C.accent), padding: "5px 10px", fontSize: 11, whiteSpace: "nowrap" }}>
+                    Adegua {nOver} bid al tetto
+                  </button>
+                )}
+              </div>
+            )}
+
             {(a.adGroups || []).map((g, gi) => (
-              <AdGroupEditor key={gi} g={g}
+              <AdGroupEditor key={gi} g={g} cap={info.cap}
                 onChange={ng => upd(ci, x => { x.adGroups[gi] = ng; return x; })}
                 onRemove={() => upd(ci, x => { x.adGroups.splice(gi, 1); return x; })}
                 isAuto={isAuto} />
@@ -161,8 +224,14 @@ function BlueprintEditor({ actions, setActions }) {
   );
 }
 
-function AdGroupEditor({ g, onChange, onRemove, isAuto }) {
+function AdGroupEditor({ g, onChange, onRemove, isAuto, cap }) {
   const set = fn => onChange(fn(structuredClone(g)));
+  // Bordo rosso sui campi che sforano: si vede mentre digiti, non alla fine.
+  const bidStyle = (v) => (
+    cap !== null && cap !== undefined && typeof v === "number" && v > cap
+      ? { borderColor: C.red, color: C.red }
+      : {}
+  );
   const usedExpr = (g.autoTargets || []).map(t => t.expressionType);
   const freeExpr = AUTO_EXPR.filter(e => !usedExpr.includes(e));
   return (
@@ -172,7 +241,7 @@ function AdGroupEditor({ g, onChange, onRemove, isAuto }) {
         <button onClick={onRemove} style={{ ...btnGhost(C.textMuted), padding: "3px 8px" }}>✕ ad group</button>
       </div>
       <Field label="Bid base (EUR)">
-        <input type="number" step="0.05" style={{ ...inputStyle, maxWidth: 120 }} value={g.defaultBid ?? ""} onChange={e => set(x => { x.defaultBid = parseFloat(e.target.value) || 0; return x; })} />
+        <input type="number" step="0.05" style={{ ...inputStyle, maxWidth: 120, ...bidStyle(g.defaultBid) }} value={g.defaultBid ?? ""} onChange={e => set(x => { x.defaultBid = parseFloat(e.target.value) || 0; return x; })} />
       </Field>
 
       {/* Prodotti */}
@@ -196,7 +265,7 @@ function AdGroupEditor({ g, onChange, onRemove, isAuto }) {
               <select style={{ ...inputStyle, flex: 1 }} value={k.matchType || "EXACT"} onChange={e => set(x => { x.keywords[ki].matchType = e.target.value; return x; })}>
                 {KW_MATCH.map(m => <option key={m}>{m}</option>)}
               </select>
-              <input type="number" step="0.05" placeholder="bid" style={{ ...inputStyle, width: 80 }} value={k.bid ?? ""} onChange={e => set(x => { x.keywords[ki].bid = parseFloat(e.target.value) || 0; return x; })} />
+              <input type="number" step="0.05" placeholder="bid" style={{ ...inputStyle, width: 80, ...bidStyle(k.bid) }} value={k.bid ?? ""} onChange={e => set(x => { x.keywords[ki].bid = parseFloat(e.target.value) || 0; return x; })} />
               <button onClick={() => set(x => { x.keywords.splice(ki, 1); return x; })} style={{ ...btnGhost(C.textMuted), padding: "4px 8px" }}>✕</button>
             </div>
           ))}
@@ -215,7 +284,7 @@ function AdGroupEditor({ g, onChange, onRemove, isAuto }) {
                 {AUTO_LABEL[t.expressionType] || t.expressionType}
                 <span style={{ color: C.textDim }}> — {t.expressionType}</span>
               </span>
-              <input type="number" step="0.05" style={{ ...inputStyle, width: 90 }} value={t.bid ?? ""} onChange={e => set(x => { x.autoTargets[ti].bid = parseFloat(e.target.value) || 0; return x; })} />
+              <input type="number" step="0.05" style={{ ...inputStyle, width: 90, ...bidStyle(t.bid) }} value={t.bid ?? ""} onChange={e => set(x => { x.autoTargets[ti].bid = parseFloat(e.target.value) || 0; return x; })} />
               <button onClick={() => set(x => { x.autoTargets.splice(ti, 1); return x; })} style={{ ...btnGhost(C.textMuted), padding: "4px 8px" }}>✕</button>
             </div>
           ))}
@@ -350,9 +419,36 @@ export default function CampaignPlanner({ onClose }) {
   }, [actions, phase, editKey, f.asin]);
 
   const currentSig = useMemo(() => JSON.stringify(actions), [actions]);
+
+  // Tetti del marketplace scelto. Best effort: senza Worker resta il solo
+  // vincolo di budget, che si calcola dal blueprint e non ha bisogno di nulla.
+  const [caps, setCaps] = useState(EMPTY_CAPS);
+  useEffect(() => {
+    if (!f.marketplace || !api.isConfigured()) { setCaps(EMPTY_CAPS); return; }
+    let alive = true;
+    api.fetchBidCaps(f.marketplace)
+      .then((r) => {
+        if (!alive) return;
+        setCaps({
+          market: Number.isFinite(r?.market_cap) ? r.market_cap : null,
+          campaigns: Object.fromEntries(
+            (r?.campaign_caps || []).map((x) => [String(x.scope_id), Number(x.max_bid)]),
+          ),
+          budgets: {},
+          minClicks: Number(r?.min_clicks_per_day) || MIN_CLICKS_PER_DAY,
+        });
+      })
+      .catch(() => alive && setCaps(EMPTY_CAPS));
+    return () => { alive = false; };
+  }, [f.marketplace]);
+
   const check = useMemo(
-    () => checkBlueprint(actions, { budgetRequested: plan?._meta?.budget_requested }),
-    [actions, plan]);
+    () => checkBlueprint(actions, {
+      budgetRequested: plan?._meta?.budget_requested,
+      caps,
+      minClicks: caps?.minClicks || MIN_CLICKS_PER_DAY,
+    }),
+    [actions, plan, caps]);
 
   // L'anteprima vale solo per il piano ESATTO che e' stata usata a validare:
   // se dopo l'anteprima tocchi un bid, il gate si richiude.
@@ -843,7 +939,7 @@ export default function CampaignPlanner({ onClose }) {
 
             <ReviewSummary check={check} meta={plan?._meta} marketplace={f.marketplace} />
 
-            <BlueprintEditor actions={actions} setActions={setActions} />
+            <BlueprintEditor actions={actions} setActions={setActions} caps={caps} />
 
             {/* Gate: anteprima -> APPLICA, come nel pannello azioni */}
             <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: 16, marginTop: 8 }}>
