@@ -3,145 +3,15 @@
     {
       "type": "create_campaign",
       "campaign": {
-        "name": "SP-AUTO-Squalo-B0G4KKC9QF",
-        "targetingType": "AUTO",
-        "dailyBudget": 1.5,
-        "biddingStrategy": "LEGACY_FOR_SALES",
-        "state": "PAUSED"
-      },
-      "adGroups": [
-        {
-          "name": "AG-auto-squalo-v1",
-          "defaultBid": 0.4,
-          "products": [
-            {
-              "asin": "B0G4KKC9QF"
-            }
-          ],
-          "autoTargets": [
-            {
-              "expressionType": "QUERY_HIGH_REL_MATCHES",
-              "bid": 0.5
-            },
-            {
-              "expressionType": "QUERY_BROAD_REL_MATCHES",
-              "bid": 0.35
-            },
-            {
-              "expressionType": "ASIN_SUBSTITUTE_RELATED",
-              "bid": 0.3
-            },
-            {
-              "expressionType": "ASIN_ACCESSORY_RELATED",
-              "bid": 0.25
-            }
-          ],
-          "negatives": [
-            {
-              "keywordText": "harry potter",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane grande",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane taglia media",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane taglia grande",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuscino divano",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia esterno",
-              "matchType": "NEGATIVE_PHRASE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "create_campaign",
-      "campaign": {
-        "name": "SP-AUTO-Squalo-B0G4KNTV6R",
-        "targetingType": "AUTO",
-        "dailyBudget": 1.5,
-        "biddingStrategy": "LEGACY_FOR_SALES",
-        "state": "PAUSED"
-      },
-      "adGroups": [
-        {
-          "name": "AG-auto-squalo-v2",
-          "defaultBid": 0.4,
-          "products": [
-            {
-              "asin": "B0G4KNTV6R"
-            }
-          ],
-          "autoTargets": [
-            {
-              "expressionType": "QUERY_HIGH_REL_MATCHES",
-              "bid": 0.5
-            },
-            {
-              "expressionType": "QUERY_BROAD_REL_MATCHES",
-              "bid": 0.35
-            },
-            {
-              "expressionType": "ASIN_SUBSTITUTE_RELATED",
-              "bid": 0.3
-            },
-            {
-              "expressionType": "ASIN_ACCESSORY_RELATED",
-              "bid": 0.25
-            }
-          ],
-          "negatives": [
-            {
-              "keywordText": "harry potter",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane grande",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane taglia media",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane taglia grande",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuscino divano",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia esterno",
-              "matchType": "NEGATIVE_PHRASE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "create_campaign",
-      "campaign": {
-        "name": "SP-MANUAL-Squalo-B0G4KKC9QF",
+        "name": "SP-Manual-Squalo-Gatto-B0G4KKC9QF",
         "targetingType": "MANUAL",
-        "dailyBudget": 2.5,
+        "dailyBudget": 4.0,
         "biddingStrategy": "LEGACY_FOR_SALES",
         "state": "PAUSED"
       },
       "adGroups": [
         {
-          "name": "AG-exact-core-v1",
+          "name": "AG-core-exact-phrase-B0G4KKC9QF",
           "defaultBid": 0.4,
           "products": [
             {
@@ -150,209 +20,184 @@
           ],
           "keywords": [
             {
-              "keywordText": "cuccia gatto squalo",
-              "matchType": "EXACT",
-              "bid": 1.5
-            },
-            {
-              "keywordText": "cuccia squalo gatto",
-              "matchType": "EXACT",
-              "bid": 1.5
-            },
-            {
-              "keywordText": "cuccia squalo",
-              "matchType": "EXACT",
-              "bid": 1.2
-            },
-            {
-              "keywordText": "cuccia gatto a casetta",
-              "matchType": "EXACT",
-              "bid": 1.2
-            },
-            {
-              "keywordText": "cuccia gatto chiusa",
-              "matchType": "EXACT",
-              "bid": 1.0
-            },
-            {
-              "keywordText": "cuccia chiusa gatto",
-              "matchType": "EXACT",
-              "bid": 1.0
-            },
-            {
-              "keywordText": "cuccia per gatto",
-              "matchType": "EXACT",
-              "bid": 1.0
-            },
-            {
-              "keywordText": "cuccia gatto interno",
-              "matchType": "EXACT",
-              "bid": 0.9
-            },
-            {
               "keywordText": "cuccia gatto",
               "matchType": "EXACT",
-              "bid": 0.9
+              "bid": 0.4
             },
             {
               "keywordText": "cuccia per gatti",
               "matchType": "EXACT",
-              "bid": 0.9
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cuccia gatto interno",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cuccia gatto chiusa",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cuccia chiusa gatto",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
               "keywordText": "casetta per gatti",
               "matchType": "EXACT",
-              "bid": 0.8
+              "bid": 0.4
             },
             {
-              "keywordText": "tana per gatto",
+              "keywordText": "cuccia gatti",
               "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "tana per gatti",
-              "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "cuccia gatto morbida",
-              "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "cuccetta per gatti",
-              "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "cuccetta per gatti da interno",
-              "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "cucce chiuse per gatti",
-              "matchType": "EXACT",
-              "bid": 0.75
+              "bid": 0.4
             },
             {
               "keywordText": "cuccia chiusa per gatti",
               "matchType": "EXACT",
-              "bid": 0.75
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatti chiusa",
+              "keywordText": "cuccia gatto squalo",
               "matchType": "EXACT",
-              "bid": 0.75
+              "bid": 0.4
             },
             {
-              "keywordText": "casa gatto",
+              "keywordText": "cuccia squalo",
               "matchType": "EXACT",
-              "bid": 0.7
+              "bid": 0.4
             },
             {
-              "keywordText": "casa gatti",
+              "keywordText": "cuccia gatto a casetta",
               "matchType": "EXACT",
-              "bid": 0.7
-            },
-            {
-              "keywordText": "casetta gatto interno",
-              "matchType": "EXACT",
-              "bid": 0.7
-            },
-            {
-              "keywordText": "cuccia igloo",
-              "matchType": "EXACT",
-              "bid": 0.65
-            },
-            {
-              "keywordText": "cuccia gatto igloo",
-              "matchType": "EXACT",
-              "bid": 0.65
+              "bid": 0.4
             },
             {
               "keywordText": "tana gatto",
               "matchType": "EXACT",
-              "bid": 0.65
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatto divertente",
-              "matchType": "PHRASE",
-              "bid": 0.55
+              "keywordText": "tana per gatto",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatto simpatica",
-              "matchType": "PHRASE",
-              "bid": 0.5
+              "keywordText": "tana per gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatto originale",
-              "matchType": "PHRASE",
-              "bid": 0.5
+              "keywordText": "cuccetta per gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatto peluche",
-              "matchType": "PHRASE",
-              "bid": 0.55
+              "keywordText": "casa gatto",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
-              "keywordText": "tana gatto peluche",
+              "keywordText": "casa gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cucce chiuse per gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cuccia gatto squalo",
               "matchType": "PHRASE",
-              "bid": 0.5
+              "bid": 0.35
             },
             {
               "keywordText": "cuccia gatto a forma di squalo",
               "matchType": "PHRASE",
-              "bid": 1.2
+              "bid": 0.35
             },
             {
-              "keywordText": "cuccia forma squalo gatto",
+              "keywordText": "cuccia gatto peluche",
               "matchType": "PHRASE",
-              "bid": 1.0
+              "bid": 0.35
             },
             {
-              "keywordText": "cuccia gatto cane piccolo",
+              "keywordText": "cuccia gatto morbida",
               "matchType": "PHRASE",
-              "bid": 0.55
+              "bid": 0.35
             },
             {
-              "keywordText": "letto per gatti",
+              "keywordText": "cuccia gatto divertente",
               "matchType": "PHRASE",
-              "bid": 0.5
+              "bid": 0.35
             },
             {
-              "keywordText": "cuccia gatto chiusa lavabile",
+              "keywordText": "tana gatto morbida",
               "matchType": "PHRASE",
-              "bid": 0.65
+              "bid": 0.3
             },
             {
-              "keywordText": "cuccia gatto grotta",
+              "keywordText": "cuccia gatto igloo",
               "matchType": "PHRASE",
-              "bid": 0.6
+              "bid": 0.3
+            },
+            {
+              "keywordText": "casetta gatto interno",
+              "matchType": "PHRASE",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "cuccetta per gatti da interno",
+              "matchType": "PHRASE",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "cucce per gatti da interno",
+              "matchType": "PHRASE",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "cuccia gatto simpatica",
+              "matchType": "BROAD",
+              "bid": 0.25
+            },
+            {
+              "keywordText": "cuccia gatto rifugio peluche",
+              "matchType": "BROAD",
+              "bid": 0.25
+            },
+            {
+              "keywordText": "tana gatto caldo invernale",
+              "matchType": "BROAD",
+              "bid": 0.25
             }
           ],
           "negatives": [
             {
+              "keywordText": "cuccia cane",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia igloo cane",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "cuccia chihuahua",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia per cani",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia cane interno",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
               "keywordText": "harry potter",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane grande",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane taglia media",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane taglia grande",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuscino divano",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia esterno",
               "matchType": "NEGATIVE_PHRASE"
             }
           ]
@@ -362,15 +207,15 @@
     {
       "type": "create_campaign",
       "campaign": {
-        "name": "SP-MANUAL-Squalo-B0G4KNTV6R",
+        "name": "SP-Manual-Squalo-Gatto-B0G4KNTV6R",
         "targetingType": "MANUAL",
-        "dailyBudget": 2.5,
+        "dailyBudget": 4.0,
         "biddingStrategy": "LEGACY_FOR_SALES",
         "state": "PAUSED"
       },
       "adGroups": [
         {
-          "name": "AG-exact-core-v2",
+          "name": "AG-core-exact-phrase-B0G4KNTV6R",
           "defaultBid": 0.4,
           "products": [
             {
@@ -379,209 +224,184 @@
           ],
           "keywords": [
             {
-              "keywordText": "cuccia gatto squalo",
-              "matchType": "EXACT",
-              "bid": 1.5
-            },
-            {
-              "keywordText": "cuccia squalo gatto",
-              "matchType": "EXACT",
-              "bid": 1.5
-            },
-            {
-              "keywordText": "cuccia squalo",
-              "matchType": "EXACT",
-              "bid": 1.2
-            },
-            {
-              "keywordText": "cuccia gatto a casetta",
-              "matchType": "EXACT",
-              "bid": 1.2
-            },
-            {
-              "keywordText": "cuccia gatto chiusa",
-              "matchType": "EXACT",
-              "bid": 1.0
-            },
-            {
-              "keywordText": "cuccia chiusa gatto",
-              "matchType": "EXACT",
-              "bid": 1.0
-            },
-            {
-              "keywordText": "cuccia per gatto",
-              "matchType": "EXACT",
-              "bid": 1.0
-            },
-            {
-              "keywordText": "cuccia gatto interno",
-              "matchType": "EXACT",
-              "bid": 0.9
-            },
-            {
               "keywordText": "cuccia gatto",
               "matchType": "EXACT",
-              "bid": 0.9
+              "bid": 0.4
             },
             {
               "keywordText": "cuccia per gatti",
               "matchType": "EXACT",
-              "bid": 0.9
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cuccia gatto interno",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cuccia gatto chiusa",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cuccia chiusa gatto",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
               "keywordText": "casetta per gatti",
               "matchType": "EXACT",
-              "bid": 0.8
+              "bid": 0.4
             },
             {
-              "keywordText": "tana per gatto",
+              "keywordText": "cuccia gatti",
               "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "tana per gatti",
-              "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "cuccia gatto morbida",
-              "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "cuccetta per gatti",
-              "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "cuccetta per gatti da interno",
-              "matchType": "EXACT",
-              "bid": 0.8
-            },
-            {
-              "keywordText": "cucce chiuse per gatti",
-              "matchType": "EXACT",
-              "bid": 0.75
+              "bid": 0.4
             },
             {
               "keywordText": "cuccia chiusa per gatti",
               "matchType": "EXACT",
-              "bid": 0.75
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatti chiusa",
+              "keywordText": "cuccia gatto squalo",
               "matchType": "EXACT",
-              "bid": 0.75
+              "bid": 0.4
             },
             {
-              "keywordText": "casa gatto",
+              "keywordText": "cuccia squalo",
               "matchType": "EXACT",
-              "bid": 0.7
+              "bid": 0.4
             },
             {
-              "keywordText": "casa gatti",
+              "keywordText": "cuccia gatto a casetta",
               "matchType": "EXACT",
-              "bid": 0.7
-            },
-            {
-              "keywordText": "casetta gatto interno",
-              "matchType": "EXACT",
-              "bid": 0.7
-            },
-            {
-              "keywordText": "cuccia igloo",
-              "matchType": "EXACT",
-              "bid": 0.65
-            },
-            {
-              "keywordText": "cuccia gatto igloo",
-              "matchType": "EXACT",
-              "bid": 0.65
+              "bid": 0.4
             },
             {
               "keywordText": "tana gatto",
               "matchType": "EXACT",
-              "bid": 0.65
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatto divertente",
-              "matchType": "PHRASE",
-              "bid": 0.55
+              "keywordText": "tana per gatto",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatto simpatica",
-              "matchType": "PHRASE",
-              "bid": 0.5
+              "keywordText": "tana per gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatto originale",
-              "matchType": "PHRASE",
-              "bid": 0.5
+              "keywordText": "cuccetta per gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
-              "keywordText": "cuccia gatto peluche",
-              "matchType": "PHRASE",
-              "bid": 0.55
+              "keywordText": "casa gatto",
+              "matchType": "EXACT",
+              "bid": 0.4
             },
             {
-              "keywordText": "tana gatto peluche",
+              "keywordText": "casa gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cucce chiuse per gatti",
+              "matchType": "EXACT",
+              "bid": 0.4
+            },
+            {
+              "keywordText": "cuccia gatto squalo",
               "matchType": "PHRASE",
-              "bid": 0.5
+              "bid": 0.35
             },
             {
               "keywordText": "cuccia gatto a forma di squalo",
               "matchType": "PHRASE",
-              "bid": 1.2
+              "bid": 0.35
             },
             {
-              "keywordText": "cuccia forma squalo gatto",
+              "keywordText": "cuccia gatto peluche",
               "matchType": "PHRASE",
-              "bid": 1.0
+              "bid": 0.35
             },
             {
-              "keywordText": "cuccia gatto cane piccolo",
+              "keywordText": "cuccia gatto morbida",
               "matchType": "PHRASE",
-              "bid": 0.55
+              "bid": 0.35
             },
             {
-              "keywordText": "letto per gatti",
+              "keywordText": "cuccia gatto divertente",
               "matchType": "PHRASE",
-              "bid": 0.5
+              "bid": 0.35
             },
             {
-              "keywordText": "cuccia gatto chiusa lavabile",
+              "keywordText": "tana gatto morbida",
               "matchType": "PHRASE",
-              "bid": 0.65
+              "bid": 0.3
             },
             {
-              "keywordText": "cuccia gatto grotta",
+              "keywordText": "cuccia gatto igloo",
               "matchType": "PHRASE",
-              "bid": 0.6
+              "bid": 0.3
+            },
+            {
+              "keywordText": "casetta gatto interno",
+              "matchType": "PHRASE",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "cuccetta per gatti da interno",
+              "matchType": "PHRASE",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "cucce per gatti da interno",
+              "matchType": "PHRASE",
+              "bid": 0.3
+            },
+            {
+              "keywordText": "cuccia gatto simpatica",
+              "matchType": "BROAD",
+              "bid": 0.25
+            },
+            {
+              "keywordText": "cuccia gatto rifugio peluche",
+              "matchType": "BROAD",
+              "bid": 0.25
+            },
+            {
+              "keywordText": "tana gatto caldo invernale",
+              "matchType": "BROAD",
+              "bid": 0.25
             }
           ],
           "negatives": [
             {
+              "keywordText": "cuccia cane",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia igloo cane",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
+              "keywordText": "cuccia chihuahua",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia per cani",
+              "matchType": "NEGATIVE_PHRASE"
+            },
+            {
+              "keywordText": "cuccia cane interno",
+              "matchType": "NEGATIVE_EXACT"
+            },
+            {
               "keywordText": "harry potter",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane grande",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane taglia media",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia cane taglia grande",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuscino divano",
-              "matchType": "NEGATIVE_PHRASE"
-            },
-            {
-              "keywordText": "cuccia esterno",
               "matchType": "NEGATIVE_PHRASE"
             }
           ]
@@ -590,16 +410,14 @@
     }
   ],
   "_meta": {
-    "generated_at": "2026-09-26T15:02:40.999662",
+    "generated_at": "2026-09-26T16:48:24.237979",
     "marketplace": "IT",
     "asin": "B0G4KNTV6R",
     "children": [
       "B0G4KKC9QF"
     ],
-    "explanation": "## Spiegazione strategica\n\n**Struttura:** Due child ASIN (B0G4KKC9QF, B0G4KNTV6R) differiscono solo per colore (nota \"colore\" nel contesto). ⚠️ **Rischio esplicito:** con varianti solo-colore, due campagne separate con le stesse keyword si faranno concorrenza reciproca su ogni asta, alzando il tuo CPC e frammentando i dati di apprendimento. La struttura imposta dall'utente (una campagna per child) viene comunque rispettata, ma ti consiglio di valutare di passare a una singola campagna con entrambi i prodotti in ad group.\n\n**Budget:** EUR 8/giorno totali, divisi in 4 campagne: 2 AUTO (EUR 1,50 ciascuna) + 2 MANUAL EXACT+PHRASE (EUR 2,50 ciascuna). Somma = EUR 8,00.\n\n**SKU:** Nessuno SKU noto per questi ASIN: i product ad vengono inseriti con il campo `asin` e segnalati — da seller dovrai sostituire con gli SKU reali prima di attivare.\n\n**Keyword:** Nessuno storico ads. Partenza da Fonte 2 (recommendations Amazon) filtrate per pertinenza al prodotto (cuccia a forma di squalo per gatti/cani piccoli, semichiusa, peluche): eliminate le keyword cane-only generiche (chihuahua, cane interno generico) e le keyword fuori contesto (cuscino, ciccia). Integrate con Search Query Performance (Fonte 3): \"cuccia gatto\", \"cuccia per gatti\", \"cuccia gatto interno\", \"casetta per gatti\", \"cuccia gatto chiusa\" hanno volume alto. Long-tail da listing e recensioni: \"cuccia squalo gatto\", \"cuccia gatto a forma di squalo\", \"tana gatto peluche\", \"cuccia gatto igloo morbida\", \"cuccia gatto divertente originale\". Bid capped a EUR 3,00 per rispettare il target ACoS 30% (CPC medio storico EUR 0,40 usato come base, bid suggeriti Amazon molto alti rapportati alla scala reale del prodotto).\n\n**Negative di partenza:** esclusi termini cane-large, harry potter (troppo specifico/nicchia non coperta), termini di abbigliamento/accessori non pertinenti.\n\n---",
+    "explanation": "## Spiegazione struttura\n\n**Prodotto:** cuccia/tana per gatti (e cani piccoli) a forma di squalo, in peluche semichiusa con cuscino lavabile. Due child ASIN: B0G4KKC9QF e B0G4KNTV6R — differenza nota solo per colore (non dichiarata nella mappa SKU). **Rischio importante:** i due child differiscono solo per colore, quindi le loro campagne dedicate si troveranno a competere sulle stesse query, frammentando i dati e alzando potenzialmente il proprio CPC. È la struttura richiesta dall'utente e la rispetto, ma consiglio di monitorare attentamente e valutare in futuro l'unificazione in un'unica campagna con entrambi gli ASIN nello stesso ad group.\n\n**Budget:** EUR 8,00/giorno totali → EUR 4,00/child. Con bid max = dailyBudget/10 = **EUR 0,40** per ogni campagna. Il CPC medio storico famiglia è già EUR 0,40, quindi il vincolo è stretto ma coerente. I bid suggeriti Amazon (EUR 11–33) sono largamente fuori portata: li uso solo come segnale di rilevanza per scegliere le keyword, non come bid effettivi.\n\n**Keyword scelte:** dalla Fonte 2 (raccomandazioni Amazon) filtro solo quelle pertinenti al prodotto gatto/tana/cuccia chiusa/squalo, escludendo termini puri da cane (cuccia igloo cane, cuccia cane interno, cuccia chihuahua ecc.). Dalla Fonte 3 (Search Query Performance) integro i volumi alti: \"cuccia gatto\" (6.701), \"cuccia per gatti\" (2.129), \"cuccia gatto interno\", \"casetta per gatti\", \"cuccia gatto chiusa\". Dal listing e recensioni ricavo long-tail: \"cuccia squalo gatto\", \"cuccia gatto a forma di squalo\", \"tana gatto morbida\", \"cuccia gatto peluche\", \"cuccia gatto igloo morbida\", \"cuccia gatto divertente\".\n\n**Negative di partenza:** escludo in entrambe le campagne termini per cani (fuori intento principale) e termini chiaramente irrilevanti emersi dalle recommendations.\n\n**SKU:** non presenti nella mappa → uso \"asin\" come campo identificativo e lo segnalo: da seller sarà necessario recuperare gli SKU effettivi prima del lancio.\n\n---",
     "warnings": [
-      "prodotto B0G4KKC9QF senza SKU: da seller aggiungilo prima di applicare",
-      "prodotto B0G4KNTV6R senza SKU: da seller aggiungilo prima di applicare",
       "prodotto B0G4KKC9QF senza SKU: da seller aggiungilo prima di applicare",
       "prodotto B0G4KNTV6R senza SKU: da seller aggiungilo prima di applicare"
     ],
