@@ -112,3 +112,22 @@ CREATE TABLE IF NOT EXISTS usage_counters (
   n     INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (day, kind)
 );
+
+-- ---------------------------------------------------------------------------
+-- 5. Impostazioni per marketplace.
+--
+-- Al momento ne contiene una sola, `min_clicks_per_day`: i clic minimi che una
+-- campagna deve potersi permettere in un giorno. Da quella discende il tetto
+-- implicito sui bid — budget / clic-minimi — che e' un vincolo diverso dal
+-- tetto sul margine e spesso piu' stringente.
+--
+-- Tabella generica di proposito: la prossima impostazione non avra' bisogno
+-- di una migrazione.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS settings (
+  marketplace  TEXT NOT NULL,
+  key          TEXT NOT NULL,
+  value        TEXT NOT NULL,
+  updated_at   TEXT NOT NULL,
+  PRIMARY KEY (marketplace, key)
+);
